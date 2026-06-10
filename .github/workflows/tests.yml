@@ -1,0 +1,28 @@
+name: Tests AuditIA
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Instalar dependencias
+        run: pip install pytest coverage
+
+      - name: Correr pruebas
+        run: python -m pytest tests/ -v
+
+      - name: Reporte de cobertura
+        run: python -m coverage run -m pytest tests/ && python -m coverage report --include="scoring/*,tests/*"
