@@ -40,3 +40,11 @@ def test_empleados_pequeño():
 def test_empleados_mediano():
     lead = {"empleados": 3}
     assert calcular_score(lead) == 15
+
+def test_clasificacion_limite_caliente():
+    assert clasificar_lead(70) == "caliente"
+
+
+def test_solo_resenas():
+    lead = {"tiene_reseñas": True}
+    assert calcular_score(lead) == 25
