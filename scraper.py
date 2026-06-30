@@ -3,7 +3,7 @@ import openpyxl
 import os
 from scoring.lead_scorer import calcular_score, clasificar_lead
 
-API_KEY = os.environ.get("AIzaSyAtvhaqWe9FIlFBrigdHLGmCBI-2BmJWDE")
+API_KEY = os.environ.get("GOOGLE_API_KEY")
 
 def buscar_negocios_google(tipo, ciudad, limite=50):
     print(f"🔍 Buscando {tipo} en {ciudad}...")
