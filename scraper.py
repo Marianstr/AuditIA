@@ -6,6 +6,7 @@ load_dotenv()
 from scoring.lead_scorer import calcular_score, clasificar_lead
 
 API_KEY = os.environ.get("GOOGLE_API_KEY")
+print("DEBUG - Key cargada:", "SI, empieza por " + API_KEY[:6] if API_KEY else "NO - viene vacia")
 
 def buscar_negocios_google(tipo, ciudad, limite=50):
     print(f"Buscando {tipo} en {ciudad}...")
