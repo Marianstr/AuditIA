@@ -11,7 +11,7 @@ def calcular_score(lead):
         score += 30
 
     # Pocas reseñas = poca visibilidad
-    reseñas = lead.get("cantidad_reseñas", 0)
+    reseñas = lead.get("cantidad_resenas", 0)
     if reseñas < 10:
         score += 30
 

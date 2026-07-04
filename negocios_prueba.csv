@@ -1,0 +1,11 @@
+nombre,tiene_sitio_web,tiene_redes_sociales,tiene_google_business,empleados,tiene_reseñas
+Restaurante Casa Pepe,False,False,True,5,True
+Peluquería Marta,False,False,False,2,False
+Fontanería García e Hijos,False,False,False,3,False
+Clínica Dental Sonrisas,True,True,True,10,True
+Bar El Rincón de Madrid,False,True,True,2,True
+Taller Mecánico Rueda,False,False,False,4,False
+Floristería La Rosa,True,False,True,1,True
+Gimnasio FitMadrid,True,True,True,15,True
+Carpintería Artesanal López,False,False,False,2,False
+Pastelería Dulce Hogar,False,True,False,3,True
