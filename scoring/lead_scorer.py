@@ -1,30 +1,19 @@
 def calcular_score(lead):
     score = 0
 
-    # Tiene sitio web?
-    if lead.get("tiene_sitio_web"):
-        score += 20
+    # No tiene sitio web = buen lead
+    if not lead.get("tiene_sitio_web"):
+        score += 40
 
-    # Tiene redes sociales?
-    if lead.get("tiene_redes_sociales"):
-        score += 15
+    # Rating bajo = presencia débil
+    rating = lead.get("rating", 5)
+    if rating < 3.5:
+        score += 30
 
-    # Tiene Google My Business?
-    if lead.get("tiene_google_business"):
-        score += 15
-
-    # Cuántos empleados tiene?
-    empleados = lead.get("empleados", 0)
-    if empleados >= 10:
-        score += 25
-    elif empleados >= 3:
-        score += 15
-    elif empleados >= 1:
-        score += 5
-
-    # Tiene reseñas online?
-    if lead.get("tiene_reseñas"):
-        score += 25
+    # Pocas reseñas = poca visibilidad
+    reseñas = lead.get("cantidad_reseñas", 0)
+    if reseñas < 10:
+        score += 30
 
     return score
 
@@ -36,3 +25,4 @@ def clasificar_lead(score):
         return "tibio"
     else:
         return "frio"
+
