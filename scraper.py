@@ -11,7 +11,7 @@ print("DEBUG - Key:", "largo " + str(len(API_KEY)) + ", termina en " + API_KEY[-
 def buscar_negocios_google(tipo, ciudad, limite=50):
     print(f"Buscando {tipo} en {ciudad}...")
     negocios = []
-    url = "https://places.googleapis.com/v1/places:searchText"
+    url = "https://places.googleapis.com/v1/places:searchText?key=" + API_KEY
     headers = {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": API_KEY,
