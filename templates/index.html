@@ -365,9 +365,9 @@
     <aside class="sidebar">
         <div class="logo">🔍 Audit<span>IA</span></div>
         <nav class="nav">
-            <a href="#" class="active">📊 Dashboard</a>
+            <a href="#" class="active" onclick="mostrarDashboard(); return false;">📊 Dashboard</a>
             <a href="#">📁 Proyectos</a>
-            <a href="#">🔎 Audits</a>
+            <a href="#" onclick="mostrarAudits(); return false;">🔎 Audits</a>
             <a href="#">👥 Clientes</a>
             <a href="#">📄 Reports</a>
             <a href="#">⚙️ Settings</a>
@@ -425,6 +425,12 @@
                     Descargar Excel</a></div>
             <div class="cards" id="cards"></div>
         </div>
+        <div id="seccion-audits" style="display:none;">
+            <div class="search-box">
+                <h2>📚 Historial de auditorías</h2>
+                <div id="lista-audits" style="margin-top:10px;"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -463,6 +469,7 @@
             datos.forEach(d => {
                 const servicios = d.servicios.map(s => `<span class="servicio">✅ ${s}</span>`).join("");
                 const webLink = d.web !== "No tiene" ? `<a href="${d.web}" target="_blank">Ver web</a>` : "Sin web";
+                const emailBtn = d.web !== "No tiene" ? `<span>✉️ <a href="${d.web}/contacto" target="_blank" title="Abre la web del negocio para buscar su email">Buscar email</a></span>` : "";
                 cards.innerHTML += `
             <div class="card">
                 <div class="card-info">
@@ -473,6 +480,7 @@
                         <span>💬 ${d.cantidad_resenas} reseñas</span>
                         <span>🌐 ${webLink}</span>
                         <span>📞 ${d.telefono}</span>
+                        ${emailBtn}
                     </div>
                 </div>
                 <div class="card-servicios">
@@ -497,6 +505,37 @@
             paginaActual += direccion;
             mostrarPagina();
             window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+        async function mostrarAudits() {
+            document.getElementById("resultados").style.display = "none";
+            document.querySelector(".search-box").style.display = "none";
+            document.getElementById("seccion-audits").style.display = "block";
+            const resp = await fetch("/historial");
+            const audits = await resp.json();
+            const lista = document.getElementById("lista-audits");
+            if (audits.length === 0) {
+                lista.innerHTML = "<p style='color:#6b7280;'>Todavía no hay auditorías guardadas. Hacé una búsqueda y aparecerá acá.</p>";
+                return;
+            }
+            lista.innerHTML = audits.map((a, i) => `
+            <div class="card" style="margin-bottom:10px;">
+                <div class="card-info">
+                    <h3>${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}</h3>
+                    <p>📅 ${a.fecha} · ${a.total} resultados</p>
+                </div>
+                <div class="card-score" style="display:flex; gap:10px; align-items:center;">
+                    <span class="badge caliente">🔥 ${a.calientes}</span>
+                    <span class="badge tibio">🌡️ ${a.tibios}</span>
+                    <span class="badge frio">❄️ ${a.frios}</span>
+                    <a href="/descargar-excel/${i}" class="badge caliente" style="text-decoration:none;">📥 Excel</a>
+                </div>
+            </div>`).join("");
+        }
+
+        function mostrarDashboard() {
+            document.getElementById("seccion-audits").style.display = "none";
+            document.querySelector(".search-box").style.display = "block";
+            document.getElementById("resultados").style.display = todosLosDatos.length ? "block" : "none";
         }
     </script>
 </body>
