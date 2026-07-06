@@ -96,6 +96,122 @@ def descargar_excel_historial(indice):
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
+@app.route("/clientes", methods=["GET", "POST"])
+def clientes():
+    try:
+        with open("clientes.json", "r", encoding="utf-8") as f:
+            lista = json.load(f)
+    except FileNotFoundError:
+        lista = []
+    if request.method == "POST":
+        nuevo = request.json
+        nuevo["estado"] = "contactado"
+        nuevo["fecha_agregado"] = datetime.now().strftime("%d/%m/%Y")
+        lista.insert(0, nuevo)
+        with open("clientes.json", "w", encoding="utf-8") as f:
+            json.dump(lista, f, ensure_ascii=False, indent=2)
+        return jsonify({"ok": True})
+    return jsonify(lista)
+
+
+@app.route("/clientes/estado", methods=["POST"])
+def cambiar_estado_cliente():
+    datos = request.json
+    try:
+        with open("clientes.json", "r", encoding="utf-8") as f:
+            lista = json.load(f)
+    except FileNotFoundError:
+        return jsonify({"ok": False}), 404
+    for c in lista:
+        if c["nombre"] == datos["nombre"]:
+            c["estado"] = datos["estado"]
+    with open("clientes.json", "w", encoding="utf-8") as f:
+        json.dump(lista, f, ensure_ascii=False, indent=2)
+    return jsonify({"ok": True})
+@app.route("/resumen")
+def resumen():
+    try:
+        with open("clientes.json", "r", encoding="utf-8") as f:
+            clientes_lista = json.load(f)
+    except FileNotFoundError:
+        clientes_lista = []
+    try:
+        with open("historial.json", "r", encoding="utf-8") as f:
+            historial_lista = json.load(f)
+    except FileNotFoundError:
+        historial_lista = []
+    try:
+        with open("facturado.json", "r", encoding="utf-8") as f:
+            facturado = json.load(f)
+    except FileNotFoundError:
+        facturado = {"total": 0, "registrados": {}}
+    for c in clientes_lista:
+        monto = float(c.get("cerrado_en") or 0)
+        clave = c["nombre"]
+        anterior = facturado["registrados"].get(clave, 0)
+        if monto != anterior:
+            facturado["total"] += monto - anterior
+            facturado["registrados"][clave] = monto
+    with open("facturado.json", "w", encoding="utf-8") as f:
+        json.dump(facturado, f, ensure_ascii=False, indent=2)
+    return jsonify({
+        "facturado": facturado["total"],
+        "clientes_activos": len(clientes_lista),
+        "auditorias": len(historial_lista),
+        "cerrados": len([c for c in clientes_lista if c.get("estado") == "cerrado"]),
+        "negociacion": len([c for c in clientes_lista if c.get("estado") == "en negociación"])
+    })
+@app.route("/clientes/presupuesto", methods=["POST"])
+def actualizar_presupuesto():
+    datos = request.json
+    try:
+        with open("clientes.json", "r", encoding="utf-8") as f:
+            lista = json.load(f)
+    except FileNotFoundError:
+        return jsonify({"ok": False}), 404
+    for c in lista:
+        if c["nombre"] == datos["nombre"]:
+            if "presupuesto" in datos:
+                c["presupuesto"] = datos["presupuesto"]
+            if "cerrado_en" in datos:
+                c["cerrado_en"] = datos["cerrado_en"]
+    with open("clientes.json", "w", encoding="utf-8") as f:
+        json.dump(lista, f, ensure_ascii=False, indent=2)
+    return jsonify({"ok": True})
+@app.route("/clientes/borrar", methods=["POST"])
+def borrar_cliente():
+    datos = request.json
+    try:
+        with open("clientes.json", "r", encoding="utf-8") as f:
+            lista = json.load(f)
+    except FileNotFoundError:
+        return jsonify({"ok": False}), 404
+    if datos.get("todo"):
+        lista = []
+    else:
+        lista = [c for c in lista if c["nombre"] != datos["nombre"]]
+    with open("clientes.json", "w", encoding="utf-8") as f:
+        json.dump(lista, f, ensure_ascii=False, indent=2)
+    return jsonify({"ok": True})
+
+
+@app.route("/historial/borrar", methods=["POST"])
+def borrar_historial():
+    datos = request.json
+    try:
+        with open("historial.json", "r", encoding="utf-8") as f:
+            lista = json.load(f)
+    except FileNotFoundError:
+        return jsonify({"ok": False}), 404
+    if datos.get("todo"):
+        lista = []
+    else:
+        indice = datos.get("indice")
+        if indice is not None and 0 <= indice < len(lista):
+            lista.pop(indice)
+    with open("historial.json", "w", encoding="utf-8") as f:
+        json.dump(lista, f, ensure_ascii=False, indent=2)
+    return jsonify({"ok": True})
 @app.route("/historial")
 def historial():
     try:
