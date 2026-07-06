@@ -19,7 +19,7 @@ jobs:
           python-version: '3.9'
 
       - name: Instalar dependencias
-        run: pip install pytest coverage
+        run: pip install pytest coverage python-dotenv requests openpyxl
 
       - name: Correr pruebas
         run: python -m pytest tests/ -v
