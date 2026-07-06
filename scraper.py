@@ -7,39 +7,50 @@ from scoring.lead_scorer import calcular_score, clasificar_lead
 
 API_KEY = os.environ.get("GOOGLE_API_KEY")
 
-def buscar_negocios_google(tipo, ciudad, limite=50):
+def buscar_negocios_google(tipo, ciudad, zona=None, limite=60):
     print(f"Buscando {tipo} en {ciudad}...")
     negocios = []
     url = "https://places.googleapis.com/v1/places:searchText?key=" + API_KEY
     headers = {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": API_KEY,
-        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount"
+        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,nextPageToken"
     }
+    if zona:
+        consulta = f"{tipo} cerca de {zona}, {ciudad}"
+    else:
+        consulta = f"{tipo} en {ciudad}"
     data = {
-        "textQuery": f"{tipo} en {ciudad}",
-        "maxResultCount": limite,
+        "textQuery": consulta,
+        "maxResultCount": 20,
+        "rankPreference": "DISTANCE" if zona else "RELEVANCE",
         "languageCode": "es"
     }
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code != 200:
-        print(f"Error: {response.status_code} - {response.text}")
-        return []
-    lugares = response.json().get("places", [])
-    for lugar in lugares:
-        nombre = lugar.get("displayName", {}).get("text", "Sin nombre")
-        tiene_web = "websiteUri" in lugar
-        rating = lugar.get("rating", 0)
-        cantidad_resenas = lugar.get("userRatingCount", 0)
-        negocios.append({
-            "nombre": nombre,
-            "direccion": lugar.get("formattedAddress", "Sin direccion"),
-            "telefono": lugar.get("nationalPhoneNumber", "No disponible"),
-            "web": lugar.get("websiteUri", "No tiene"),
-            "rating": rating,
-            "cantidad_resenas": cantidad_resenas,
-            "tiene_sitio_web": tiene_web,
-        })
+    while len(negocios) < limite:
+        response = requests.post(url, headers=headers, json=data)
+        if response.status_code != 200:
+            print(f"Error: {response.status_code} - {response.text}")
+            break
+        respuesta = response.json()
+        lugares = respuesta.get("places", [])
+        for lugar in lugares:
+            nombre = lugar.get("displayName", {}).get("text", "Sin nombre")
+            tiene_web = "websiteUri" in lugar
+            rating = lugar.get("rating", 0)
+            cantidad_resenas = lugar.get("userRatingCount", 0)
+            negocios.append({
+                "nombre": nombre,
+                "direccion": lugar.get("formattedAddress", "Sin direccion"),
+                "telefono": lugar.get("nationalPhoneNumber", "No disponible"),
+                "web": lugar.get("websiteUri", "No tiene"),
+                "rating": rating,
+                "cantidad_resenas": cantidad_resenas,
+                "tiene_sitio_web": tiene_web,
+            })
+        token = respuesta.get("nextPageToken")
+        if not token:
+            break
+        data["pageToken"] = token
     return negocios
 
 def generar_excel(negocios, tipo, ciudad):

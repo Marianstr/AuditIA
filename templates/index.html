@@ -1,128 +1,504 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuditIA - Dashboard</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; color: #333; }
-        header { background: #1a1a2e; color: white; padding: 20px 40px; }
-        header h1 { font-size: 28px; }
-        header p { color: #aaa; margin-top: 5px; }
-        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
-        .search-box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
-        .search-box h2 { margin-bottom: 20px; color: #1a1a2e; }
-        .inputs { display: flex; gap: 15px; flex-wrap: wrap; }
-        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; min-width: 200px; }
-        button { background: #e94560; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 16px; cursor: pointer; }
-        button:hover { background: #c73652; }
-        .loading { text-align: center; padding: 20px; display: none; color: #666; }
-        .resultados { display: none; }
-        .stats { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-        .stat { background: white; padding: 20px; border-radius: 10px; flex: 1; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .stat .numero { font-size: 36px; font-weight: bold; }
-        .stat .label { color: #666; margin-top: 5px; }
-        .caliente .numero { color: #e94560; }
-        .tibio .numero { color: #f5a623; }
-        .frio .numero { color: #4a90d9; }
-        .cards { display: flex; flex-direction: column; gap: 15px; }
-        .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
-        .card-info { flex: 2; }
-        .card-info h3 { font-size: 18px; margin-bottom: 5px; }
-        .card-info p { color: #666; font-size: 14px; }
-        .card-servicios { flex: 2; }
-        .card-servicios h4 { font-size: 13px; color: #999; margin-bottom: 8px; text-transform: uppercase; }
-        .servicio { background: #f0f7ff; color: #1a1a2e; padding: 5px 10px; border-radius: 20px; font-size: 13px; display: inline-block; margin: 3px; }
-        .card-score { flex: 1; text-align: center; }
-        .score-num { font-size: 42px; font-weight: bold; }
-        .badge { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; margin-top: 8px; }
-        .badge.caliente { background: #ffe0e6; color: #e94560; }
-        .badge.tibio { background: #fff4e0; color: #f5a623; }
-        .badge.frio { background: #e0ecff; color: #4a90d9; }
-        .card-meta { font-size: 13px; color: #888; margin-top: 8px; }
-        .card-meta span { margin-right: 15px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #eef2f1;
+            color: #1f2937;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 230px;
+            background: #123f33;
+            color: #d7e5e0;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 36px;
+            padding-left: 8px;
+        }
+
+        .logo span {
+            color: #22C897;
+        }
+
+        .nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            color: #cfe0da;
+            text-decoration: none;
+            font-size: 15px;
+            margin-bottom: 6px;
+            transition: background .2s;
+        }
+
+        .nav a:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .nav a.active {
+            background: #22C897;
+            color: #0d2b23;
+            font-weight: 600;
+        }
+
+        .sidebar .new-project {
+            margin-top: auto;
+            border: 1px solid #3a6b5c;
+            background: transparent;
+            color: #d7e5e0;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .sidebar .new-project:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ===== MAIN ===== */
+        .main {
+            margin-left: 230px;
+            flex: 1;
+            padding: 28px 36px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .topbar h1 {
+            font-size: 22px;
+            color: #123f33;
+        }
+
+        .user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        .user .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #22C897;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* ===== SEARCH ===== */
+        .search-box {
+            background: #fff;
+            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            margin-bottom: 24px;
+        }
+
+        .search-box h2 {
+            margin-bottom: 16px;
+            color: #123f33;
+            font-size: 17px;
+        }
+
+        .inputs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 15px;
+            min-width: 200px;
+        }
+
+        input:focus {
+            outline: 2px solid #22C897;
+            border-color: transparent;
+        }
+
+        button.buscar {
+            background: #1c8a68;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button.buscar:hover {
+            background: #166f53;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+            color: #6b7280;
+        }
+
+        .resultados {
+            display: none;
+        }
+
+        /* ===== STATS ===== */
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: #fff;
+            padding: 18px 22px;
+            border-radius: 14px;
+            flex: 1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 160px;
+        }
+
+        .stat .label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .stat .numero {
+            font-size: 30px;
+            font-weight: bold;
+            color: #123f33;
+            margin-top: 4px;
+        }
+
+        .stat .pill {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .caliente .pill {
+            background: #d9f5ea;
+            color: #1c8a68;
+        }
+
+        .tibio .pill {
+            background: #fdf3d7;
+            color: #b7791f;
+        }
+
+        .frio .pill {
+            background: #fde2e2;
+            color: #c53030;
+        }
+
+        /* ===== CARDS ===== */
+        .cards {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .card-info {
+            flex: 2;
+        }
+
+        .card-info h3 {
+            font-size: 17px;
+            margin-bottom: 4px;
+            color: #123f33;
+        }
+
+        .card-info p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .card-meta {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+
+        .card-meta span {
+            margin-right: 15px;
+        }
+
+        .card-meta a {
+            color: #1c8a68;
+        }
+
+        .card-servicios {
+            flex: 2;
+        }
+
+        .card-servicios h4 {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .servicio {
+            background: #e9f8f2;
+            color: #14614a;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: inline-block;
+            margin: 3px;
+        }
+
+        .card-score {
+            flex: 1;
+            text-align: center;
+        }
+
+        .score-num {
+            font-size: 38px;
+            font-weight: bold;
+            color: #123f33;
+        }
+
+        .badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .badge.caliente {
+            background: #d9f5ea;
+            color: #1c8a68;
+        }
+
+        .badge.tibio {
+            background: #fdf3d7;
+            color: #b7791f;
+        }
+
+        .badge.frio {
+            background: #fde2e2;
+            color: #c53030;
+        }
+
+        @media (max-width: 800px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .card {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
+
 <body>
-    <header>
-        <h1>🔍 AuditIA</h1>
-        <p>Sistema inteligente de captacion de leads para agencias web</p>
-    </header>
-    <div class="container">
+    <aside class="sidebar">
+        <div class="logo">🔍 Audit<span>IA</span></div>
+        <nav class="nav">
+            <a href="#" class="active">📊 Dashboard</a>
+            <a href="#">📁 Proyectos</a>
+            <a href="#">🔎 Audits</a>
+            <a href="#">👥 Clientes</a>
+            <a href="#">📄 Reports</a>
+            <a href="#">⚙️ Settings</a>
+        </nav>
+        <button class="new-project">＋ New Project</button>
+    </aside>
+
+    <div class="main">
+        <div class="topbar">
+            <h1>Panel de Control — Resumen Global</h1>
+            <div class="user">
+                <div class="avatar">M</div>
+                <span>Marian</span>
+            </div>
+        </div>
+
         <div class="search-box">
             <h2>Buscar negocios</h2>
             <div class="inputs">
                 <input type="text" id="tipo" placeholder="Tipo de negocio (ej: fontaneros)" />
                 <input type="text" id="ciudad" placeholder="Ciudad (ej: Madrid)" />
-                <button onclick="buscar()">Buscar leads</button>
+                <input type="text" id="zona" placeholder="Zona o calle (opcional)" />
+                <button class="buscar" onclick="buscar()">Buscar leads</button>
             </div>
         </div>
+
         <div class="loading" id="loading">⏳ Buscando negocios en Google Maps...</div>
+
         <div class="resultados" id="resultados">
             <div class="stats">
                 <div class="stat caliente">
-                    <div class="numero" id="count-caliente">0</div>
-                    <div class="label">🔥 Calientes</div>
+                    <div>
+                        <div class="label">🔥 Calientes</div>
+                        <div class="numero" id="count-caliente">0</div>
+                    </div>
+                    <div class="pill">Alta</div>
                 </div>
                 <div class="stat tibio">
-                    <div class="numero" id="count-tibio">0</div>
-                    <div class="label">🌡️ Tibios</div>
+                    <div>
+                        <div class="label">🌡️ Tibios</div>
+                        <div class="numero" id="count-tibio">0</div>
+                    </div>
+                    <div class="pill">Media</div>
                 </div>
                 <div class="stat frio">
-                    <div class="numero" id="count-frio">0</div>
-                    <div class="label">❄️ Frios</div>
+                    <div>
+                        <div class="label">❄️ Fríos</div>
+                        <div class="numero" id="count-frio">0</div>
+                    </div>
+                    <div class="pill">Baja</div>
                 </div>
             </div>
+            <div style="text-align: right; margin-bottom: 14px;"><a href="/descargar-excel" class="buscar"
+                    style="background: #1c8a68; color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">📥
+                    Descargar Excel</a></div>
             <div class="cards" id="cards"></div>
         </div>
     </div>
+
     <script>
+        let todosLosDatos = [];
+        let paginaActual = 1;
+        const porPagina = 15;
+
         async function buscar() {
             const tipo = document.getElementById("tipo").value;
             const ciudad = document.getElementById("ciudad").value;
-            if (!tipo || !ciudad) { alert("Completa los dos campos"); return; }
+            const zona = document.getElementById("zona").value;
+            if (!tipo || !ciudad) { alert("Completa tipo y ciudad"); return; }
             document.getElementById("loading").style.display = "block";
             document.getElementById("resultados").style.display = "none";
             const response = await fetch("/buscar", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tipo, ciudad })
+                body: JSON.stringify({ tipo, ciudad, zona })
             });
-            const datos = await response.json();
+            todosLosDatos = await response.json();
+            paginaActual = 1;
             document.getElementById("loading").style.display = "none";
             document.getElementById("resultados").style.display = "block";
-            document.getElementById("count-caliente").textContent = datos.filter(d => d.clasificacion === "caliente").length;
-            document.getElementById("count-tibio").textContent = datos.filter(d => d.clasificacion === "tibio").length;
-            document.getElementById("count-frio").textContent = datos.filter(d => d.clasificacion === "frio").length;
+            document.getElementById("count-caliente").textContent = todosLosDatos.filter(d => d.clasificacion === "caliente").length;
+            document.getElementById("count-tibio").textContent = todosLosDatos.filter(d => d.clasificacion === "tibio").length;
+            document.getElementById("count-frio").textContent = todosLosDatos.filter(d => d.clasificacion === "frio").length;
+            mostrarPagina();
+        }
+
+        function mostrarPagina() {
+            const inicio = (paginaActual - 1) * porPagina;
+            const datos = todosLosDatos.slice(inicio, inicio + porPagina);
+            const totalPaginas = Math.max(1, Math.ceil(todosLosDatos.length / porPagina));
             const cards = document.getElementById("cards");
             cards.innerHTML = "";
             datos.forEach(d => {
                 const servicios = d.servicios.map(s => `<span class="servicio">✅ ${s}</span>`).join("");
                 const webLink = d.web !== "No tiene" ? `<a href="${d.web}" target="_blank">Ver web</a>` : "Sin web";
                 cards.innerHTML += `
-                <div class="card">
-                    <div class="card-info">
-                        <h3>${d.nombre}</h3>
-                        <p>${d.direccion}</p>
-                        <div class="card-meta">
-                            <span>⭐ ${d.rating}</span>
-                            <span>💬 ${d.cantidad_resenas} reseñas</span>
-                            <span>🌐 ${webLink}</span>
-                            <span>📞 ${d.telefono}</span>
-                        </div>
+            <div class="card">
+                <div class="card-info">
+                    <h3>${d.nombre}</h3>
+                    <p>${d.direccion}</p>
+                    <div class="card-meta">
+                        <span>⭐ ${d.rating}</span>
+                        <span>💬 ${d.cantidad_resenas} reseñas</span>
+                        <span>🌐 ${webLink}</span>
+                        <span>📞 ${d.telefono}</span>
                     </div>
-                    <div class="card-servicios">
-                        <h4>Servicios recomendados</h4>
-                        ${servicios || "<span style='color:#aaa'>Sin recomendaciones</span>"}
-                    </div>
-                    <div class="card-score">
-                        <div class="score-num">${d.score}</div>
-                        <div class="badge ${d.clasificacion}">${d.clasificacion.toUpperCase()}</div>
-                    </div>
-                </div>`;
+                </div>
+                <div class="card-servicios">
+                    <h4>Servicios recomendados</h4>
+                    ${servicios || "<span style='color:#aaa'>Sin recomendaciones</span>"}
+                </div>
+                <div class="card-score">
+                    <div class="score-num">${d.score}</div>
+                    <div class="badge ${d.clasificacion}">${d.clasificacion.toUpperCase()}</div>
+                </div>
+            </div>`;
             });
+            cards.innerHTML += `
+        <div style="display:flex; justify-content:center; align-items:center; gap:16px; margin-top:10px;">
+            <button class="buscar" onclick="cambiarPagina(-1)" ${paginaActual === 1 ? "disabled style='opacity:0.4'" : ""}>← Anterior</button>
+            <span style="color:#6b7280;">Página ${paginaActual} de ${totalPaginas}</span>
+            <button class="buscar" onclick="cambiarPagina(1)" ${paginaActual === totalPaginas ? "disabled style='opacity:0.4'" : ""}>Siguiente →</button>
+        </div>`;
+        }
+
+        function cambiarPagina(direccion) {
+            paginaActual += direccion;
+            mostrarPagina();
+            window.scrollTo({ top: 0, behavior: "smooth" });
         }
     </script>
 </body>
+
 </html>
