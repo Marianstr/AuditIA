@@ -373,7 +373,7 @@
         <div class="logo">🔍 Audit<span>IA</span></div>
         <nav class="nav">
             <a href="#" class="active" onclick="mostrarDashboard(); return false;">📊 Dashboard</a>
-            <a href="#">📁 Proyectos</a>
+            <a href="#" onclick="mostrarProyectos(); return false;">📁 Proyectos</a>
             <a href="#" onclick="mostrarAudits(); return false;">🔎 Audits</a>
             <a href="#" onclick="mostrarClientes(); return false;">👥 Clientes</a>
             <a href="#" onclick="mostrarReports(); return false;">📄 Reports</a>
@@ -470,6 +470,17 @@
                 <div id="contenido-reports" style="margin-top:10px;"></div>
             </div>
         </div>
+        <div id="seccion-proyectos" style="display:none;">
+            <div class="search-box">
+                <h2>📁 Proyectos</h2>
+                <div style="display:flex; gap:10px; margin:14px 0;">
+                    <input id="nombre-proyecto" placeholder="Nombre del proyecto (ej: Campaña Salamanca Q3)"
+                        style="flex:1;">
+                    <button class="buscar" onclick="crearProyecto()">＋ Crear</button>
+                </div>
+                <div id="lista-proyectos"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -553,6 +564,7 @@
         }
         async function mostrarAudits() {
             marcarMenu(2);
+            const proyectos = await (await fetch("/proyectos")).json();
             document.getElementById("panel-grafico").style.display = "none";
             document.getElementById("resultados").style.display = "none";
             document.querySelector(".search-box").style.display = "none";
@@ -575,9 +587,75 @@
                     <span class="badge tibio">🌡️ ${a.tibios}</span>
                     <span class="badge frio">❄️ ${a.frios}</span>
                     <a href="/descargar-excel/${i}" class="badge" style="text-decoration:none; background:#292524; color:#fff;">📥 Excel</a>
+                    <select onchange="asignarProyecto(${i}, this.value)" onclick="event.stopPropagation()" style="padding:6px 10px; border:1px solid #E7E5E4; border-radius:8px; font-size:12px; font-family:inherit; color:#44403C; background:#F5F5F4; max-width:150px;">
+                        <option value="">📁 Sin proyecto</option>
+                        ${proyectos.map(p => `<option value="${p.nombre.replace(/"/g, "&quot;")}" ${a.proyecto === p.nombre ? "selected" : ""}>📁 ${p.nombre}</option>`).join("")}
+                    </select>
                     <button class="buscar" style="font-size:12px; padding:6px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="borrarAudits(false, ${i})">🗑️</button>
                 </div>
             </div>`).join("");
+        }
+        async function mostrarProyectos() {
+            marcarMenu(1);
+            document.getElementById("panel-grafico").style.display = "none";
+            document.getElementById("resultados").style.display = "none";
+            document.querySelector(".search-box").style.display = "none";
+            document.getElementById("seccion-audits").style.display = "none";
+            document.getElementById("seccion-clientes").style.display = "none";
+            document.getElementById("seccion-reports").style.display = "none";
+            document.getElementById("seccion-proyectos").style.display = "block";
+
+            const proyectos = await (await fetch("/proyectos")).json();
+            const audits = await (await fetch("/historial")).json();
+            const lista = document.getElementById("lista-proyectos");
+
+            if (proyectos.length === 0) {
+                lista.innerHTML = "<p style='color:#78716C;'>Todavía no creaste proyectos. Escribí un nombre arriba y dale a Crear.</p>";
+                return;
+            }
+
+            lista.innerHTML = "<div style='display:flex; gap:12px; flex-wrap:wrap;'>" + proyectos.map(p => {
+                const suyas = audits.filter(a => a.proyecto === p.nombre);
+                const calientes = suyas.reduce((s, a) => s + (a.calientes || 0), 0);
+                return `
+                <div style="flex:1; min-width:220px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:16px;">
+                    <div onclick="mostrarAudits()" style="cursor:pointer;" title="Ver búsquedas en Audits">
+                        <div style="font-size:15px; font-weight:500;">📁 ${p.nombre}</div>
+                        <div style="font-size:12px; color:#78716C; margin-top:4px;">${suyas.length} búsqueda${suyas.length === 1 ? "" : "s"} · 🔥 ${calientes} calientes · creado ${p.fecha}</div>
+                    </div>
+                    <button class="buscar" style="font-size:12px; padding:5px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4; margin-top:10px;" onclick="borrarProyecto('${p.nombre.replace(/'/g, "\\'")}')">🗑️ Borrar</button>
+                </div>`;
+            }).join("") + "</div>";
+        }
+
+        async function crearProyecto() {
+            const nombre = document.getElementById("nombre-proyecto").value.trim();
+            if (!nombre) return;
+            await fetch("/proyectos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nombre: nombre })
+            });
+            document.getElementById("nombre-proyecto").value = "";
+            mostrarProyectos();
+        }
+
+        async function borrarProyecto(nombre) {
+            if (!confirm("¿Borrar el proyecto \"" + nombre + "\"? Sus búsquedas quedan sin asignar.")) return;
+            await fetch("/borrar-proyecto", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nombre: nombre })
+            });
+            mostrarProyectos();
+        }
+
+        async function asignarProyecto(indice, proyecto) {
+            await fetch("/asignar-proyecto", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ indice: indice, proyecto: proyecto })
+            });
         }
         async function mostrarReports() {
             marcarMenu(4);
@@ -841,6 +919,7 @@
 
         function mostrarDashboard() {
             marcarMenu(0);
+            document.getElementById("seccion-proyectos").style.display = "none";
             document.getElementById("seccion-audits").style.display = "none";
             document.querySelector(".search-box").style.display = "block";
             document.getElementById("resultados").style.display = todosLosDatos.length ? "block" : "none";

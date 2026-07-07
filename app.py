@@ -113,6 +113,62 @@ def clientes():
         return jsonify({"ok": True})
     return jsonify(lista)
 
+@app.route("/proyectos", methods=["GET", "POST"])
+def proyectos():
+    try:
+        with open("proyectos.json", "r", encoding="utf-8") as f:
+            lista = json.load(f)
+    except FileNotFoundError:
+        lista = []
+    if request.method == "POST":
+        nuevo = request.json
+        nuevo["fecha"] = datetime.now().strftime("%d/%m/%Y")
+        lista.insert(0, nuevo)
+        with open("proyectos.json", "w", encoding="utf-8") as f:
+            json.dump(lista, f, ensure_ascii=False, indent=2)
+        return jsonify({"ok": True})
+    return jsonify(lista)
+
+
+@app.route("/asignar-proyecto", methods=["POST"])
+def asignar_proyecto():
+    datos = request.json
+    try:
+        with open("historial.json", "r", encoding="utf-8") as f:
+            historial = json.load(f)
+    except FileNotFoundError:
+        historial = []
+    indice = datos.get("indice")
+    if indice is not None and 0 <= indice < len(historial):
+        historial[indice]["proyecto"] = datos.get("proyecto", "")
+        with open("historial.json", "w", encoding="utf-8") as f:
+            json.dump(historial, f, ensure_ascii=False, indent=2)
+    return jsonify({"ok": True})
+
+
+@app.route("/borrar-proyecto", methods=["POST"])
+def borrar_proyecto():
+    nombre = request.json.get("nombre", "")
+    try:
+        with open("proyectos.json", "r", encoding="utf-8") as f:
+            lista = json.load(f)
+    except FileNotFoundError:
+        lista = []
+    lista = [p for p in lista if p.get("nombre") != nombre]
+    with open("proyectos.json", "w", encoding="utf-8") as f:
+        json.dump(lista, f, ensure_ascii=False, indent=2)
+    try:
+        with open("historial.json", "r", encoding="utf-8") as f:
+            historial = json.load(f)
+        for a in historial:
+            if a.get("proyecto") == nombre:
+                a["proyecto"] = ""
+        with open("historial.json", "w", encoding="utf-8") as f:
+            json.dump(historial, f, ensure_ascii=False, indent=2)
+    except FileNotFoundError:
+        pass
+    return jsonify({"ok": True})
+
 
 @app.route("/clientes/estado", methods=["POST"])
 def cambiar_estado_cliente():
