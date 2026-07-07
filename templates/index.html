@@ -406,7 +406,7 @@
         <div class="loading" id="loading">⏳ Buscando negocios en Google Maps...</div>
         <div id="panel-grafico"
             style="background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:18px; margin-bottom:20px; display:none;">
-            <div style="font-size:14px; font-weight:bold; color:#123f33; margin-bottom:10px;">📈 Captación de leads por
+            <div style="font-size:14px; font-weight:bold; color: #1C1917; margin-bottom:10px;">📈 Captación de leads por
                 auditoría</div>
             <div style="position:relative; height:220px;"><canvas id="grafico-leads"></canvas></div>
         </div>
@@ -474,6 +474,11 @@
 
     <script>
         let todosLosDatos = [];
+        function marcarMenu(indice) {
+            document.querySelectorAll(".nav a").forEach((a, i) => {
+                a.classList.toggle("active", i === indice);
+            });
+        }
         let paginaActual = 1;
         const porPagina = 15;
 
@@ -547,6 +552,8 @@
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
         async function mostrarAudits() {
+            marcarMenu(2);
+            document.getElementById("panel-grafico").style.display = "none";
             document.getElementById("resultados").style.display = "none";
             document.querySelector(".search-box").style.display = "none";
             document.getElementById("seccion-audits").style.display = "block";
@@ -573,6 +580,8 @@
             </div>`).join("");
         }
         async function mostrarReports() {
+            marcarMenu(4);
+            document.getElementById("panel-grafico").style.display = "none";
             document.getElementById("resultados").style.display = "none";
             document.querySelector(".search-box").style.display = "none";
             document.getElementById("seccion-audits").style.display = "none";
@@ -628,7 +637,7 @@
                 <div style="font-size:13px; color:#78716C; margin-bottom:12px;">🏆 Mejores búsquedas (por leads calientes)</div>
                 <div style="font-size:13px;">
                     ${top.length === 0 ? "<p style='color:#78716C;'>Todavía no hay auditorías.</p>" : top.map((a, i) => `
-                    <div style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F5F5F4;">
+                    <div onclick="mostrarAudits()" style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F5F5F4; cursor:pointer;" title="Ver en Audits">
                         <span>${i + 1}. ${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}</span>
                         <span style="color:#B5533A; font-weight:500;">🔥 ${a.calientes || 0}</span>
                     </div>`).join("")}
@@ -651,6 +660,8 @@
             });
         }
         async function mostrarClientes() {
+            marcarMenu(3);
+            document.getElementById("panel-grafico").style.display = "none";
             document.getElementById("resultados").style.display = "none";
             document.querySelector(".search-box").style.display = "none";
             document.getElementById("seccion-audits").style.display = "none";
@@ -829,6 +840,7 @@
         dibujarGrafico();
 
         function mostrarDashboard() {
+            marcarMenu(0);
             document.getElementById("seccion-audits").style.display = "none";
             document.querySelector(".search-box").style.display = "block";
             document.getElementById("resultados").style.display = todosLosDatos.length ? "block" : "none";
