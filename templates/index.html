@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuditIA - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,9 +16,9 @@
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #eef2f1;
-            color: #1f2937;
+            font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
+            background: #FAFAF9;
+            color: #1C1917;
             display: flex;
             min-height: 100vh;
         }
@@ -23,8 +26,9 @@
         /* ===== SIDEBAR ===== */
         .sidebar {
             width: 230px;
-            background: #123f33;
-            color: #d7e5e0;
+            background: #F5F5F4;
+            color: #78716C;
+            border-right: 1px solid #E7E5E4;
             display: flex;
             flex-direction: column;
             padding: 24px 16px;
@@ -40,13 +44,13 @@
             gap: 10px;
             font-size: 22px;
             font-weight: bold;
-            color: #fff;
+            color: #1C1917;
             margin-bottom: 36px;
             padding-left: 8px;
         }
 
         .logo span {
-            color: #22C897;
+            color: #1C1917;
         }
 
         .nav a {
@@ -55,7 +59,7 @@
             gap: 12px;
             padding: 12px 14px;
             border-radius: 10px;
-            color: #cfe0da;
+            color: #78716C;
             text-decoration: none;
             font-size: 15px;
             margin-bottom: 6px;
@@ -63,20 +67,20 @@
         }
 
         .nav a:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: #E7E5E4;
         }
 
         .nav a.active {
-            background: #22C897;
-            color: #0d2b23;
+            background: #E7E5E4;
+            color: #1C1917;
             font-weight: 600;
         }
 
         .sidebar .new-project {
             margin-top: auto;
-            border: 1px solid #3a6b5c;
-            background: transparent;
-            color: #d7e5e0;
+            border: 1px solid #E7E5E4;
+            color: #1C1917;
+            background: #fff;
             padding: 12px;
             border-radius: 10px;
             font-size: 15px;
@@ -102,15 +106,17 @@
         }
 
         .topbar h1 {
-            font-size: 22px;
-            color: #123f33;
+            font-size: 26px;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            color: #1C1917;
         }
 
         .user {
             display: flex;
             align-items: center;
             gap: 10px;
-            color: #4b5563;
+            color: #78716C;
             font-size: 14px;
         }
 
@@ -118,7 +124,7 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: #22C897;
+            background: #292524;
             color: #fff;
             display: flex;
             align-items: center;
@@ -137,7 +143,7 @@
 
         .search-box h2 {
             margin-bottom: 16px;
-            color: #123f33;
+            color: #1C1917;
             font-size: 17px;
         }
 
@@ -150,19 +156,19 @@
         input {
             flex: 1;
             padding: 12px;
-            border: 1px solid #d1d5db;
+            border: 1px solid #E7E5E4;
             border-radius: 10px;
             font-size: 15px;
             min-width: 200px;
         }
 
         input:focus {
-            outline: 2px solid #22C897;
+            outline: 2px solid #292524;
             border-color: transparent;
         }
 
         button.buscar {
-            background: #1c8a68;
+            background: #292524;
             color: white;
             border: none;
             padding: 12px 28px;
@@ -180,7 +186,7 @@
             text-align: center;
             padding: 20px;
             display: none;
-            color: #6b7280;
+            color: #78716C;
         }
 
         .resultados {
@@ -208,14 +214,14 @@
         }
 
         .stat .label {
-            color: #6b7280;
+            color: #78716C;
             font-size: 14px;
         }
 
         .stat .numero {
             font-size: 30px;
-            font-weight: bold;
-            color: #123f33;
+            font-weight: 500;
+            color: #1C1917;
             margin-top: 4px;
         }
 
@@ -227,20 +233,18 @@
         }
 
         .caliente .pill {
-            background: #d9f5ea;
-            color: #1c8a68;
+            background: #F5E9E5;
+            color: #B5533A;
         }
 
         .tibio .pill {
-            background: #fdf3d7;
-            color: #b7791f;
+            background: #F5EDDD;
+            color: #B8873D;
         }
 
         .frio .pill {
-            background: #fde2e2;
-            color: #fff;
-            color: #6b7280;
-            border: 1px solid #d1d5db;
+            background: #E8EDF2;
+            color: #5E7A94;
         }
 
         /* ===== CARDS ===== */
@@ -268,17 +272,17 @@
         .card-info h3 {
             font-size: 17px;
             margin-bottom: 4px;
-            color: #123f33;
+            color: #1C1917;
         }
 
         .card-info p {
-            color: #6b7280;
+            color: #78716C;
             font-size: 14px;
         }
 
         .card-meta {
             font-size: 13px;
-            color: #6b7280;
+            color: #78716C;
             margin-top: 8px;
         }
 
@@ -287,7 +291,7 @@
         }
 
         .card-meta a {
-            color: #1c8a68;
+            color: #292524;
         }
 
         .card-servicios {
@@ -296,15 +300,15 @@
 
         .card-servicios h4 {
             font-size: 12px;
-            color: #9ca3af;
+            color: #78716C;
             margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: .5px;
         }
 
         .servicio {
-            background: #e9f8f2;
-            color: #14614a;
+            background: #F5F5F4;
+            color: #44403C;
             padding: 5px 12px;
             border-radius: 20px;
             font-size: 13px;
@@ -319,8 +323,8 @@
 
         .score-num {
             font-size: 38px;
-            font-weight: bold;
-            color: #123f33;
+            font-weight: 500;
+            color: #1C1917;
         }
 
         .badge {
@@ -333,20 +337,18 @@
         }
 
         .badge.caliente {
-            background: #d9f5ea;
-            color: #1c8a68;
+            background: #F5E9E5;
+            color: #B5533A;
         }
 
         .badge.tibio {
-            background: #fdf3d7;
-            color: #b7791f;
+            background: #F5EDDD;
+            color: #B8873D;
         }
 
         .badge.frio {
-            background: #fde2e2;
-            color: #fff;
-            color: #6b7280;
-            border: 1px solid #d1d5db;
+            background: #E8EDF2;
+            color: #5E7A94;
         }
 
         @media (max-width: 800px) {
@@ -403,7 +405,7 @@
 
         <div class="loading" id="loading">⏳ Buscando negocios en Google Maps...</div>
         <div id="panel-grafico"
-            style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:18px; margin-bottom:20px; display:none;">
+            style="background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:18px; margin-bottom:20px; display:none;">
             <div style="font-size:14px; font-weight:bold; color:#123f33; margin-bottom:10px;">📈 Captación de leads por
                 auditoría</div>
             <div style="position:relative; height:220px;"><canvas id="grafico-leads"></canvas></div>
@@ -434,7 +436,7 @@
                 </div>
             </div>
             <div style="text-align: right; margin-bottom: 14px;"><a href="/descargar-excel" class="buscar"
-                    style="background: #1c8a68; color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">📥
+                    style="background: #292524; color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">📥
                     Descargar Excel</a></div>
             <div class="cards" id="cards"></div>
         </div>
@@ -442,7 +444,7 @@
             <div class="search-box">
                 <h2>📚 Historial de auditorías</h2>
                 <button class="buscar"
-                    style="font-size:13px; padding:8px 14px; background:#fff; color:#6b7280; border:1px solid #d1d5db;"
+                    style="font-size:13px; padding:8px 14px; background:#fff; color:#78716C; border:1px solid #E7E5E4;"
                     onclick="borrarAudits(true)">🗑️ Borrar todo</button>
                 <div id="lista-audits" style="margin-top:10px;"></div>
             </div>
@@ -451,7 +453,7 @@
             <div class="search-box">
                 <h2>👥 Mis clientes</h2>
                 <button class="buscar"
-                    style="font-size:13px; padding:8px 14px; background:#fff; color:#6b7280; border:1px solid #d1d5db;"
+                    style="font-size:13px; padding:8px 14px; background:#fff; color:#78716C; border:1px solid #E7E5E4;"
                     onclick="borrarClientes(true)">🗑️ Borrar todo</button>
                 <div id="lista-clientes" style="margin-top:10px;"></div>
             </div>
@@ -522,7 +524,7 @@
             cards.innerHTML += `
         <div style="display:flex; justify-content:center; align-items:center; gap:16px; margin-top:10px;">
             <button class="buscar" onclick="cambiarPagina(-1)" ${paginaActual === 1 ? "disabled style='opacity:0.4'" : ""}>← Anterior</button>
-            <span style="color:#6b7280;">Página ${paginaActual} de ${totalPaginas}</span>
+            <span style="color:#78716C;">Página ${paginaActual} de ${totalPaginas}</span>
             <button class="buscar" onclick="cambiarPagina(1)" ${paginaActual === totalPaginas ? "disabled style='opacity:0.4'" : ""}>Siguiente →</button>
         </div>`;
         }
@@ -540,7 +542,7 @@
             const audits = await resp.json();
             const lista = document.getElementById("lista-audits");
             if (audits.length === 0) {
-                lista.innerHTML = "<p style='color:#6b7280;'>Todavía no hay auditorías guardadas. Hacé una búsqueda y aparecerá acá.</p>";
+                lista.innerHTML = "<p style='color:#78716C;'>Todavía no hay auditorías guardadas. Hacé una búsqueda y aparecerá acá.</p>";
                 return;
             }
             lista.innerHTML = audits.map((a, i) => `
@@ -553,8 +555,8 @@
                     <span class="badge caliente">🔥 ${a.calientes}</span>
                     <span class="badge tibio">🌡️ ${a.tibios}</span>
                     <span class="badge frio">❄️ ${a.frios}</span>
-                    <a href="/descargar-excel/${i}" class="badge caliente" style="text-decoration:none;">📥 Excel</a>
-                    <button class="buscar" style="font-size:12px; padding:6px 10px; background:#fff; color:#6b7280; border:1px solid #d1d5db;" onclick="borrarAudits(false, ${i})">🗑️</button>
+                    <a href="/descargar-excel/${i}" class="badge" style="text-decoration:none; background:#292524; color:#fff;">📥 Excel</a>
+                    <button class="buscar" style="font-size:12px; padding:6px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="borrarAudits(false, ${i})">🗑️</button>
                 </div>
             </div>`).join("");
         }
@@ -568,7 +570,7 @@
             const clientes = await resp.json();
             const lista = document.getElementById("lista-clientes");
             if (clientes.length === 0) {
-                lista.innerHTML = "<p style='color:#6b7280;'>Todavía no agregaste clientes. Buscá leads y usá el botón ➕ para guardarlos acá.</p>";
+                lista.innerHTML = "<p style='color:#78716C;'>Todavía no agregaste clientes. Buscá leads y usá el botón ➕ para guardarlos acá.</p>";
                 return;
             }
             const colores = { contactado: "tibio", "en negociación": "caliente", cerrado: "caliente", descartado: "frio" };
@@ -577,17 +579,17 @@
             const tasa = totalPresu > 0 ? Math.round(totalCerrado / totalPresu * 100) : 0;
             const resumen = `
         <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
-            <div style="flex:1; min-width:140px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:12px 16px;">
-                <div style="font-size:12px; color:#9ca3af;">Total presupuestado</div>
-                <div style="font-size:22px; font-weight:bold; color:#123f33;">${totalPresu.toLocaleString("es-ES")} €</div>
+            <div style="flex:1; min-width:140px; background:#fff; border:1px solid #E7E5E4; border-radius:10px; padding:12px 16px;">
+                <div style="font-size:12px; color:#78716C;">Total presupuestado</div>
+                <div style="font-size:22px; font-weight:500; color: #1C1917;">${totalPresu.toLocaleString("es-ES")} €</div>
             </div>
-            <div style="flex:1; min-width:140px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:12px 16px;">
-                <div style="font-size:12px; color:#9ca3af;">Total cerrado</div>
-                <div style="font-size:22px; font-weight:bold; color:#1c8a68;">${totalCerrado.toLocaleString("es-ES")} €</div>
+            <div style="flex:1; min-width:140px; background:#fff; border:1px solid #E7E5E4; border-radius:10px; padding:12px 16px;">
+                <div style="font-size:12px; color:#78716C;">Total cerrado</div>
+                <div style="font-size:22px; font-weight:500; color: #1C1917;">${totalCerrado.toLocaleString("es-ES")} €</div>
             </div>
-            <div style="flex:1; min-width:140px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:12px 16px;">
-                <div style="font-size:12px; color:#9ca3af;">Tasa de cierre</div>
-                <div style="font-size:22px; font-weight:bold; color:#123f33;">${tasa}%</div>
+            <div style="flex:1; min-width:140px; background:#fff; border:1px solid #E7E5E4; border-radius:10px; padding:12px 16px;">
+                <div style="font-size:12px; color:#78716C;">Tasa de cierre</div>
+                <div style="font-size:22px; font-weight:500; color: #1C1917;">${tasa}%</div>
             </div>
         </div>`;
             lista.innerHTML = resumen + clientes.map(c => `
@@ -601,24 +603,24 @@
                     </div>
                     <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
                         <div>
-                            <label style="font-size:12px; color:#9ca3af; display:block; margin-bottom:4px;">💶 Presupuestado (€)</label>
+                            <label style="font-size:12px; color:#78716C; display:block; margin-bottom:4px;">💶 Presupuestado (€)</label>
                             <input type="number" value="${c.presupuesto || ""}" style="width:130px; min-width:130px; padding:8px;" onchange="guardarPresupuesto('${c.nombre.replace(/'/g, "\\'")}', 'presupuesto', this.value)" />
                         </div>
                         <div>
-                            <label style="font-size:12px; color:#9ca3af; display:block; margin-bottom:4px;">✅ Cerrado en (€)</label>
+                            <label style="font-size:12px; color:#78716C; display:block; margin-bottom:4px;">✅ Cerrado en (€)</label>
                             <input type="number" value="${c.cerrado_en || ""}" style="width:130px; min-width:130px; padding:8px;" onchange="guardarPresupuesto('${c.nombre.replace(/'/g, "\\'")}', 'cerrado_en', this.value)" />
                         </div>
                     </div>
                 </div>
                 <div class="card-score">
-                    <select onchange="cambiarEstado('${c.nombre.replace(/'/g, "\\'")}', this.value)" style="padding:8px 12px; border-radius:8px; border:1px solid #d1d5db;">
+                    <select onchange="cambiarEstado('${c.nombre.replace(/'/g, "\\'")}', this.value)" style="padding:8px 12px; border-radius:8px; border:1px solid #E7E5E4;">
                         <option ${c.estado === "contactado" ? "selected" : ""}>contactado</option>
                         <option ${c.estado === "en negociación" ? "selected" : ""}>en negociación</option>
                         <option ${c.estado === "cerrado" ? "selected" : ""}>cerrado</option>
                         <option ${c.estado === "descartado" ? "selected" : ""}>descartado</option>
                     </select>
                     <div class="badge ${colores[c.estado] || "tibio"}" style="margin-top:8px;">${c.estado.toUpperCase()}</div>
-                    <button style="margin-top:8px; font-size:12px; padding:6px 12px; background:#fff; color:#6b7280; border:1px solid #d1d5db; border-radius:8px; cursor:pointer;" onclick="borrarClientes(false, '${c.nombre.replace(/'/g, "\\'")}')">🗑️ Borrar</button>
+                    <button style="margin-top:8px; font-size:12px; padding:6px 12px; background:#fff; color:#78716C; border:1px solid #E7E5E4; border-radius:8px; cursor:pointer;" onclick="borrarClientes(false, '${c.nombre.replace(/'/g, "\\'")}')">🗑️ Borrar</button>
                 </div>
             </div>`).join("");
         }
@@ -676,25 +678,25 @@
             const resp = await fetch("/resumen");
             const r = await resp.json();
             document.getElementById("tarjetas-resumen").innerHTML = `
-            <div style="flex:1.3; min-width:170px; background:#123f33; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#9FE1CB;">💰 Total facturado general</div>
-                <div style="font-size:24px; font-weight:bold; color:#fff;">${r.facturado.toLocaleString("es-ES")} €</div>
+            <div style="flex:1.3; min-width:170px; background:#F2F1F0; border:1px solid #E3E1DF; border-radius:12px; padding:14px 18px;">
+                <div style="font-size:12px; color:#78716C;">💰 Total facturado general</div>
+                <div style="font-size:24px; font-weight:500; color:#1C1917;">${r.facturado.toLocaleString("es-ES")} €</div>
             </div>
-            <div style="flex:1; min-width:130px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#9ca3af;">Clientes activos</div>
-                <div style="font-size:24px; font-weight:bold; color:#123f33;">${r.clientes_activos}</div>
+            <div style="flex:1; min-width:130px; background:#EDF2EC; border:1px solid #DCE5DA; border-radius:12px; padding:14px 18px;">
+                <div style="font-size:12px; color:#78716C;">Clientes activos</div>
+                <div style="font-size:24px; font-weight:500; color:#1C1917;">${r.clientes_activos}</div>
             </div>
-            <div style="flex:1; min-width:130px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#9ca3af;">Auditorías realizadas</div>
-                <div style="font-size:24px; font-weight:bold; color:#123f33;">${r.auditorias}</div>
+            <div style="flex:1; min-width:130px; background:#F7F3EC; border:1px solid #EAE2D4; border-radius:12px; padding:14px 18px;">
+                <div style="font-size:12px; color:#78716C;">Auditorías realizadas</div>
+                <div style="font-size:24px; font-weight:500; color:#1C1917;">${r.auditorias}</div>
             </div>
-            <div style="flex:1; min-width:130px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#9ca3af;">Clientes cerrados</div>
-                <div style="font-size:24px; font-weight:bold; color:#1c8a68;">${r.cerrados}</div>
+            <div style="flex:1; min-width:130px; background:#F6EDEA; border:1px solid #EBDCD6; border-radius:12px; padding:14px 18px;">
+                <div style="font-size:12px; color:#78716C;">Clientes cerrados</div>
+                <div style="font-size:24px; font-weight:500; color: #1C1917;">${r.cerrados}</div>
             </div>
-            <div style="flex:1; min-width:130px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#9ca3af;">En negociación</div>
-                <div style="font-size:24px; font-weight:bold; color:#b7791f;">${r.negociacion}</div>
+            <div style="flex:1; min-width:130px; background:#EBF1F4; border:1px solid #D9E4EA; border-radius:12px; padding:14px 18px;">
+                <div style="font-size:12px; color:#78716C;">En negociación</div>
+                <div style="font-size:24px; font-weight:500; color: #1C1917;">${r.negociacion}</div>
             </div>`;
         }
         cargarResumen();
@@ -714,15 +716,15 @@
                     datasets: [{
                         label: "🔥 Calientes",
                         data: datos.map(a => a.calientes),
-                        borderColor: "#1c8a68",
-                        backgroundColor: "rgba(34, 200, 151, 0.15)",
+                        borderColor: "#B5533A",
+                        backgroundColor: "rgba(181, 83, 58, 0.10)",
                         fill: true,
                         tension: 0.35
                     }, {
                         label: "🌡️ Tibios",
                         data: datos.map(a => a.tibios),
-                        borderColor: "#d9a441",
-                        backgroundColor: "rgba(217, 164, 65, 0.08)",
+                        borderColor: "#B8873D",
+                        backgroundColor: "rgba(184, 135, 61, 0.08)",
                         fill: true,
                         tension: 0.35
                     }]
