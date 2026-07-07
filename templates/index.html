@@ -376,7 +376,7 @@
             <a href="#">📁 Proyectos</a>
             <a href="#" onclick="mostrarAudits(); return false;">🔎 Audits</a>
             <a href="#" onclick="mostrarClientes(); return false;">👥 Clientes</a>
-            <a href="#">📄 Reports</a>
+            <a href="#" onclick="mostrarReports(); return false;">📄 Reports</a>
             <a href="#">⚙️ Settings</a>
         </nav>
         <button class="new-project">＋ New Project</button>
@@ -456,6 +456,18 @@
                     style="font-size:13px; padding:8px 14px; background:#fff; color:#78716C; border:1px solid #E7E5E4;"
                     onclick="borrarClientes(true)">🗑️ Borrar todo</button>
                 <div id="lista-clientes" style="margin-top:10px;"></div>
+            </div>
+        </div>
+        <div id="seccion-reports" style="display:none;">
+            <div class="search-box">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2>📊 Reports — Resumen del negocio</h2>
+                    <button class="buscar" onclick="window.print()"
+                        style="background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4; font-size:13px; padding:8px 14px;">🖨️
+                        Exportar
+                        PDF</button>
+                </div>
+                <div id="contenido-reports" style="margin-top:10px;"></div>
             </div>
         </div>
     </div>
@@ -560,7 +572,84 @@
                 </div>
             </div>`).join("");
         }
+        async function mostrarReports() {
+            document.getElementById("resultados").style.display = "none";
+            document.querySelector(".search-box").style.display = "none";
+            document.getElementById("seccion-audits").style.display = "none";
+            document.getElementById("seccion-clientes").style.display = "none";
+            document.getElementById("seccion-reports").style.display = "block";
 
+            const audits = await (await fetch("/historial")).json();
+            const clientes = await (await fetch("/clientes")).json();
+            const resumen = await (await fetch("/resumen")).json();
+
+            const calientes = audits.reduce((s, a) => s + (a.calientes || 0), 0);
+            const tibios = audits.reduce((s, a) => s + (a.tibios || 0), 0);
+            const frios = audits.reduce((s, a) => s + (a.frios || 0), 0);
+            const totalLeads = calientes + tibios + frios;
+            const totalPresu = clientes.reduce((s, c) => s + (parseFloat(c.presupuesto) || 0), 0);
+            const totalCerrado = clientes.reduce((s, c) => s + (parseFloat(c.cerrado_en) || 0), 0);
+            const tasa = totalPresu > 0 ? Math.round(totalCerrado / totalPresu * 100) : 0;
+            const top = [...audits].sort((a, b) => (b.calientes || 0) - (a.calientes || 0)).slice(0, 5);
+
+            document.getElementById("contenido-reports").innerHTML = `
+        
+        <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:140px; background:#F2F1F0; border:1px solid #E3E1DF; border-radius:12px; padding:12px 16px;">
+                <div style="font-size:12px; color:#78716C;">💰 Facturado histórico</div>
+                <div style="font-size:22px; font-weight:500; color:#1C1917;">${(resumen.facturado || 0).toLocaleString("es-ES")} €</div>
+            </div>
+            <div style="flex:1; min-width:140px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:12px 16px;">
+                <div style="font-size:12px; color:#78716C;">Presupuestado activo</div>
+                <div style="font-size:22px; font-weight:500; color:#1C1917;">${totalPresu.toLocaleString("es-ES")} €</div>
+            </div>
+            <div style="flex:1; min-width:140px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:12px 16px;">
+                <div style="font-size:12px; color:#78716C;">Tasa de cierre</div>
+                <div style="font-size:22px; font-weight:500; color:#1C1917;">${tasa}%</div>
+            </div>
+            <div style="flex:1; min-width:140px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:12px 16px;">
+                <div style="font-size:12px; color:#78716C;">Leads totales captados</div>
+                <div style="font-size:22px; font-weight:500; color:#1C1917;">${totalLeads}</div>
+            </div>
+        </div>
+        <div style="display:flex; gap:14px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:260px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:16px;">
+                <div style="font-size:13px; color:#78716C; margin-bottom:12px;">Distribución de leads (histórico)</div>
+                <div style="display:flex; align-items:center; gap:20px;">
+                    <div style="width:150px;"><canvas id="graficoDonut"></canvas></div>
+                    <div style="font-size:13px; line-height:2.2;">
+                        <div>🔥 Calientes · ${calientes} (${totalLeads ? Math.round(calientes / totalLeads * 100) : 0}%)</div>
+                        <div>🌡️ Tibios · ${tibios} (${totalLeads ? Math.round(tibios / totalLeads * 100) : 0}%)</div>
+                        <div>❄️ Fríos · ${frios} (${totalLeads ? Math.round(frios / totalLeads * 100) : 0}%)</div>
+                    </div>
+                </div>
+            </div>
+            <div style="flex:1; min-width:260px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:16px;">
+                <div style="font-size:13px; color:#78716C; margin-bottom:12px;">🏆 Mejores búsquedas (por leads calientes)</div>
+                <div style="font-size:13px;">
+                    ${top.length === 0 ? "<p style='color:#78716C;'>Todavía no hay auditorías.</p>" : top.map((a, i) => `
+                    <div style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F5F5F4;">
+                        <span>${i + 1}. ${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}</span>
+                        <span style="color:#B5533A; font-weight:500;">🔥 ${a.calientes || 0}</span>
+                    </div>`).join("")}
+                </div>
+            </div>
+        </div>`;
+
+            new Chart(document.getElementById("graficoDonut"), {
+                type: "doughnut",
+                data: {
+                    labels: ["Calientes", "Tibios", "Fríos"],
+                    datasets: [{
+                        data: [calientes, tibios, frios],
+                        backgroundColor: ["#B5533A", "#B8873D", "#5E7A94"],
+                        borderWidth: 2,
+                        borderColor: "#fff"
+                    }]
+                },
+                options: { plugins: { legend: { display: false } }, cutout: "68%" }
+            });
+        }
         async function mostrarClientes() {
             document.getElementById("resultados").style.display = "none";
             document.querySelector(".search-box").style.display = "none";
