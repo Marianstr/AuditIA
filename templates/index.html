@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         * {
             margin: 0;
@@ -112,6 +113,12 @@
             color: #1C1917;
         }
 
+        .topbar .titulos p {
+            font-size: 13px;
+            color: #78716C;
+            margin-top: 4px;
+        }
+
         .user {
             display: flex;
             align-items: center;
@@ -168,9 +175,9 @@
         }
 
         button.buscar {
-            background: #292524;
-            color: white;
-            border: none;
+            background: #F5F5F4;
+            color: #44403C;
+            border: 1px solid #E7E5E4;
             padding: 12px 28px;
             border-radius: 10px;
             font-size: 15px;
@@ -179,7 +186,7 @@
         }
 
         button.buscar:hover {
-            background: #166f53;
+            background: #E7E5E4;
         }
 
         .loading {
@@ -187,6 +194,15 @@
             padding: 20px;
             display: none;
             color: #78716C;
+        }
+
+        .icono-girando {
+            animation: girar 1s linear infinite;
+        }
+
+        @keyframes girar {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .resultados {
@@ -370,21 +386,24 @@
 
 <body>
     <aside class="sidebar">
-        <div class="logo">🔍 Audit<span>IA</span></div>
+        <div class="logo"><i data-lucide="search" style="width:20px; height:20px;"></i> Audit<span>IA</span></div>
         <nav class="nav">
-            <a href="#" class="active" onclick="mostrarDashboard(); return false;">📊 Panel</a>
-            <a href="#" onclick="mostrarProyectos(); return false;">📁 Proyectos</a>
-            <a href="#" onclick="mostrarAudits(); return false;">🔎 Auditorías</a>
-            <a href="#" onclick="mostrarClientes(); return false;">👥 Clientes</a>
-            <a href="#" onclick="mostrarReports(); return false;">📄 Informes</a>
-            <a href="#" onclick="mostrarAjustes(); return false;">⚙️ Ajustes</a>
+            <a href="#" class="active" onclick="mostrarDashboard(); return false;"><i data-lucide="layout-dashboard" style="width:18px; height:18px;"></i> Panel</a>
+            <a href="#" onclick="mostrarProyectos(); return false;"><i data-lucide="folder-kanban" style="width:18px; height:18px;"></i> Proyectos</a>
+            <a href="#" onclick="mostrarAudits(); return false;"><i data-lucide="search" style="width:18px; height:18px;"></i> Auditorías</a>
+            <a href="#" onclick="mostrarClientes(); return false;"><i data-lucide="users" style="width:18px; height:18px;"></i> Clientes</a>
+            <a href="#" onclick="mostrarReports(); return false;"><i data-lucide="bar-chart-3" style="width:18px; height:18px;"></i> Informes</a>
+            <a href="#" onclick="mostrarAjustes(); return false;"><i data-lucide="settings" style="width:18px; height:18px;"></i> Ajustes</a>
         </nav>
         <button class="new-project">＋ Nuevo proyecto</button>
     </aside>
 
     <div class="main">
         <div class="topbar">
-            <h1>Panel de Control — Resumen Global</h1>
+            <div class="titulos">
+                <h1 id="titulo-seccion">Panel de Control — Resumen Global</h1>
+                <p id="descripcion-seccion">Vista general de tu actividad comercial y métricas clave.</p>
+            </div>
             <div class="user">
                 <div class="avatar">M</div>
                 <span>Marian</span>
@@ -400,14 +419,14 @@
                 <input type="text" id="tipo" placeholder="Tipo de negocio (ej: fontaneros)" />
                 <input type="text" id="ciudad" placeholder="Ciudad (ej: Madrid)" />
                 <input type="text" id="zona" placeholder="Zona o calle (opcional)" />
-                <button class="buscar" onclick="buscar()">Buscar leads</button>
+                <button class="buscar" style="background:#44403C; color:#fff; border:none;" onclick="buscar()">Buscar leads</button>
             </div>
         </div>
 
-        <div class="loading" id="loading">⏳ Buscando negocios en Google Maps...</div>
+        <div class="loading" id="loading"><i data-lucide="loader-circle" class="icono-girando" style="width:16px; height:16px; vertical-align:-3px;"></i> Buscando negocios en Google Maps...</div>
         <div id="panel-grafico"
             style="background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:18px; margin-bottom:20px; display:none;">
-            <div style="font-size:14px; font-weight:bold; color: #1C1917; margin-bottom:10px;">📈 Captación de leads por
+            <div style="font-size:14px; font-weight:bold; color: #1C1917; margin-bottom:10px;"><i data-lucide="trending-up" style="width:16px; height:16px; vertical-align:-3px;"></i> Captación de leads por
                 auditoría</div>
             <div style="position:relative; height:220px;"><canvas id="grafico-leads"></canvas></div>
         </div>
@@ -416,55 +435,55 @@
             <div class="stats">
                 <div class="stat caliente">
                     <div>
-                        <div class="label">🔥 Calientes</div>
+                        <div class="label"><i data-lucide="flame" style="width:16px; height:16px; vertical-align:-3px; color:#B5533A;"></i> Calientes</div>
                         <div class="numero" id="count-caliente">0</div>
                     </div>
                     <div class="pill">Alta</div>
                 </div>
                 <div class="stat tibio">
                     <div>
-                        <div class="label">🌡️ Tibios</div>
+                        <div class="label"><i data-lucide="leaf" style="width:16px; height:16px; vertical-align:-3px; color:#B8873D;"></i> Tibios</div>
                         <div class="numero" id="count-tibio">0</div>
                     </div>
                     <div class="pill">Media</div>
                 </div>
                 <div class="stat frio">
                     <div>
-                        <div class="label">❄️ Fríos</div>
+                        <div class="label"><i data-lucide="snowflake" style="width:16px; height:16px; vertical-align:-3px; color:#5E7A94;"></i> Fríos</div>
                         <div class="numero" id="count-frio">0</div>
                     </div>
                     <div class="pill">Baja</div>
                 </div>
             </div>
             <div style="text-align: right; margin-bottom: 14px;"><a href="/descargar-excel" class="buscar"
-                    style="background: #292524; color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;">📥
+                    style="background: #F5F5F4; color: #44403C; border: 1px solid #E7E5E4; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;"><i data-lucide="download" style="width:16px; height:16px; vertical-align:-3px;"></i>
                     Descargar Excel</a></div>
             <div class="cards" id="cards"></div>
         </div>
         <div id="seccion-audits" style="display:none;">
             <div class="search-box">
-                <h2>📚 Historial de auditorías</h2>
+                <h2><i data-lucide="history" style="width:16px; height:16px; vertical-align:-2px;"></i> Historial de auditorías</h2>
                 <button class="buscar"
                     style="font-size:13px; padding:8px 14px; background:#fff; color:#78716C; border:1px solid #E7E5E4;"
-                    onclick="borrarAudits(true)">🗑️ Borrar todo</button>
+                    onclick="borrarAudits(true)"><i data-lucide="trash-2" style="width:16px; height:16px; vertical-align:-3px;"></i> Borrar todo</button>
                 <div id="lista-audits" style="margin-top:10px;"></div>
             </div>
         </div>
         <div id="seccion-clientes" style="display:none;">
             <div class="search-box">
-                <h2>👥 Mis clientes</h2>
+                <h2><i data-lucide="users" style="width:16px; height:16px; vertical-align:-2px;"></i> Mis clientes</h2>
                 <button class="buscar"
                     style="font-size:13px; padding:8px 14px; background:#fff; color:#78716C; border:1px solid #E7E5E4;"
-                    onclick="borrarClientes(true)">🗑️ Borrar todo</button>
+                    onclick="borrarClientes(true)"><i data-lucide="trash-2" style="width:16px; height:16px; vertical-align:-3px;"></i> Borrar todo</button>
                 <div id="lista-clientes" style="margin-top:10px;"></div>
             </div>
         </div>
         <div id="seccion-reports" style="display:none;">
             <div class="search-box">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h2>📊 Informes — Resumen del negocio</h2>
+                    <h2><i data-lucide="bar-chart-3" style="width:16px; height:16px; vertical-align:-2px;"></i> Informes — Resumen del negocio</h2>
                     <button class="buscar" onclick="window.print()"
-                        style="background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4; font-size:13px; padding:8px 14px;">🖨️
+                        style="background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4; font-size:13px; padding:8px 14px;"><i data-lucide="printer" style="width:16px; height:16px; vertical-align:-3px;"></i>
                         Exportar
                         PDF</button>
                 </div>
@@ -473,7 +492,7 @@
         </div>
         <div id="seccion-proyectos" style="display:none;">
             <div class="search-box">
-                <h2>📁 Proyectos</h2>
+                <h2><i data-lucide="folder" style="width:16px; height:16px; vertical-align:-2px;"></i> Proyectos</h2>
                 <div style="display:flex; gap:10px; margin:14px 0;">
                     <input id="nombre-proyecto" placeholder="Nombre del proyecto (ej: Campaña Salamanca Q3)"
                         style="flex:1;">
@@ -482,9 +501,9 @@
                 <div id="lista-proyectos"></div>
             </div>
         </div>
-        <div id="seccion-ajustes" style="display:none;">
-            <div class="search-box" style="max-width:420px;">
-                <h2>⚙️ Cambiar contraseña</h2>
+        <div id="seccion-ajustes" style="display:none; justify-content:center; align-items:center; min-height:70vh;">
+            <div class="search-box" style="max-width:420px; width:100%;">
+                <h2><i data-lucide="key-round" style="width:16px; height:16px; vertical-align:-2px;"></i> Cambiar contraseña</h2>
                 <div class="campo-ajuste">
                     <label style="font-size:12px; color:#78716C; display:block; margin-bottom:6px;">Contraseña actual</label>
                     <input type="password" id="ajustes-actual" style="width:100%; margin-bottom:14px;">
@@ -497,7 +516,7 @@
                     <label style="font-size:12px; color:#78716C; display:block; margin-bottom:6px;">Repetir nueva contraseña</label>
                     <input type="password" id="ajustes-repetir" style="width:100%; margin-bottom:14px;">
                 </div>
-                <button class="buscar" onclick="cambiarPassword()">Guardar contraseña</button>
+                <button class="buscar" style="background:#7A9471; color:#fff; border:none;" onclick="cambiarPassword()">Guardar contraseña</button>
                 <div id="ajustes-feedback" style="margin-top:12px; font-size:13px;"></div>
             </div>
         </div>
@@ -542,19 +561,19 @@
             const cards = document.getElementById("cards");
             cards.innerHTML = "";
             datos.forEach((d, idx) => {
-                const servicios = d.servicios.map(s => `<span class="servicio">✅ ${s}</span>`).join("");
+                const servicios = d.servicios.map(s => `<span class="servicio"><i data-lucide="check-circle-2" style="width:16px; height:16px; vertical-align:-3px; color:#7A9471;"></i> ${s}</span>`).join("");
                 const webLink = d.web !== "No tiene" ? `<a href="${d.web}" target="_blank">Ver web</a>` : "Sin web";
-                const emailBtn = d.web !== "No tiene" ? `<span>✉️ <a href="${d.web}/contacto" target="_blank" title="Abre la web del negocio para buscar su email">Buscar email</a></span>` : "";
+                const emailBtn = d.web !== "No tiene" ? `<span><i data-lucide="mail" style="width:16px; height:16px; vertical-align:-3px;"></i> <a href="${d.web}/contacto" target="_blank" title="Abre la web del negocio para buscar su email">Buscar email</a></span>` : "";
                 cards.innerHTML += `
             <div class="card">
                 <div class="card-info">
                     <h3>${d.nombre}</h3>
                     <p>${d.direccion}</p>
                     <div class="card-meta">
-                        <span>⭐ ${d.rating}</span>
-                        <span>💬 ${d.cantidad_resenas} reseñas</span>
-                        <span>🌐 ${webLink}</span>
-                        <span>📞 ${d.telefono}</span>
+                        <span><i data-lucide="star" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.rating}</span>
+                        <span><i data-lucide="message-square" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.cantidad_resenas} reseñas</span>
+                        <span><i data-lucide="globe" style="width:16px; height:16px; vertical-align:-3px;"></i> ${webLink}</span>
+                        <span><i data-lucide="phone" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.telefono}</span>
                         ${emailBtn}
                     </div>
                 </div>
@@ -564,7 +583,7 @@
                 </div>
                 <div class="card-score">
                     <div class="score-num">${d.score}</div>
-                    <button class="buscar" style="margin-top:8px; font-size:13px; padding:8px 14px;" onclick="agregarCliente(${(paginaActual - 1) * porPagina + idx})">➕ Cliente</button>
+                    <button class="buscar" style="margin-top:8px; font-size:13px; padding:8px 14px; background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4;" onclick="agregarCliente(${(paginaActual - 1) * porPagina + idx})"><i data-lucide="user-plus" style="width:16px; height:16px; vertical-align:-3px;"></i> Cliente</button>
                     <div class="badge ${d.clasificacion}">${d.clasificacion.toUpperCase()}</div>
                 </div>
             </div>`;
@@ -575,6 +594,7 @@
             <span style="color:#78716C;">Página ${paginaActual} de ${totalPaginas}</span>
             <button class="buscar" onclick="cambiarPagina(1)" ${paginaActual === totalPaginas ? "disabled style='opacity:0.4'" : ""}>Siguiente →</button>
         </div>`;
+            lucide.createIcons();
         }
 
         function cambiarPagina(direccion) {
@@ -584,6 +604,8 @@
         }
         async function mostrarAudits() {
             marcarMenu(2);
+            document.getElementById("titulo-seccion").textContent = "Auditorías";
+            document.getElementById("descripcion-seccion").textContent = "Buscá empresas por zona y analizá su presencia digital.";
             const proyectos = await (await fetch("/proyectos")).json();
             document.getElementById("panel-grafico").style.display = "none";
             document.getElementById("resultados").style.display = "none";
@@ -604,26 +626,30 @@
             <div class="card" style="margin-bottom:10px;">
                 <div class="card-info">
                     <h3>${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}</h3>
-                    <p>📅 ${a.fecha} · ${a.total} resultados</p>
+                    <p><i data-lucide="calendar" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.fecha} · ${a.total} resultados</p>
                 </div>
                 <div class="card-score" style="display:flex; gap:10px; align-items:center;">
-                    <span class="badge caliente">🔥 ${a.calientes}</span>
-                    <span class="badge tibio">🌡️ ${a.tibios}</span>
-                    <span class="badge frio">❄️ ${a.frios}</span>
-                    <a href="/descargar-excel/${i}" class="badge" style="text-decoration:none; background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4;">📥 Excel</a>
+                    <span class="badge caliente"><i data-lucide="flame" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.calientes}</span>
+                    <span class="badge tibio"><i data-lucide="leaf" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.tibios}</span>
+                    <span class="badge frio"><i data-lucide="snowflake" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.frios}</span>
+                    <a href="/descargar-excel/${i}" class="badge" style="text-decoration:none; background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4;"><i data-lucide="download" style="width:16px; height:16px; vertical-align:-3px;"></i> Excel</a>
                     <span style="position:relative; display:inline-block;">
                         <select onchange="asignarProyecto(${i}, this.value, this)" onclick="event.stopPropagation()" style="padding:6px 10px; border:1px solid #E7E5E4; border-radius:8px; font-size:12px; font-family:inherit; color:#44403C; background:#F5F5F4; max-width:150px; transition:background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;">
-                            <option value="">📁 Sin proyecto</option>
+                            <option value="" disabled hidden ${!a.proyecto ? "selected" : ""}>📁 Proyecto</option>
+                            <option value="">Sin asignar</option>
                             ${proyectos.map(p => `<option value="${p.nombre.replace(/"/g, "&quot;")}" ${a.proyecto === p.nombre ? "selected" : ""}>📁 ${p.nombre}</option>`).join("")}
                         </select>
                         <span class="check-guardado" style="position:absolute; top:-7px; right:-7px; width:18px; height:18px; border-radius:50%; background:#7A9471; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,0.2); opacity:0; transform:scale(0.4); transition:opacity 0.25s cubic-bezier(.34,1.56,.64,1), transform 0.35s cubic-bezier(.34,1.56,.64,1); pointer-events:none;">✓</span>
                     </span>
-                    <button class="buscar" style="font-size:12px; padding:6px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="borrarAudits(false, ${i})">🗑️</button>
+                    <button class="buscar" style="font-size:12px; padding:6px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="borrarAudits(false, ${i})"><i data-lucide="trash-2" style="width:16px; height:16px; vertical-align:-3px;"></i></button>
                 </div>
             </div>`).join("");
+            lucide.createIcons();
         }
         async function mostrarProyectos() {
             marcarMenu(1);
+            document.getElementById("titulo-seccion").textContent = "Proyectos";
+            document.getElementById("descripcion-seccion").textContent = "Organizá tus búsquedas en campañas de prospección.";
             document.getElementById("panel-grafico").style.display = "none";
             document.getElementById("resultados").style.display = "none";
             document.querySelector(".search-box").style.display = "none";
@@ -648,12 +674,13 @@
                 return `
                 <div style="flex:1; min-width:220px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:16px;">
                     <div onclick="mostrarAudits()" style="cursor:pointer;" title="Ver búsquedas en Auditorías">
-                        <div style="font-size:15px; font-weight:500;">📁 ${p.nombre}</div>
-                        <div style="font-size:12px; color:#78716C; margin-top:4px;">${suyas.length} búsqueda${suyas.length === 1 ? "" : "s"} · 🔥 ${calientes} calientes · creado ${p.fecha}</div>
+                        <div style="font-size:15px; font-weight:500;"><i data-lucide="folder" style="width:16px; height:16px; vertical-align:-3px;"></i> ${p.nombre}</div>
+                        <div style="font-size:12px; color:#78716C; margin-top:4px;">${suyas.length} búsqueda${suyas.length === 1 ? "" : "s"} · <i data-lucide="flame" style="width:16px; height:16px; vertical-align:-3px; color:#B5533A;"></i> ${calientes} calientes · creado ${p.fecha}</div>
                     </div>
-                    <button class="buscar" style="font-size:12px; padding:5px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4; margin-top:10px;" onclick="borrarProyecto('${p.nombre.replace(/'/g, "\\'")}')">🗑️ Borrar</button>
+                    <button class="buscar" style="font-size:12px; padding:5px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4; margin-top:10px;" onclick="borrarProyecto('${p.nombre.replace(/'/g, "\\'")}')"><i data-lucide="trash-2" style="width:16px; height:16px; vertical-align:-3px;"></i> Borrar</button>
                 </div>`;
             }).join("") + "</div>";
+            lucide.createIcons();
         }
 
         async function crearProyecto() {
@@ -700,6 +727,8 @@
         }
         async function mostrarReports() {
             marcarMenu(4);
+            document.getElementById("titulo-seccion").textContent = "Informes";
+            document.getElementById("descripcion-seccion").textContent = "Métricas de rendimiento y exportación de reportes.";
             document.getElementById("panel-grafico").style.display = "none";
             document.getElementById("resultados").style.display = "none";
             document.querySelector(".search-box").style.display = "none";
@@ -726,7 +755,7 @@
         
         <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
             <div style="flex:1; min-width:140px; background:#F2F1F0; border:1px solid #E3E1DF; border-radius:12px; padding:12px 16px;">
-                <div style="font-size:12px; color:#78716C;">💰 Facturado histórico</div>
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="wallet" style="width:16px; height:16px; vertical-align:-3px;"></i> Facturado histórico</div>
                 <div style="font-size:22px; font-weight:500; color:#1C1917;">${(resumen.facturado || 0).toLocaleString("es-ES")} €</div>
             </div>
             <div style="flex:1; min-width:140px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:12px 16px;">
@@ -748,23 +777,24 @@
                 <div style="display:flex; align-items:center; gap:20px;">
                     <div style="width:150px;"><canvas id="graficoDonut"></canvas></div>
                     <div style="font-size:13px; line-height:2.2;">
-                        <div>🔥 Calientes · ${calientes} (${totalLeads ? Math.round(calientes / totalLeads * 100) : 0}%)</div>
-                        <div>🌡️ Tibios · ${tibios} (${totalLeads ? Math.round(tibios / totalLeads * 100) : 0}%)</div>
-                        <div>❄️ Fríos · ${frios} (${totalLeads ? Math.round(frios / totalLeads * 100) : 0}%)</div>
+                        <div><i data-lucide="flame" style="width:16px; height:16px; vertical-align:-3px; color:#B5533A;"></i> Calientes · ${calientes} (${totalLeads ? Math.round(calientes / totalLeads * 100) : 0}%)</div>
+                        <div><i data-lucide="leaf" style="width:16px; height:16px; vertical-align:-3px; color:#B8873D;"></i> Tibios · ${tibios} (${totalLeads ? Math.round(tibios / totalLeads * 100) : 0}%)</div>
+                        <div><i data-lucide="snowflake" style="width:16px; height:16px; vertical-align:-3px; color:#5E7A94;"></i> Fríos · ${frios} (${totalLeads ? Math.round(frios / totalLeads * 100) : 0}%)</div>
                     </div>
                 </div>
             </div>
             <div style="flex:1; min-width:260px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:16px;">
-                <div style="font-size:13px; color:#78716C; margin-bottom:12px;">🏆 Mejores búsquedas (por leads calientes)</div>
+                <div style="font-size:13px; color:#78716C; margin-bottom:12px;"><i data-lucide="trophy" style="width:16px; height:16px; vertical-align:-3px;"></i> Mejores búsquedas (por leads calientes)</div>
                 <div style="font-size:13px;">
                     ${top.length === 0 ? "<p style='color:#78716C;'>Todavía no hay auditorías.</p>" : top.map((a, i) => `
                     <div onclick="mostrarAudits()" style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F5F5F4; cursor:pointer;" title="Ver en Auditorías">
                         <span>${i + 1}. ${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}</span>
-                        <span style="color:#B5533A; font-weight:500;">🔥 ${a.calientes || 0}</span>
+                        <span style="color:#B5533A; font-weight:500;"><i data-lucide="flame" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.calientes || 0}</span>
                     </div>`).join("")}
                 </div>
             </div>
         </div>`;
+            lucide.createIcons();
 
             new Chart(document.getElementById("graficoDonut"), {
                 type: "doughnut",
@@ -782,6 +812,8 @@
         }
         async function mostrarClientes() {
             marcarMenu(3);
+            document.getElementById("titulo-seccion").textContent = "Clientes";
+            document.getElementById("descripcion-seccion").textContent = "Gestioná tu cartera de clientes y su estado comercial.";
             document.getElementById("panel-grafico").style.display = "none";
             document.getElementById("resultados").style.display = "none";
             document.querySelector(".search-box").style.display = "none";
@@ -794,7 +826,8 @@
             const clientes = await resp.json();
             const lista = document.getElementById("lista-clientes");
             if (clientes.length === 0) {
-                lista.innerHTML = "<p style='color:#78716C;'>Todavía no agregaste clientes. Buscá leads y usá el botón ➕ para guardarlos acá.</p>";
+                lista.innerHTML = "<p style='color:#78716C;'>Todavía no agregaste clientes. Buscá leads y usá el botón <i data-lucide=\"user-plus\" style=\"width:14px; height:14px; vertical-align:-2px;\"></i> para guardarlos acá.</p>";
+                lucide.createIcons();
                 return;
             }
             const colores = { contactado: "tibio", "en negociación": "caliente", cerrado: "caliente", descartado: "frio" };
@@ -822,16 +855,16 @@
                     <h3>${c.nombre}</h3>
                     <p>${c.direccion}</p>
                     <div class="card-meta">
-                        <span>📞 ${c.telefono}</span>
-                        <span>📅 Agregado: ${c.fecha_agregado}</span>
+                        <span><i data-lucide="phone" style="width:16px; height:16px; vertical-align:-3px;"></i> ${c.telefono}</span>
+                        <span><i data-lucide="calendar" style="width:16px; height:16px; vertical-align:-3px;"></i> Agregado: ${c.fecha_agregado}</span>
                     </div>
                     <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
                         <div>
-                            <label style="font-size:12px; color:#78716C; display:block; margin-bottom:4px;">💶 Presupuestado (€)</label>
+                            <label style="font-size:12px; color:#78716C; display:block; margin-bottom:4px;"><i data-lucide="euro" style="width:14px; height:14px; vertical-align:-2px;"></i> Presupuestado (€)</label>
                             <input type="number" value="${c.presupuesto || ""}" style="width:130px; min-width:130px; padding:8px;" onchange="guardarPresupuesto('${c.nombre.replace(/'/g, "\\'")}', 'presupuesto', this.value)" />
                         </div>
                         <div>
-                            <label style="font-size:12px; color:#78716C; display:block; margin-bottom:4px;">✅ Cerrado en (€)</label>
+                            <label style="font-size:12px; color:#78716C; display:block; margin-bottom:4px;"><i data-lucide="check-circle-2" style="width:14px; height:14px; vertical-align:-2px; color:#7A9471;"></i> Cerrado en (€)</label>
                             <input type="number" value="${c.cerrado_en || ""}" style="width:130px; min-width:130px; padding:8px;" onchange="guardarPresupuesto('${c.nombre.replace(/'/g, "\\'")}', 'cerrado_en', this.value)" />
                         </div>
                     </div>
@@ -844,9 +877,10 @@
                         <option ${c.estado === "descartado" ? "selected" : ""}>descartado</option>
                     </select>
                     <div class="badge ${colores[c.estado] || "tibio"}" style="margin-top:8px;">${c.estado.toUpperCase()}</div>
-                    <button style="margin-top:8px; font-size:12px; padding:6px 12px; background:#fff; color:#78716C; border:1px solid #E7E5E4; border-radius:8px; cursor:pointer;" onclick="borrarClientes(false, '${c.nombre.replace(/'/g, "\\'")}')">🗑️ Borrar</button>
+                    <button style="margin-top:8px; font-size:12px; padding:6px 12px; background:#fff; color:#78716C; border:1px solid #E7E5E4; border-radius:8px; cursor:pointer;" onclick="borrarClientes(false, '${c.nombre.replace(/'/g, "\\'")}')"><i data-lucide="trash-2" style="width:16px; height:16px; vertical-align:-3px;"></i> Borrar</button>
                 </div>
             </div>`).join("");
+            lucide.createIcons();
         }
 
         async function guardarPresupuesto(nombre, campo, valor) {
@@ -876,7 +910,7 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ nombre: d.nombre, direccion: d.direccion, telefono: d.telefono, web: d.web })
             });
-            alert("✅ " + d.nombre + " agregado a Clientes");
+            alert(d.nombre + " agregado a Clientes");
         }
         async function borrarClientes(todo, nombre) {
             const msj = todo ? "¿Borrar TODOS los clientes?" : "¿Borrar a " + nombre + "?";
@@ -903,27 +937,29 @@
             const r = await resp.json();
             document.getElementById("tarjetas-resumen").innerHTML = `
             <div style="flex:1.3; min-width:170px; background:#F2F1F0; border:1px solid #E3E1DF; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#78716C;">💰 Total facturado general</div>
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="wallet" style="width:16px; height:16px; vertical-align:-3px;"></i> Total facturado general</div>
                 <div style="font-size:24px; font-weight:500; color:#1C1917;">${r.facturado.toLocaleString("es-ES")} €</div>
             </div>
             <div style="flex:1; min-width:130px; background:#EDF2EC; border:1px solid #DCE5DA; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#78716C;">Clientes activos</div>
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="user-check" style="width:16px; height:16px; vertical-align:-3px;"></i> Clientes activos</div>
                 <div style="font-size:24px; font-weight:500; color:#1C1917;">${r.clientes_activos}</div>
             </div>
             <div style="flex:1; min-width:130px; background:#F7F3EC; border:1px solid #EAE2D4; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#78716C;">Auditorías realizadas</div>
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="file-search" style="width:16px; height:16px; vertical-align:-3px;"></i> Auditorías realizadas</div>
                 <div style="font-size:24px; font-weight:500; color:#1C1917;">${r.auditorias}</div>
             </div>
             <div style="flex:1; min-width:130px; background:#F6EDEA; border:1px solid #EBDCD6; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#78716C;">Clientes cerrados</div>
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="flag" style="width:16px; height:16px; vertical-align:-3px;"></i> Clientes cerrados</div>
                 <div style="font-size:24px; font-weight:500; color: #1C1917;">${r.cerrados}</div>
             </div>
             <div style="flex:1; min-width:130px; background:#EBF1F4; border:1px solid #D9E4EA; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#78716C;">En negociación</div>
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="handshake" style="width:16px; height:16px; vertical-align:-3px;"></i> En negociación</div>
                 <div style="font-size:24px; font-weight:500; color: #1C1917;">${r.negociacion}</div>
             </div>`;
+            lucide.createIcons();
         }
         cargarResumen();
+        lucide.createIcons();
         let graficoLeads = null;
         async function dibujarGrafico() {
             const resp = await fetch("/historial");
@@ -965,6 +1001,8 @@
 
         function mostrarDashboard() {
             marcarMenu(0);
+            document.getElementById("titulo-seccion").textContent = "Panel de Control — Resumen Global";
+            document.getElementById("descripcion-seccion").textContent = "Vista general de tu actividad comercial y métricas clave.";
             document.getElementById("seccion-proyectos").style.display = "none";
             document.getElementById("seccion-audits").style.display = "none";
             document.getElementById("seccion-clientes").style.display = "none";
@@ -972,18 +1010,22 @@
             document.getElementById("seccion-ajustes").style.display = "none";
             document.querySelector(".search-box").style.display = "block";
             document.getElementById("resultados").style.display = todosLosDatos.length ? "block" : "none";
+            document.getElementById("tarjetas-resumen").style.display = "flex";
         }
 
         async function mostrarAjustes() {
             marcarMenu(5);
+            document.getElementById("titulo-seccion").textContent = "Ajustes";
+            document.getElementById("descripcion-seccion").textContent = "Configuración de tu cuenta.";
             document.getElementById("panel-grafico").style.display = "none";
             document.getElementById("resultados").style.display = "none";
+            document.getElementById("tarjetas-resumen").style.display = "none";
             document.querySelector(".search-box").style.display = "none";
             document.getElementById("seccion-audits").style.display = "none";
             document.getElementById("seccion-clientes").style.display = "none";
             document.getElementById("seccion-reports").style.display = "none";
             document.getElementById("seccion-proyectos").style.display = "none";
-            document.getElementById("seccion-ajustes").style.display = "block";
+            document.getElementById("seccion-ajustes").style.display = "flex";
         }
 
         async function cambiarPassword() {
