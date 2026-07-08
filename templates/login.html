@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuditIA - Iniciar sesión</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(160deg, #F5F5F4, #E7E3DD);
+        }
+
+        .tarjeta-login {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 12px 32px rgba(28, 25, 23, 0.10);
+            padding: 40px 36px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+        }
+
+        .wordmark {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1C1917;
+        }
+
+        .wordmark span {
+            font-weight: 300;
+            color: #7A9471;
+        }
+
+        .acento {
+            width: 40px;
+            height: 3px;
+            background: #7A9471;
+            border-radius: 2px;
+            margin: 10px auto 14px;
+        }
+
+        .subtitulo {
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            color: #78716C;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+
+        .campo {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .campo label {
+            display: block;
+            font-size: 12px;
+            color: #78716C;
+            margin-bottom: 6px;
+        }
+
+        .campo input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #E7E5E4;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            background: #FAFAF9;
+        }
+
+        .campo input:focus {
+            outline: none;
+            border-color: #7A9471;
+            background: #fff;
+        }
+
+        .error {
+            background: #F6EDEA;
+            color: #B5533A;
+            border: 1px solid #EBDCD6;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        button.entrar {
+            width: 100%;
+            background: #7A9471;
+            color: #fff;
+            border: none;
+            padding: 13px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: background 0.2s;
+        }
+
+        button.entrar:hover {
+            background: #6a8261;
+        }
+
+        .nota {
+            margin-top: 22px;
+            font-size: 12px;
+            color: #A8A29E;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="tarjeta-login">
+        <div class="wordmark">Audit<span>IA</span></div>
+        <div class="acento"></div>
+        <div class="subtitulo">Prospección inteligente</div>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="/login">
+            <div class="campo">
+                <label for="usuario">Usuario</label>
+                <input type="text" id="usuario" name="usuario" autocomplete="username" required>
+            </div>
+            <div class="campo">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="entrar">Entrar →</button>
+        </form>
+
+        <div class="nota">Podés cambiar la contraseña desde Ajustes</div>
+    </div>
+</body>
+
+</html>

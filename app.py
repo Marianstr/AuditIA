@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
 from dotenv import load_dotenv
+from functools import wraps
 import os
 import json
 from datetime import datetime
@@ -12,15 +13,73 @@ from scraper import buscar_negocios_google
 from scoring.lead_scorer import calcular_score, clasificar_lead, recomendar_servicios
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY") or "auditia-secret-key-cambiar-en-produccion"
 
 # Guardamos la última búsqueda en memoria para poder exportarla a Excel
 ultima_busqueda = {"resultados": [], "tipo": "", "ciudad": ""}
 
+AUTH_FILE = "auth.json"
+
+def cargar_auth():
+    if not os.path.exists(AUTH_FILE):
+        datos = {"usuario": "admin", "password": "auditia2026"}
+        with open(AUTH_FILE, "w", encoding="utf-8") as f:
+            json.dump(datos, f, ensure_ascii=False, indent=2)
+        return datos
+    with open(AUTH_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+cargar_auth()
+
+def login_required(f):
+    @wraps(f)
+    def decorada(*args, **kwargs):
+        if not session.get("usuario"):
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorada
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == "POST":
+        auth = cargar_auth()
+        usuario = request.form.get("usuario", "")
+        password = request.form.get("password", "")
+        if usuario == auth.get("usuario") and password == auth.get("password"):
+            session["usuario"] = usuario
+            return redirect(url_for("index"))
+        error = "Usuario o contraseña incorrectos"
+    return render_template("login.html", error=error)
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+@app.route("/cambiar-password", methods=["POST"])
+@login_required
+def cambiar_password():
+    datos = request.json
+    actual = datos.get("actual", "")
+    nueva = datos.get("nueva", "")
+    auth = cargar_auth()
+    if actual != auth.get("password"):
+        return jsonify({"ok": False, "error": "La contraseña actual no es correcta"}), 400
+    if not nueva:
+        return jsonify({"ok": False, "error": "La nueva contraseña no puede estar vacía"}), 400
+    auth["password"] = nueva
+    with open(AUTH_FILE, "w", encoding="utf-8") as f:
+        json.dump(auth, f, ensure_ascii=False, indent=2)
+    return jsonify({"ok": True})
+
 @app.route("/")
+@login_required
 def index():
     return render_template("index.html")
 
 @app.route("/buscar", methods=["POST"])
+@login_required
 def buscar():
     tipo = request.json.get("tipo")
     ciudad = request.json.get("ciudad")
@@ -69,6 +128,7 @@ def buscar():
     return jsonify(resultados)
 
 @app.route("/descargar-excel/<int:indice>")
+@login_required
 def descargar_excel_historial(indice):
     try:
         with open("historial.json", "r", encoding="utf-8") as f:
@@ -97,6 +157,7 @@ def descargar_excel_historial(indice):
     )
 
 @app.route("/clientes", methods=["GET", "POST"])
+@login_required
 def clientes():
     try:
         with open("clientes.json", "r", encoding="utf-8") as f:
@@ -114,6 +175,7 @@ def clientes():
     return jsonify(lista)
 
 @app.route("/proyectos", methods=["GET", "POST"])
+@login_required
 def proyectos():
     try:
         with open("proyectos.json", "r", encoding="utf-8") as f:
@@ -131,6 +193,7 @@ def proyectos():
 
 
 @app.route("/asignar-proyecto", methods=["POST"])
+@login_required
 def asignar_proyecto():
     datos = request.json
     try:
@@ -147,6 +210,7 @@ def asignar_proyecto():
 
 
 @app.route("/borrar-proyecto", methods=["POST"])
+@login_required
 def borrar_proyecto():
     nombre = request.json.get("nombre", "")
     try:
@@ -171,6 +235,7 @@ def borrar_proyecto():
 
 
 @app.route("/clientes/estado", methods=["POST"])
+@login_required
 def cambiar_estado_cliente():
     datos = request.json
     try:
@@ -185,6 +250,7 @@ def cambiar_estado_cliente():
         json.dump(lista, f, ensure_ascii=False, indent=2)
     return jsonify({"ok": True})
 @app.route("/resumen")
+@login_required
 def resumen():
     try:
         with open("clientes.json", "r", encoding="utf-8") as f:
@@ -218,6 +284,7 @@ def resumen():
         "negociacion": len([c for c in clientes_lista if c.get("estado") == "en negociación"])
     })
 @app.route("/clientes/presupuesto", methods=["POST"])
+@login_required
 def actualizar_presupuesto():
     datos = request.json
     try:
@@ -235,6 +302,7 @@ def actualizar_presupuesto():
         json.dump(lista, f, ensure_ascii=False, indent=2)
     return jsonify({"ok": True})
 @app.route("/clientes/borrar", methods=["POST"])
+@login_required
 def borrar_cliente():
     datos = request.json
     try:
@@ -252,6 +320,7 @@ def borrar_cliente():
 
 
 @app.route("/historial/borrar", methods=["POST"])
+@login_required
 def borrar_historial():
     datos = request.json
     try:
@@ -269,15 +338,17 @@ def borrar_historial():
         json.dump(lista, f, ensure_ascii=False, indent=2)
     return jsonify({"ok": True})
 @app.route("/historial")
+@login_required
 def historial():
     try:
         with open("historial.json", "r", encoding="utf-8") as f:
             datos = json.load(f)
     except FileNotFoundError:
         datos = []
-    resumen = [{k: r[k] for k in ("fecha", "tipo", "ciudad", "zona", "total", "calientes", "tibios", "frios")} for r in datos]
+    resumen = [{**{k: r[k] for k in ("fecha", "tipo", "ciudad", "zona", "total", "calientes", "tibios", "frios")}, "proyecto": r.get("proyecto", "")} for r in datos]
     return jsonify(resumen)
 @app.route("/descargar-excel")
+@login_required
 def descargar_excel():
     resultados = ultima_busqueda["resultados"]
     if not resultados:

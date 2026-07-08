@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuditIA - Dashboard</title>
+    <title>AuditIA - Panel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -372,14 +372,14 @@
     <aside class="sidebar">
         <div class="logo">🔍 Audit<span>IA</span></div>
         <nav class="nav">
-            <a href="#" class="active" onclick="mostrarDashboard(); return false;">📊 Dashboard</a>
+            <a href="#" class="active" onclick="mostrarDashboard(); return false;">📊 Panel</a>
             <a href="#" onclick="mostrarProyectos(); return false;">📁 Proyectos</a>
-            <a href="#" onclick="mostrarAudits(); return false;">🔎 Audits</a>
+            <a href="#" onclick="mostrarAudits(); return false;">🔎 Auditorías</a>
             <a href="#" onclick="mostrarClientes(); return false;">👥 Clientes</a>
-            <a href="#" onclick="mostrarReports(); return false;">📄 Reports</a>
-            <a href="#">⚙️ Settings</a>
+            <a href="#" onclick="mostrarReports(); return false;">📄 Informes</a>
+            <a href="#" onclick="mostrarAjustes(); return false;">⚙️ Ajustes</a>
         </nav>
-        <button class="new-project">＋ New Project</button>
+        <button class="new-project">＋ Nuevo proyecto</button>
     </aside>
 
     <div class="main">
@@ -388,6 +388,7 @@
             <div class="user">
                 <div class="avatar">M</div>
                 <span>Marian</span>
+                <a href="/logout" style="color:#A8A29E; font-size:12px; text-decoration:none; margin-left:6px; border-left:1px solid #E7E5E4; padding-left:10px;">Cerrar sesión</a>
             </div>
         </div>
 
@@ -461,7 +462,7 @@
         <div id="seccion-reports" style="display:none;">
             <div class="search-box">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h2>📊 Reports — Resumen del negocio</h2>
+                    <h2>📊 Informes — Resumen del negocio</h2>
                     <button class="buscar" onclick="window.print()"
                         style="background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4; font-size:13px; padding:8px 14px;">🖨️
                         Exportar
@@ -479,6 +480,25 @@
                     <button class="buscar" onclick="crearProyecto()">＋ Crear</button>
                 </div>
                 <div id="lista-proyectos"></div>
+            </div>
+        </div>
+        <div id="seccion-ajustes" style="display:none;">
+            <div class="search-box" style="max-width:420px;">
+                <h2>⚙️ Cambiar contraseña</h2>
+                <div class="campo-ajuste">
+                    <label style="font-size:12px; color:#78716C; display:block; margin-bottom:6px;">Contraseña actual</label>
+                    <input type="password" id="ajustes-actual" style="width:100%; margin-bottom:14px;">
+                </div>
+                <div class="campo-ajuste">
+                    <label style="font-size:12px; color:#78716C; display:block; margin-bottom:6px;">Nueva contraseña</label>
+                    <input type="password" id="ajustes-nueva" style="width:100%; margin-bottom:14px;">
+                </div>
+                <div class="campo-ajuste">
+                    <label style="font-size:12px; color:#78716C; display:block; margin-bottom:6px;">Repetir nueva contraseña</label>
+                    <input type="password" id="ajustes-repetir" style="width:100%; margin-bottom:14px;">
+                </div>
+                <button class="buscar" onclick="cambiarPassword()">Guardar contraseña</button>
+                <div id="ajustes-feedback" style="margin-top:12px; font-size:13px;"></div>
             </div>
         </div>
     </div>
@@ -568,6 +588,10 @@
             document.getElementById("panel-grafico").style.display = "none";
             document.getElementById("resultados").style.display = "none";
             document.querySelector(".search-box").style.display = "none";
+            document.getElementById("seccion-clientes").style.display = "none";
+            document.getElementById("seccion-reports").style.display = "none";
+            document.getElementById("seccion-proyectos").style.display = "none";
+            document.getElementById("seccion-ajustes").style.display = "none";
             document.getElementById("seccion-audits").style.display = "block";
             const resp = await fetch("/historial");
             const audits = await resp.json();
@@ -586,11 +610,14 @@
                     <span class="badge caliente">🔥 ${a.calientes}</span>
                     <span class="badge tibio">🌡️ ${a.tibios}</span>
                     <span class="badge frio">❄️ ${a.frios}</span>
-                    <a href="/descargar-excel/${i}" class="badge" style="text-decoration:none; background:#292524; color:#fff;">📥 Excel</a>
-                    <select onchange="asignarProyecto(${i}, this.value)" onclick="event.stopPropagation()" style="padding:6px 10px; border:1px solid #E7E5E4; border-radius:8px; font-size:12px; font-family:inherit; color:#44403C; background:#F5F5F4; max-width:150px;">
-                        <option value="">📁 Sin proyecto</option>
-                        ${proyectos.map(p => `<option value="${p.nombre.replace(/"/g, "&quot;")}" ${a.proyecto === p.nombre ? "selected" : ""}>📁 ${p.nombre}</option>`).join("")}
-                    </select>
+                    <a href="/descargar-excel/${i}" class="badge" style="text-decoration:none; background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4;">📥 Excel</a>
+                    <span style="position:relative; display:inline-block;">
+                        <select onchange="asignarProyecto(${i}, this.value, this)" onclick="event.stopPropagation()" style="padding:6px 10px; border:1px solid #E7E5E4; border-radius:8px; font-size:12px; font-family:inherit; color:#44403C; background:#F5F5F4; max-width:150px; transition:background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;">
+                            <option value="">📁 Sin proyecto</option>
+                            ${proyectos.map(p => `<option value="${p.nombre.replace(/"/g, "&quot;")}" ${a.proyecto === p.nombre ? "selected" : ""}>📁 ${p.nombre}</option>`).join("")}
+                        </select>
+                        <span class="check-guardado" style="position:absolute; top:-7px; right:-7px; width:18px; height:18px; border-radius:50%; background:#7A9471; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,0.2); opacity:0; transform:scale(0.4); transition:opacity 0.25s cubic-bezier(.34,1.56,.64,1), transform 0.35s cubic-bezier(.34,1.56,.64,1); pointer-events:none;">✓</span>
+                    </span>
                     <button class="buscar" style="font-size:12px; padding:6px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="borrarAudits(false, ${i})">🗑️</button>
                 </div>
             </div>`).join("");
@@ -603,6 +630,7 @@
             document.getElementById("seccion-audits").style.display = "none";
             document.getElementById("seccion-clientes").style.display = "none";
             document.getElementById("seccion-reports").style.display = "none";
+            document.getElementById("seccion-ajustes").style.display = "none";
             document.getElementById("seccion-proyectos").style.display = "block";
 
             const proyectos = await (await fetch("/proyectos")).json();
@@ -619,7 +647,7 @@
                 const calientes = suyas.reduce((s, a) => s + (a.calientes || 0), 0);
                 return `
                 <div style="flex:1; min-width:220px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:16px;">
-                    <div onclick="mostrarAudits()" style="cursor:pointer;" title="Ver búsquedas en Audits">
+                    <div onclick="mostrarAudits()" style="cursor:pointer;" title="Ver búsquedas en Auditorías">
                         <div style="font-size:15px; font-weight:500;">📁 ${p.nombre}</div>
                         <div style="font-size:12px; color:#78716C; margin-top:4px;">${suyas.length} búsqueda${suyas.length === 1 ? "" : "s"} · 🔥 ${calientes} calientes · creado ${p.fecha}</div>
                     </div>
@@ -650,12 +678,25 @@
             mostrarProyectos();
         }
 
-        async function asignarProyecto(indice, proyecto) {
+        async function asignarProyecto(indice, proyecto, sel) {
             await fetch("/asignar-proyecto", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ indice: indice, proyecto: proyecto })
             });
+            sel.style.borderColor = "#7A9471";
+            sel.style.background = "#DCE6D9";
+            sel.style.boxShadow = "0 0 0 3px rgba(122,148,113,0.3)";
+            const check = sel.nextElementSibling;
+            check.style.opacity = "1";
+            check.style.transform = "scale(1)";
+            setTimeout(() => {
+                sel.style.borderColor = "#E7E5E4";
+                sel.style.background = "#F5F5F4";
+                sel.style.boxShadow = "none";
+                check.style.opacity = "0";
+                check.style.transform = "scale(0.4)";
+            }, 1500);
         }
         async function mostrarReports() {
             marcarMenu(4);
@@ -664,6 +705,8 @@
             document.querySelector(".search-box").style.display = "none";
             document.getElementById("seccion-audits").style.display = "none";
             document.getElementById("seccion-clientes").style.display = "none";
+            document.getElementById("seccion-proyectos").style.display = "none";
+            document.getElementById("seccion-ajustes").style.display = "none";
             document.getElementById("seccion-reports").style.display = "block";
 
             const audits = await (await fetch("/historial")).json();
@@ -715,7 +758,7 @@
                 <div style="font-size:13px; color:#78716C; margin-bottom:12px;">🏆 Mejores búsquedas (por leads calientes)</div>
                 <div style="font-size:13px;">
                     ${top.length === 0 ? "<p style='color:#78716C;'>Todavía no hay auditorías.</p>" : top.map((a, i) => `
-                    <div onclick="mostrarAudits()" style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F5F5F4; cursor:pointer;" title="Ver en Audits">
+                    <div onclick="mostrarAudits()" style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F5F5F4; cursor:pointer;" title="Ver en Auditorías">
                         <span>${i + 1}. ${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}</span>
                         <span style="color:#B5533A; font-weight:500;">🔥 ${a.calientes || 0}</span>
                     </div>`).join("")}
@@ -743,6 +786,9 @@
             document.getElementById("resultados").style.display = "none";
             document.querySelector(".search-box").style.display = "none";
             document.getElementById("seccion-audits").style.display = "none";
+            document.getElementById("seccion-reports").style.display = "none";
+            document.getElementById("seccion-proyectos").style.display = "none";
+            document.getElementById("seccion-ajustes").style.display = "none";
             document.getElementById("seccion-clientes").style.display = "block";
             const resp = await fetch("/clientes");
             const clientes = await resp.json();
@@ -921,8 +967,56 @@
             marcarMenu(0);
             document.getElementById("seccion-proyectos").style.display = "none";
             document.getElementById("seccion-audits").style.display = "none";
+            document.getElementById("seccion-clientes").style.display = "none";
+            document.getElementById("seccion-reports").style.display = "none";
+            document.getElementById("seccion-ajustes").style.display = "none";
             document.querySelector(".search-box").style.display = "block";
             document.getElementById("resultados").style.display = todosLosDatos.length ? "block" : "none";
+        }
+
+        async function mostrarAjustes() {
+            marcarMenu(5);
+            document.getElementById("panel-grafico").style.display = "none";
+            document.getElementById("resultados").style.display = "none";
+            document.querySelector(".search-box").style.display = "none";
+            document.getElementById("seccion-audits").style.display = "none";
+            document.getElementById("seccion-clientes").style.display = "none";
+            document.getElementById("seccion-reports").style.display = "none";
+            document.getElementById("seccion-proyectos").style.display = "none";
+            document.getElementById("seccion-ajustes").style.display = "block";
+        }
+
+        async function cambiarPassword() {
+            const actual = document.getElementById("ajustes-actual").value;
+            const nueva = document.getElementById("ajustes-nueva").value;
+            const repetir = document.getElementById("ajustes-repetir").value;
+            const feedback = document.getElementById("ajustes-feedback");
+            if (!actual || !nueva || !repetir) {
+                feedback.style.color = "#B5533A";
+                feedback.textContent = "Completá los tres campos.";
+                return;
+            }
+            if (nueva !== repetir) {
+                feedback.style.color = "#B5533A";
+                feedback.textContent = "La nueva contraseña y su repetición no coinciden.";
+                return;
+            }
+            const resp = await fetch("/cambiar-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ actual: actual, nueva: nueva })
+            });
+            const datos = await resp.json();
+            if (datos.ok) {
+                feedback.style.color = "#7A9471";
+                feedback.textContent = "✓ Contraseña actualizada correctamente.";
+                document.getElementById("ajustes-actual").value = "";
+                document.getElementById("ajustes-nueva").value = "";
+                document.getElementById("ajustes-repetir").value = "";
+            } else {
+                feedback.style.color = "#B5533A";
+                feedback.textContent = datos.error || "No se pudo actualizar la contraseña.";
+            }
         }
     </script>
 </body>
