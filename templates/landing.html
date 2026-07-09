@@ -153,6 +153,128 @@
             color: #78716C;
         }
 
+        #planes {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        #planes .acento-seccion {
+            width: 40px;
+            height: 2px;
+            background: #10855E;
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        #planes h2 {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 500;
+            color: #1C1917;
+            margin-bottom: 8px;
+        }
+
+        #planes > p {
+            text-align: center;
+            font-size: 15px;
+            color: #78716C;
+            margin-bottom: 32px;
+        }
+
+        .planes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .plan {
+            position: relative;
+            background: #fff;
+            border: 0.5px solid #E7E5E4;
+            border-radius: 12px;
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .plan-destacado {
+            border: 2px solid #10855E;
+        }
+
+        .plan-etiqueta {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #E8F2EE;
+            color: #10855E;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .plan h3 {
+            font-size: 15px;
+            font-weight: 500;
+            color: #1C1917;
+            margin-bottom: 4px;
+        }
+
+        .plan-subtitulo {
+            font-size: 13px;
+            color: #78716C;
+            margin-bottom: 16px;
+        }
+
+        .plan-precio {
+            font-size: 28px;
+            font-weight: 500;
+            color: #1C1917;
+            margin-bottom: 20px;
+        }
+
+        .plan-precio span {
+            font-size: 14px;
+            font-weight: 400;
+            color: #78716C;
+        }
+
+        .plan-lista {
+            list-style: none;
+            margin-bottom: 24px;
+        }
+
+        .plan-lista li {
+            font-size: 13px;
+            color: #57534E;
+            padding: 6px 0;
+            border-top: 1px solid #F5F5F4;
+        }
+
+        .plan-lista li:first-child {
+            border-top: none;
+        }
+
+        .plan-boton {
+            display: block;
+            text-align: center;
+            margin-top: auto;
+            border: 0.5px solid #D6D3D1;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1C1917;
+            text-decoration: none;
+        }
+
+        .plan-boton-destacado {
+            background: #10855E;
+            border-color: #10855E;
+            color: #fff;
+        }
+
         footer {
             text-align: center;
             padding: 0 24px 40px;
@@ -207,6 +329,50 @@
                 <div class="icono-circulo"><i data-lucide="target"></i></div>
                 <h3>Actúa</h3>
                 <p>Te dice qué necesita cada empresa y con qué herramienta resolverlo.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="planes">
+        <div class="acento-seccion"></div>
+        <h2>Planes</h2>
+        <p>Empezá gratis. Escalá cuando tu cartera lo pida.</p>
+        <div class="planes-grid">
+            <div class="plan">
+                <h3>FREE</h3>
+                <p class="plan-subtitulo">Para probar la herramienta</p>
+                <p class="plan-precio">0 € <span>/mes</span></p>
+                <ul class="plan-lista">
+                    <li>5 búsquedas al mes</li>
+                    <li>Puntuación de leads</li>
+                    <li>Exportación a Excel</li>
+                </ul>
+                <a href="/login" class="plan-boton">Empezar gratis</a>
+            </div>
+            <div class="plan plan-destacado">
+                <span class="plan-etiqueta">Más elegido</span>
+                <h3>PRO</h3>
+                <p class="plan-subtitulo">Para freelances y consultores</p>
+                <p class="plan-precio">49 € <span>/mes</span></p>
+                <ul class="plan-lista">
+                    <li>50 búsquedas al mes</li>
+                    <li>CRM de clientes</li>
+                    <li>Proyectos e informes</li>
+                    <li>Exportación a PDF</li>
+                </ul>
+                <a href="mailto:marianutn0102@gmail.com?subject=Plan%20Pro" class="plan-boton plan-boton-destacado">Contactar</a>
+            </div>
+            <div class="plan">
+                <h3>AGENCY</h3>
+                <p class="plan-subtitulo">Para equipos y agencias</p>
+                <p class="plan-precio">149 € <span>/mes</span></p>
+                <ul class="plan-lista">
+                    <li>200 búsquedas al mes</li>
+                    <li>Todo lo del plan Pro</li>
+                    <li>Varios usuarios</li>
+                    <li>Búsquedas extra a 0,50 €</li>
+                </ul>
+                <a href="mailto:marianutn0102@gmail.com?subject=Plan%20Agency" class="plan-boton">Contactar</a>
             </div>
         </div>
     </section>
