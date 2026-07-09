@@ -327,14 +327,40 @@
             letter-spacing: .5px;
         }
 
-        .servicio {
-            background: #F5F5F4;
-            color: #44403C;
-            padding: 5px 12px;
-            border-radius: 20px;
+        .enlace-recomendacion {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             font-size: 13px;
-            display: inline-block;
-            margin: 3px;
+            color: #78716C;
+            text-decoration: none;
+            border-bottom: 1px solid #D6D3D1;
+            padding-bottom: 1px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .enlace-recomendacion:hover {
+            color: #1C1917;
+            border-bottom-color: #78716C;
+        }
+
+        .fila-recomendacion {
+            position: relative;
+            padding-left: 16px;
+        }
+
+        .fila-recomendacion::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 20px;
+            background: #D6D3D1;
+            border-radius: 2px;
         }
 
         .card-score {
@@ -466,6 +492,7 @@
                     style="background: #F5F5F4; color: #44403C; border: 1px solid #E7E5E4; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;"><i data-lucide="download" style="width:16px; height:16px; vertical-align:-3px;"></i>
                     Descargar Excel</a></div>
             <div class="cards" id="cards"></div>
+            <div style="color:#A8A29E; font-size:11px; margin-top:14px;">Algunos enlaces son de afiliado. AuditIA puede recibir una comisión sin coste adicional para el usuario.</div>
         </div>
         <div id="seccion-audits" style="display:none;">
             <div class="search-box">
@@ -534,6 +561,40 @@
     </div>
 
     <script>
+        const HERRAMIENTAS = {
+            hostinger: { id: "hostinger", nombre: "Hostinger", url: "https://www.hostinger.com?ref=auditia", boton: "Crear web con Hostinger" },
+            semrush: { id: "semrush", nombre: "Semrush", url: "https://www.semrush.com?ref=auditia", boton: "Auditar SEO con Semrush" },
+            brevo: { id: "brevo", nombre: "Brevo", url: "https://www.brevo.com?ref=auditia", boton: "Gestionar reputación con Brevo" },
+            canva: { id: "canva", nombre: "Canva", url: "https://www.canva.com?ref=auditia", boton: "Diseñar con Canva" },
+            elementor: { id: "elementor", nombre: "Elementor", url: "https://elementor.com?ref=auditia", boton: "Armar sitio con Elementor" },
+            adobeExpress: { id: "adobeExpress", nombre: "Adobe Express", url: "https://www.adobe.com/express/?ref=auditia", boton: "Diseñar en Adobe Express" }
+        };
+
+        function recomendaciones(lead) {
+            if (lead.clasificacion === "frio") return [];
+            const recs = [];
+            const tieneWeb = lead.web !== "No tiene";
+            const rating = lead.rating || 0;
+            const sinResenas = (lead.cantidad_resenas || 0) === 0;
+
+            if (!tieneWeb) {
+                recs.push({ motivo: "No tiene sitio web", herramientas: [HERRAMIENTAS.hostinger] });
+            }
+            if (!tieneWeb && lead.clasificacion === "caliente") {
+                recs.push({ motivo: "Necesita presencia digital completa", herramientas: [HERRAMIENTAS.elementor] });
+            }
+            if (sinResenas || rating < 4.0) {
+                recs.push({ motivo: "Reputación online mejorable", herramientas: [HERRAMIENTAS.brevo] });
+            }
+            if (tieneWeb && rating < 4.0) {
+                recs.push({ motivo: "Web sin optimizar para buscadores", herramientas: [HERRAMIENTAS.semrush] });
+            }
+            if (!tieneWeb || sinResenas) {
+                recs.push({ motivo: "Necesita identidad visual", herramientas: [HERRAMIENTAS.adobeExpress, HERRAMIENTAS.canva] });
+            }
+            return recs;
+        }
+
         let todosLosDatos = [];
         function marcarMenu(indice) {
             document.querySelectorAll(".nav a").forEach((a, i) => {
@@ -567,6 +628,40 @@
             mostrarPagina();
         }
 
+        function filaRecomendacion(r) {
+            const enlaces = r.herramientas.map((h, i) => {
+                const texto = i === 0 ? h.boton : `o con ${h.nombre}`;
+                return `<a href="${h.url}" target="_blank" rel="noopener sponsored" class="enlace-recomendacion">${texto} <i data-lucide="external-link" style="width:13px; height:13px;"></i></a>`;
+            }).join("");
+            return `
+            <div class="fila-recomendacion" style="display:flex; align-items:center; justify-content:space-between; gap:20px; background:#FFFFFF; border-radius:0; padding-top:13px; padding-right:16px; padding-bottom:13px; margin-bottom:8px;">
+                <span style="font-size:14px; font-weight:500; color:#1C1917;">${r.motivo}</span>
+                <div style="display:flex; gap:14px;">${enlaces}</div>
+            </div>`;
+        }
+
+        function htmlRecomendaciones(lead, globalIdx) {
+            const recs = recomendaciones(lead);
+            if (recs.length === 0) {
+                return `<p style="color:#78716C; font-size:13px;">Presencia digital sólida. Sin oportunidades evidentes.</p>`;
+            }
+            const primeras = recs.slice(0, 3).map(filaRecomendacion).join("");
+            const resto = recs.slice(3);
+            if (resto.length === 0) return primeras;
+            const idExtra = `rec-extra-${globalIdx}`;
+            return `${primeras}
+            <div id="${idExtra}" style="display:none;">${resto.map(filaRecomendacion).join("")}</div>
+            <a href="#" id="link-${idExtra}" onclick="event.preventDefault(); toggleRecomendaciones('${idExtra}', ${resto.length});" style="font-size:12px; color:#78716C; text-decoration:underline;">Ver más recomendaciones (${resto.length})</a>`;
+        }
+
+        function toggleRecomendaciones(idExtra, n) {
+            const extra = document.getElementById(idExtra);
+            const link = document.getElementById(`link-${idExtra}`);
+            const abierto = extra.style.display === "block";
+            extra.style.display = abierto ? "none" : "block";
+            link.textContent = abierto ? `Ver más recomendaciones (${n})` : "Ver menos";
+        }
+
         function mostrarPagina() {
             const inicio = (paginaActual - 1) * porPagina;
             const datos = todosLosDatos.slice(inicio, inicio + porPagina);
@@ -574,7 +669,7 @@
             const cards = document.getElementById("cards");
             cards.innerHTML = "";
             datos.forEach((d, idx) => {
-                const servicios = d.servicios.map(s => `<span class="servicio"><i data-lucide="check-circle-2" style="width:16px; height:16px; vertical-align:-3px; color:#7A9471;"></i> ${s}</span>`).join("");
+                const globalIdx = (paginaActual - 1) * porPagina + idx;
                 const webLink = d.web !== "No tiene" ? `<a href="${d.web}" target="_blank">Ver web</a>` : "Sin web";
                 const emailBtn = d.web !== "No tiene" ? `<span><i data-lucide="mail" style="width:16px; height:16px; vertical-align:-3px;"></i> <a href="${d.web}/contacto" target="_blank" title="Abre la web del negocio para buscar su email">Buscar email</a></span>` : "";
                 cards.innerHTML += `
@@ -591,8 +686,8 @@
                     </div>
                 </div>
                 <div class="card-servicios">
-                    <h4>Servicios recomendados</h4>
-                    ${servicios || "<span style='color:#aaa'>Sin recomendaciones</span>"}
+                    <h4>Cómo ayudarle</h4>
+                    ${htmlRecomendaciones(d, globalIdx)}
                 </div>
                 <div class="card-score">
                     <div class="score-num">${d.score}</div>
