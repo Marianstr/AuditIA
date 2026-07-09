@@ -46,13 +46,9 @@
             font-size: 22px;
             font-weight: bold;
             color: #1C1917;
-            margin-bottom: 36px;
-            padding-left: 8px;
+            padding: 13px 0 20px 14px;
         }
 
-        .logo span {
-            color: #1C1917;
-        }
 
         .nav a {
             display: flex;
@@ -114,7 +110,7 @@
         }
 
         .topbar .titulos p {
-            font-size: 13px;
+            font-size: 16px;
             color: #78716C;
             margin-top: 4px;
         }
@@ -151,7 +147,7 @@
         .search-box h2 {
             margin-bottom: 16px;
             color: #1C1917;
-            font-size: 17px;
+            font-size: 21px;
         }
 
         .inputs {
@@ -281,6 +277,15 @@
             gap: 20px;
         }
 
+        .fila-historial {
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .fila-historial:hover {
+            background: #FAFAF9;
+        }
+
         .card-info {
             flex: 2;
         }
@@ -386,7 +391,7 @@
 
 <body>
     <aside class="sidebar">
-        <div class="logo"><i data-lucide="search" style="width:20px; height:20px;"></i> Audit<span>IA</span></div>
+        <div class="logo"><img src="/static/auditia-logo.png" alt="AuditIA" style="height:48px; width:auto;"></div>
         <nav class="nav">
             <a href="#" class="active" onclick="mostrarDashboard(); return false;"><i data-lucide="layout-dashboard" style="width:18px; height:18px;"></i> Panel</a>
             <a href="#" onclick="mostrarProyectos(); return false;"><i data-lucide="folder-kanban" style="width:18px; height:18px;"></i> Proyectos</a>
@@ -432,6 +437,8 @@
         </div>
 
         <div class="resultados" id="resultados">
+            <button class="buscar" id="btn-volver-historial" onclick="volverAlHistorial()"
+                style="display:none; margin-bottom:14px; background:#fff; color:#44403C; border:1px solid #E7E5E4;">← Volver al historial</button>
             <div class="stats">
                 <div class="stat caliente">
                     <div>
@@ -455,7 +462,7 @@
                     <div class="pill">Baja</div>
                 </div>
             </div>
-            <div style="text-align: right; margin-bottom: 14px;"><a href="/descargar-excel" class="buscar"
+            <div style="text-align: right; margin-bottom: 14px;"><a href="/descargar-excel" id="link-excel-resultados" class="buscar"
                     style="background: #F5F5F4; color: #44403C; border: 1px solid #E7E5E4; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-block;"><i data-lucide="download" style="width:16px; height:16px; vertical-align:-3px;"></i>
                     Descargar Excel</a></div>
             <div class="cards" id="cards"></div>
@@ -466,6 +473,10 @@
                 <button class="buscar"
                     style="font-size:13px; padding:8px 14px; background:#fff; color:#78716C; border:1px solid #E7E5E4;"
                     onclick="borrarAudits(true)"><i data-lucide="trash-2" style="width:16px; height:16px; vertical-align:-3px;"></i> Borrar todo</button>
+                <div id="filtro-proyecto-header" style="display:none; align-items:center; justify-content:space-between; background:#F5F5F4; border:1px solid #E7E5E4; border-radius:10px; padding:10px 14px; margin-top:14px;">
+                    <span style="font-size:14px; font-weight:600; color:#1C1917;"><i data-lucide="folder" style="width:16px; height:16px; vertical-align:-3px;"></i> <span id="filtro-proyecto-nombre"></span></span>
+                    <button class="buscar" style="font-size:12px; padding:6px 12px; background:#fff; color:#44403C; border:1px solid #E7E5E4;" onclick="mostrarAudits()">← Ver todas las auditorías</button>
+                </div>
                 <div id="lista-audits" style="margin-top:10px;"></div>
             </div>
         </div>
@@ -539,6 +550,8 @@
             if (!tipo || !ciudad) { alert("Completa tipo y ciudad"); return; }
             document.getElementById("loading").style.display = "block";
             document.getElementById("resultados").style.display = "none";
+            document.getElementById("btn-volver-historial").style.display = "none";
+            document.getElementById("link-excel-resultados").href = "/descargar-excel";
             const response = await fetch("/buscar", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -602,7 +615,7 @@
             mostrarPagina();
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
-        async function mostrarAudits() {
+        async function mostrarAudits(proyectoFiltro = null) {
             marcarMenu(2);
             document.getElementById("titulo-seccion").textContent = "Auditorías";
             document.getElementById("descripcion-seccion").textContent = "Buscá empresas por zona y analizá su presencia digital.";
@@ -618,12 +631,26 @@
             const resp = await fetch("/historial");
             const audits = await resp.json();
             const lista = document.getElementById("lista-audits");
-            if (audits.length === 0) {
-                lista.innerHTML = "<p style='color:#78716C;'>Todavía no hay auditorías guardadas. Hacé una búsqueda y aparecerá acá.</p>";
+
+            const filtroHeader = document.getElementById("filtro-proyecto-header");
+            if (proyectoFiltro) {
+                filtroHeader.style.display = "flex";
+                document.getElementById("filtro-proyecto-nombre").textContent = "Proyecto: " + proyectoFiltro;
+            } else {
+                filtroHeader.style.display = "none";
+            }
+
+            const auditsConIndice = audits.map((a, i) => ({ ...a, i }));
+            const auditsFiltrados = proyectoFiltro ? auditsConIndice.filter(a => a.proyecto === proyectoFiltro) : auditsConIndice;
+
+            if (auditsFiltrados.length === 0) {
+                lista.innerHTML = proyectoFiltro
+                    ? "<p style='color:#78716C; text-align:center; padding:30px 0;'>Este proyecto todavía no tiene auditorías asignadas.</p>"
+                    : "<p style='color:#78716C;'>Todavía no hay auditorías guardadas. Hacé una búsqueda y aparecerá acá.</p>";
                 return;
             }
-            lista.innerHTML = audits.map((a, i) => `
-            <div class="card" style="margin-bottom:10px;">
+            lista.innerHTML = auditsFiltrados.map(a => { const i = a.i; return `
+            <div class="card fila-historial" style="margin-bottom:10px;" onclick="verResultadosHistorial(${i})">
                 <div class="card-info">
                     <h3>${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}</h3>
                     <p><i data-lucide="calendar" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.fecha} · ${a.total} resultados</p>
@@ -632,7 +659,7 @@
                     <span class="badge caliente"><i data-lucide="flame" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.calientes}</span>
                     <span class="badge tibio"><i data-lucide="leaf" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.tibios}</span>
                     <span class="badge frio"><i data-lucide="snowflake" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.frios}</span>
-                    <a href="/descargar-excel/${i}" class="badge" style="text-decoration:none; background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4;"><i data-lucide="download" style="width:16px; height:16px; vertical-align:-3px;"></i> Excel</a>
+                    <a href="/descargar-excel/${i}" onclick="event.stopPropagation()" class="badge" style="text-decoration:none; background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4;"><i data-lucide="download" style="width:16px; height:16px; vertical-align:-3px;"></i> Excel</a>
                     <span style="position:relative; display:inline-block;">
                         <select onchange="asignarProyecto(${i}, this.value, this)" onclick="event.stopPropagation()" style="padding:6px 10px; border:1px solid #E7E5E4; border-radius:8px; font-size:12px; font-family:inherit; color:#44403C; background:#F5F5F4; max-width:150px; transition:background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;">
                             <option value="" disabled hidden ${!a.proyecto ? "selected" : ""}>📁 Proyecto</option>
@@ -641,10 +668,31 @@
                         </select>
                         <span class="check-guardado" style="position:absolute; top:-7px; right:-7px; width:18px; height:18px; border-radius:50%; background:#7A9471; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,0.2); opacity:0; transform:scale(0.4); transition:opacity 0.25s cubic-bezier(.34,1.56,.64,1), transform 0.35s cubic-bezier(.34,1.56,.64,1); pointer-events:none;">✓</span>
                     </span>
-                    <button class="buscar" style="font-size:12px; padding:6px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="borrarAudits(false, ${i})"><i data-lucide="trash-2" style="width:16px; height:16px; vertical-align:-3px;"></i></button>
+                    <button class="buscar" style="font-size:12px; padding:6px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="event.stopPropagation(); borrarAudits(false, ${i})"><i data-lucide="trash-2" style="width:16px; height:16px; vertical-align:-3px;"></i></button>
                 </div>
-            </div>`).join("");
+            </div>`; }).join("");
             lucide.createIcons();
+        }
+        async function verResultadosHistorial(indice) {
+            const response = await fetch(`/historial/resultados/${indice}`);
+            if (!response.ok) { alert("No se pudieron cargar los resultados de esta auditoría."); return; }
+            todosLosDatos = await response.json();
+            paginaActual = 1;
+            document.getElementById("seccion-audits").style.display = "none";
+            document.getElementById("resultados").style.display = "block";
+            document.getElementById("btn-volver-historial").style.display = "inline-block";
+            document.getElementById("link-excel-resultados").href = `/descargar-excel/${indice}`;
+            document.getElementById("count-caliente").textContent = todosLosDatos.filter(d => d.clasificacion === "caliente").length;
+            document.getElementById("count-tibio").textContent = todosLosDatos.filter(d => d.clasificacion === "tibio").length;
+            document.getElementById("count-frio").textContent = todosLosDatos.filter(d => d.clasificacion === "frio").length;
+            mostrarPagina();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+        function volverAlHistorial() {
+            document.getElementById("resultados").style.display = "none";
+            document.getElementById("btn-volver-historial").style.display = "none";
+            document.getElementById("link-excel-resultados").href = "/descargar-excel";
+            document.getElementById("seccion-audits").style.display = "block";
         }
         async function mostrarProyectos() {
             marcarMenu(1);
@@ -672,12 +720,12 @@
                 const suyas = audits.filter(a => a.proyecto === p.nombre);
                 const calientes = suyas.reduce((s, a) => s + (a.calientes || 0), 0);
                 return `
-                <div style="flex:1; min-width:220px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:16px;">
-                    <div onclick="mostrarAudits()" style="cursor:pointer;" title="Ver búsquedas en Auditorías">
+                <div class="fila-historial" style="flex:1; min-width:220px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:16px;" onclick="mostrarAudits('${p.nombre.replace(/'/g, "\\'")}')" title="Ver búsquedas en Auditorías">
+                    <div>
                         <div style="font-size:15px; font-weight:500;"><i data-lucide="folder" style="width:16px; height:16px; vertical-align:-3px;"></i> ${p.nombre}</div>
                         <div style="font-size:12px; color:#78716C; margin-top:4px;">${suyas.length} búsqueda${suyas.length === 1 ? "" : "s"} · <i data-lucide="flame" style="width:16px; height:16px; vertical-align:-3px; color:#B5533A;"></i> ${calientes} calientes · creado ${p.fecha}</div>
                     </div>
-                    <button class="buscar" style="font-size:12px; padding:5px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4; margin-top:10px;" onclick="borrarProyecto('${p.nombre.replace(/'/g, "\\'")}')"><i data-lucide="trash-2" style="width:16px; height:16px; vertical-align:-3px;"></i> Borrar</button>
+                    <button class="buscar" style="font-size:12px; padding:5px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4; margin-top:10px;" onclick="event.stopPropagation(); borrarProyecto('${p.nombre.replace(/'/g, "\\'")}')"><i data-lucide="trash-2" style="width:16px; height:16px; vertical-align:-3px;"></i> Borrar</button>
                 </div>`;
             }).join("") + "</div>";
             lucide.createIcons();
@@ -749,7 +797,8 @@
             const totalPresu = clientes.reduce((s, c) => s + (parseFloat(c.presupuesto) || 0), 0);
             const totalCerrado = clientes.reduce((s, c) => s + (parseFloat(c.cerrado_en) || 0), 0);
             const tasa = totalPresu > 0 ? Math.round(totalCerrado / totalPresu * 100) : 0;
-            const top = [...audits].sort((a, b) => (b.calientes || 0) - (a.calientes || 0)).slice(0, 5);
+            const auditsConIndice = audits.map((a, i) => ({ ...a, i }));
+            const top = [...auditsConIndice].sort((a, b) => (b.calientes || 0) - (a.calientes || 0)).slice(0, 5);
 
             document.getElementById("contenido-reports").innerHTML = `
         
@@ -786,9 +835,9 @@
             <div style="flex:1; min-width:260px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:16px;">
                 <div style="font-size:13px; color:#78716C; margin-bottom:12px;"><i data-lucide="trophy" style="width:16px; height:16px; vertical-align:-3px;"></i> Mejores búsquedas (por leads calientes)</div>
                 <div style="font-size:13px;">
-                    ${top.length === 0 ? "<p style='color:#78716C;'>Todavía no hay auditorías.</p>" : top.map((a, i) => `
-                    <div onclick="mostrarAudits()" style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F5F5F4; cursor:pointer;" title="Ver en Auditorías">
-                        <span>${i + 1}. ${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}</span>
+                    ${top.length === 0 ? "<p style='color:#78716C;'>Todavía no hay auditorías.</p>" : top.map((a, idx) => `
+                    <div onclick="mostrarAudits().then(() => verResultadosHistorial(${a.i}))" style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F5F5F4; cursor:pointer;" title="Ver resultados de esta búsqueda">
+                        <span>${idx + 1}. ${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}</span>
                         <span style="color:#B5533A; font-weight:500;"><i data-lucide="flame" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.calientes || 0}</span>
                     </div>`).join("")}
                 </div>
@@ -974,14 +1023,14 @@
                 data: {
                     labels: datos.map(a => a.tipo + " (" + a.fecha.split(" ")[0] + ")"),
                     datasets: [{
-                        label: "🔥 Calientes",
+                        label: "Calientes",
                         data: datos.map(a => a.calientes),
                         borderColor: "#B5533A",
                         backgroundColor: "rgba(181, 83, 58, 0.10)",
                         fill: true,
                         tension: 0.35
                     }, {
-                        label: "🌡️ Tibios",
+                        label: "Tibios",
                         data: datos.map(a => a.tibios),
                         borderColor: "#B8873D",
                         backgroundColor: "rgba(184, 135, 61, 0.08)",

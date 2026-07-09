@@ -127,6 +127,17 @@ def buscar():
     ultima_busqueda["ciudad"] = ciudad
     return jsonify(resultados)
 
+@app.route("/historial/resultados/<int:indice>")
+@login_required
+def resultados_historial(indice):
+    try:
+        with open("historial.json", "r", encoding="utf-8") as f:
+            historial = json.load(f)
+        registro = historial[indice]
+    except (FileNotFoundError, IndexError):
+        return jsonify({"error": "Auditoría no encontrada"}), 404
+    return jsonify(registro["resultados"])
+
 @app.route("/descargar-excel/<int:indice>")
 @login_required
 def descargar_excel_historial(indice):
