@@ -15,19 +15,24 @@ from scoring.lead_scorer import calcular_score, clasificar_lead, recomendar_serv
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or "auditia-secret-key-cambiar-en-produccion"
 
-# Guardamos la última búsqueda en memoria para poder exportarla a Excel
-ultima_busqueda = {"resultados": [], "tipo": "", "ciudad": ""}
-
 AUTH_FILE = "auth.json"
 
 def cargar_auth():
     if not os.path.exists(AUTH_FILE):
-        datos = {"usuario": "admin", "password": "auditia2026"}
-        with open(AUTH_FILE, "w", encoding="utf-8") as f:
-            json.dump(datos, f, ensure_ascii=False, indent=2)
+        datos = {
+            "admin": {"password": "auditia2026", "limite": None, "usadas": 0},
+            "ariel": {"password": "utn2026", "limite": 10, "usadas": 0},
+            "profe2": {"password": "utn2026", "limite": 10, "usadas": 0},
+            "visitante": {"password": "123", "limite": 15, "usadas": 0},
+        }
+        guardar_auth(datos)
         return datos
     with open(AUTH_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
+
+def guardar_auth(datos):
+    with open(AUTH_FILE, "w", encoding="utf-8") as f:
+        json.dump(datos, f, ensure_ascii=False, indent=2)
 
 cargar_auth()
 
@@ -46,7 +51,8 @@ def login():
         auth = cargar_auth()
         usuario = request.form.get("usuario", "")
         password = request.form.get("password", "")
-        if usuario == auth.get("usuario") and password == auth.get("password"):
+        registro = auth.get(usuario)
+        if registro and password == registro.get("password"):
             session["usuario"] = usuario
             return redirect(url_for("index"))
         error = "Usuario o contraseña incorrectos"
@@ -55,28 +61,16 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("login"))
-
-@app.route("/cambiar-password", methods=["POST"])
-@login_required
-def cambiar_password():
-    datos = request.json
-    actual = datos.get("actual", "")
-    nueva = datos.get("nueva", "")
-    auth = cargar_auth()
-    if actual != auth.get("password"):
-        return jsonify({"ok": False, "error": "La contraseña actual no es correcta"}), 400
-    if not nueva:
-        return jsonify({"ok": False, "error": "La nueva contraseña no puede estar vacía"}), 400
-    auth["password"] = nueva
-    with open(AUTH_FILE, "w", encoding="utf-8") as f:
-        json.dump(auth, f, ensure_ascii=False, indent=2)
-    return jsonify({"ok": True})
+    return redirect(url_for("landing"))
 
 @app.route("/")
+def landing():
+    return render_template("landing.html")
+
+@app.route("/app")
 @login_required
 def index():
-    return render_template("index.html")
+    return render_template("index.html", usuario=session["usuario"])
 
 @app.route("/buscar", methods=["POST"])
 @login_required
@@ -84,8 +78,22 @@ def buscar():
     tipo = request.json.get("tipo")
     ciudad = request.json.get("ciudad")
     zona = request.json.get("zona")
-    
-    negocios = buscar_negocios_google(tipo, ciudad, zona)
+
+    auth = cargar_auth()
+    registro_usuario = auth.get(session["usuario"])
+    limite = registro_usuario.get("limite")
+    usadas = registro_usuario.get("usadas", 0)
+    if limite is not None and usadas >= limite:
+        return jsonify({"error": "Has alcanzado el límite de búsquedas de tu plan."}), 403
+
+    try:
+        negocios = buscar_negocios_google(tipo, ciudad, zona)
+    except Exception:
+        return jsonify({"error": "Ocurrió un error al buscar en Google Maps. Intentá de nuevo más tarde."}), 502
+
+    registro_usuario["usadas"] = usadas + 1
+    guardar_auth(auth)
+
     resultados = []
     for negocio in negocios:
         score = calcular_score(negocio)
@@ -112,20 +120,19 @@ def buscar():
         "calientes": len([r for r in resultados if r["clasificacion"] == "caliente"]),
         "tibios": len([r for r in resultados if r["clasificacion"] == "tibio"]),
         "frios": len([r for r in resultados if r["clasificacion"] == "frio"]),
-        "resultados": resultados
+        "resultados": resultados,
+        "usuario": session["usuario"]
     }
     try:
         with open("historial.json", "r", encoding="utf-8") as f:
             historial = json.load(f)
     except FileNotFoundError:
         historial = []
-    historial.insert(0, registro)
+    historial.append(registro)
+    indice = len(historial) - 1
     with open("historial.json", "w", encoding="utf-8") as f:
         json.dump(historial, f, ensure_ascii=False, indent=2)
-    ultima_busqueda["resultados"] = resultados
-    ultima_busqueda["tipo"] = tipo
-    ultima_busqueda["ciudad"] = ciudad
-    return jsonify(resultados)
+    return jsonify({"resultados": resultados, "indice": indice})
 
 @app.route("/historial/resultados/<int:indice>")
 @login_required
@@ -135,6 +142,8 @@ def resultados_historial(indice):
             historial = json.load(f)
         registro = historial[indice]
     except (FileNotFoundError, IndexError):
+        return jsonify({"error": "Auditoría no encontrada"}), 404
+    if registro.get("usuario", "admin") != session["usuario"]:
         return jsonify({"error": "Auditoría no encontrada"}), 404
     return jsonify(registro["resultados"])
 
@@ -146,6 +155,8 @@ def descargar_excel_historial(indice):
             historial = json.load(f)
         registro = historial[indice]
     except (FileNotFoundError, IndexError):
+        return "Auditoría no encontrada.", 404
+    if registro.get("usuario", "admin") != session["usuario"]:
         return "Auditoría no encontrada.", 404
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -170,6 +181,7 @@ def descargar_excel_historial(indice):
 @app.route("/clientes", methods=["GET", "POST"])
 @login_required
 def clientes():
+    usuario = session["usuario"]
     try:
         with open("clientes.json", "r", encoding="utf-8") as f:
             lista = json.load(f)
@@ -179,15 +191,17 @@ def clientes():
         nuevo = request.json
         nuevo["estado"] = "contactado"
         nuevo["fecha_agregado"] = datetime.now().strftime("%d/%m/%Y")
+        nuevo["usuario"] = usuario
         lista.insert(0, nuevo)
         with open("clientes.json", "w", encoding="utf-8") as f:
             json.dump(lista, f, ensure_ascii=False, indent=2)
         return jsonify({"ok": True})
-    return jsonify(lista)
+    return jsonify([c for c in lista if c.get("usuario", "admin") == usuario])
 
 @app.route("/proyectos", methods=["GET", "POST"])
 @login_required
 def proyectos():
+    usuario = session["usuario"]
     try:
         with open("proyectos.json", "r", encoding="utf-8") as f:
             lista = json.load(f)
@@ -196,24 +210,26 @@ def proyectos():
     if request.method == "POST":
         nuevo = request.json
         nuevo["fecha"] = datetime.now().strftime("%d/%m/%Y")
+        nuevo["usuario"] = usuario
         lista.insert(0, nuevo)
         with open("proyectos.json", "w", encoding="utf-8") as f:
             json.dump(lista, f, ensure_ascii=False, indent=2)
         return jsonify({"ok": True})
-    return jsonify(lista)
+    return jsonify([p for p in lista if p.get("usuario", "admin") == usuario])
 
 
 @app.route("/asignar-proyecto", methods=["POST"])
 @login_required
 def asignar_proyecto():
     datos = request.json
+    usuario = session["usuario"]
     try:
         with open("historial.json", "r", encoding="utf-8") as f:
             historial = json.load(f)
     except FileNotFoundError:
         historial = []
     indice = datos.get("indice")
-    if indice is not None and 0 <= indice < len(historial):
+    if indice is not None and 0 <= indice < len(historial) and historial[indice].get("usuario", "admin") == usuario:
         historial[indice]["proyecto"] = datos.get("proyecto", "")
         with open("historial.json", "w", encoding="utf-8") as f:
             json.dump(historial, f, ensure_ascii=False, indent=2)
@@ -224,19 +240,20 @@ def asignar_proyecto():
 @login_required
 def borrar_proyecto():
     nombre = request.json.get("nombre", "")
+    usuario = session["usuario"]
     try:
         with open("proyectos.json", "r", encoding="utf-8") as f:
             lista = json.load(f)
     except FileNotFoundError:
         lista = []
-    lista = [p for p in lista if p.get("nombre") != nombre]
+    lista = [p for p in lista if not (p.get("nombre") == nombre and p.get("usuario", "admin") == usuario)]
     with open("proyectos.json", "w", encoding="utf-8") as f:
         json.dump(lista, f, ensure_ascii=False, indent=2)
     try:
         with open("historial.json", "r", encoding="utf-8") as f:
             historial = json.load(f)
         for a in historial:
-            if a.get("proyecto") == nombre:
+            if a.get("proyecto") == nombre and a.get("usuario", "admin") == usuario:
                 a["proyecto"] = ""
         with open("historial.json", "w", encoding="utf-8") as f:
             json.dump(historial, f, ensure_ascii=False, indent=2)
@@ -249,35 +266,67 @@ def borrar_proyecto():
 @login_required
 def cambiar_estado_cliente():
     datos = request.json
+    usuario = session["usuario"]
     try:
         with open("clientes.json", "r", encoding="utf-8") as f:
             lista = json.load(f)
     except FileNotFoundError:
         return jsonify({"ok": False}), 404
     for c in lista:
-        if c["nombre"] == datos["nombre"]:
+        if c["nombre"] == datos["nombre"] and c.get("usuario", "admin") == usuario:
             c["estado"] = datos["estado"]
     with open("clientes.json", "w", encoding="utf-8") as f:
         json.dump(lista, f, ensure_ascii=False, indent=2)
     return jsonify({"ok": True})
-@app.route("/resumen")
+@app.route("/perfil")
 @login_required
-def resumen():
+def perfil():
+    usuario = session["usuario"]
+    auth = cargar_auth()
+    registro = auth.get(usuario, {})
+    try:
+        with open("historial.json", "r", encoding="utf-8") as f:
+            historial = json.load(f)
+    except FileNotFoundError:
+        historial = []
     try:
         with open("clientes.json", "r", encoding="utf-8") as f:
             clientes_lista = json.load(f)
     except FileNotFoundError:
         clientes_lista = []
     try:
+        with open("proyectos.json", "r", encoding="utf-8") as f:
+            proyectos_lista = json.load(f)
+    except FileNotFoundError:
+        proyectos_lista = []
+    return jsonify({
+        "usuario": usuario,
+        "limite": registro.get("limite"),
+        "usadas": registro.get("usadas", 0),
+        "auditorias": len([h for h in historial if h.get("usuario", "admin") == usuario]),
+        "clientes": len([c for c in clientes_lista if c.get("usuario", "admin") == usuario]),
+        "proyectos": len([p for p in proyectos_lista if p.get("usuario", "admin") == usuario])
+    })
+@app.route("/resumen")
+@login_required
+def resumen():
+    usuario = session["usuario"]
+    try:
+        with open("clientes.json", "r", encoding="utf-8") as f:
+            clientes_lista = [c for c in json.load(f) if c.get("usuario", "admin") == usuario]
+    except FileNotFoundError:
+        clientes_lista = []
+    try:
         with open("historial.json", "r", encoding="utf-8") as f:
-            historial_lista = json.load(f)
+            historial_lista = [h for h in json.load(f) if h.get("usuario", "admin") == usuario]
     except FileNotFoundError:
         historial_lista = []
     try:
         with open("facturado.json", "r", encoding="utf-8") as f:
-            facturado = json.load(f)
+            facturado_todos = json.load(f)
     except FileNotFoundError:
-        facturado = {"total": 0, "registrados": {}}
+        facturado_todos = {}
+    facturado = facturado_todos.get(usuario, {"total": 0, "registrados": {}})
     for c in clientes_lista:
         monto = float(c.get("cerrado_en") or 0)
         clave = c["nombre"]
@@ -285,8 +334,9 @@ def resumen():
         if monto != anterior:
             facturado["total"] += monto - anterior
             facturado["registrados"][clave] = monto
+    facturado_todos[usuario] = facturado
     with open("facturado.json", "w", encoding="utf-8") as f:
-        json.dump(facturado, f, ensure_ascii=False, indent=2)
+        json.dump(facturado_todos, f, ensure_ascii=False, indent=2)
     return jsonify({
         "facturado": facturado["total"],
         "clientes_activos": len(clientes_lista),
@@ -298,13 +348,14 @@ def resumen():
 @login_required
 def actualizar_presupuesto():
     datos = request.json
+    usuario = session["usuario"]
     try:
         with open("clientes.json", "r", encoding="utf-8") as f:
             lista = json.load(f)
     except FileNotFoundError:
         return jsonify({"ok": False}), 404
     for c in lista:
-        if c["nombre"] == datos["nombre"]:
+        if c["nombre"] == datos["nombre"] and c.get("usuario", "admin") == usuario:
             if "presupuesto" in datos:
                 c["presupuesto"] = datos["presupuesto"]
             if "cerrado_en" in datos:
@@ -316,15 +367,16 @@ def actualizar_presupuesto():
 @login_required
 def borrar_cliente():
     datos = request.json
+    usuario = session["usuario"]
     try:
         with open("clientes.json", "r", encoding="utf-8") as f:
             lista = json.load(f)
     except FileNotFoundError:
         return jsonify({"ok": False}), 404
     if datos.get("todo"):
-        lista = []
+        lista = [c for c in lista if c.get("usuario", "admin") != usuario]
     else:
-        lista = [c for c in lista if c["nombre"] != datos["nombre"]]
+        lista = [c for c in lista if not (c["nombre"] == datos["nombre"] and c.get("usuario", "admin") == usuario)]
     with open("clientes.json", "w", encoding="utf-8") as f:
         json.dump(lista, f, ensure_ascii=False, indent=2)
     return jsonify({"ok": True})
@@ -334,16 +386,17 @@ def borrar_cliente():
 @login_required
 def borrar_historial():
     datos = request.json
+    usuario = session["usuario"]
     try:
         with open("historial.json", "r", encoding="utf-8") as f:
             lista = json.load(f)
     except FileNotFoundError:
         return jsonify({"ok": False}), 404
     if datos.get("todo"):
-        lista = []
+        lista = [h for h in lista if h.get("usuario", "admin") != usuario]
     else:
         indice = datos.get("indice")
-        if indice is not None and 0 <= indice < len(lista):
+        if indice is not None and 0 <= indice < len(lista) and lista[indice].get("usuario", "admin") == usuario:
             lista.pop(indice)
     with open("historial.json", "w", encoding="utf-8") as f:
         json.dump(lista, f, ensure_ascii=False, indent=2)
@@ -356,40 +409,14 @@ def historial():
             datos = json.load(f)
     except FileNotFoundError:
         datos = []
-    resumen = [{**{k: r[k] for k in ("fecha", "tipo", "ciudad", "zona", "total", "calientes", "tibios", "frios")}, "proyecto": r.get("proyecto", "")} for r in datos]
+    usuario = session["usuario"]
+    resumen = [
+        {**{k: r[k] for k in ("fecha", "tipo", "ciudad", "zona", "total", "calientes", "tibios", "frios")},
+         "proyecto": r.get("proyecto", ""), "indice": i}
+        for i, r in enumerate(datos) if r.get("usuario", "admin") == usuario
+    ]
+    resumen.reverse()
     return jsonify(resumen)
-@app.route("/descargar-excel")
-@login_required
-def descargar_excel():
-    resultados = ultima_busqueda["resultados"]
-    if not resultados:
-        return "No hay resultados para exportar. Hacé una búsqueda primero.", 400
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Leads"
-    ws.append(["Nombre", "Direccion", "Telefono", "Web", "Rating", "Resenas", "Score", "Clasificacion", "Servicios recomendados"])
-    for r in resultados:
-        ws.append([
-            r["nombre"],
-            r["direccion"],
-            r["telefono"],
-            r["web"],
-            r["rating"],
-            r["cantidad_resenas"],
-            r["score"],
-            r["clasificacion"],
-            ", ".join(r["servicios"])
-        ])
-    buffer = io.BytesIO()
-    wb.save(buffer)
-    buffer.seek(0)
-    nombre_archivo = f"leads_{ultima_busqueda['tipo']}_{ultima_busqueda['ciudad']}.xlsx"
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name=nombre_archivo,
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
