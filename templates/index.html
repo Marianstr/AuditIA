@@ -315,6 +315,36 @@
             color: #292524;
         }
 
+        .fila-contacto {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .boton-contacto {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .boton-llamar {
+            background: #F5F5F4;
+            border: 0.5px solid #E7E5E4;
+            color: #57534E;
+        }
+
+        .boton-whatsapp {
+            background: #E8F2EE;
+            border: 0.5px solid #C5DFD5;
+            color: #0B6446;
+        }
+
         .card-servicios {
             flex: 2;
         }
@@ -493,6 +523,7 @@
                     Descargar Excel</a></div>
             <div class="cards" id="cards"></div>
             <div style="color:#A8A29E; font-size:11px; margin-top:14px;">Algunos enlaces son de afiliado. AuditIA puede recibir una comisión sin coste adicional para el usuario.</div>
+            <div style="color:#A8A29E; font-size:11px; margin-top:4px;">AuditIA no envía comunicaciones en tu nombre. Antes de contactar, asegurate de cumplir la normativa vigente (LSSI art. 21 y RGPD).</div>
         </div>
         <div id="seccion-audits" style="display:none;">
             <div class="search-box">
@@ -588,6 +619,9 @@
             adobeExpress: { id: "adobeExpress", nombre: "Adobe Express", url: "https://www.adobe.com/express/?ref=auditia", boton: "Diseñar en Adobe Express" }
         };
 
+        const USUARIO_SESION = {{ usuario | tojson }};
+        const NOMBRE_CONTACTO = USUARIO_SESION.includes("@") ? USUARIO_SESION.split("@")[0] : USUARIO_SESION;
+
         function recomendaciones(lead) {
             if (lead.clasificacion === "frio") return [];
             const recs = [];
@@ -611,6 +645,24 @@
                 recs.push({ motivo: "Necesita identidad visual", herramientas: [HERRAMIENTAS.adobeExpress, HERRAMIENTAS.canva] });
             }
             return recs;
+        }
+
+        function botonesContacto(lead) {
+            const digitos = (lead.telefono || "").replace(/\D/g, "");
+            if (!digitos) return "";
+            const telHref = `tel:+34${digitos}`;
+            const botones = [`<a href="${telHref}" class="boton-contacto boton-llamar"><i data-lucide="phone" style="width:14px; height:14px;"></i> Llamar</a>`];
+            const esMovil = digitos[0] === "6" || digitos[0] === "7";
+            if (esMovil) {
+                const recs = recomendaciones(lead);
+                if (recs.length > 0) {
+                    const motivo = recs[0].motivo.charAt(0).toLowerCase() + recs[0].motivo.slice(1);
+                    const mensaje = `Hola ${lead.nombre}, soy ${NOMBRE_CONTACTO} y trabajo en diseño web. Vi vuestra ficha en Google Maps y me llamó la atención que ${motivo}. ¿Te interesaría que hablemos?`;
+                    const waHref = `https://wa.me/34${digitos}?text=${encodeURIComponent(mensaje)}`;
+                    botones.push(`<a href="${waHref}" target="_blank" class="boton-contacto boton-whatsapp"><i data-lucide="message-circle" style="width:14px; height:14px;"></i> WhatsApp</a>`);
+                }
+            }
+            return `<div class="fila-contacto">${botones.join("")}</div>`;
         }
 
         let todosLosDatos = [];
@@ -707,6 +759,7 @@
                         <span><i data-lucide="phone" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.telefono}</span>
                         ${emailBtn}
                     </div>
+                    ${botonesContacto(d)}
                 </div>
                 <div class="card-servicios">
                     <h4>Cómo ayudarle</h4>
