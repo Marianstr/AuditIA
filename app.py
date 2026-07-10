@@ -13,6 +13,7 @@ load_dotenv()
 
 from scraper import buscar_negocios_google
 from scoring.lead_scorer import calcular_score, clasificar_lead, recomendar_servicios
+from scoring.analizador_web import analizar_web
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or "auditia-secret-key-cambiar-en-produccion"
@@ -166,6 +167,17 @@ def buscar():
     with open("historial.json", "w", encoding="utf-8") as f:
         json.dump(historial, f, ensure_ascii=False, indent=2)
     return jsonify({"resultados": resultados, "indice": indice})
+
+@app.route("/analizar-web", methods=["POST"])
+@login_required
+def analizar_web_ruta():
+    url = request.json.get("web", "")
+    if not url or url == "No tiene":
+        return jsonify({"error": "Este lead no tiene sitio web para analizar."}), 400
+    resultado = analizar_web(url)
+    if not resultado.get("ok"):
+        return jsonify({"error": resultado.get("error", "No se pudo analizar la web.")}), 502
+    return jsonify(resultado)
 
 @app.route("/historial/resultados/<int:indice>")
 @login_required

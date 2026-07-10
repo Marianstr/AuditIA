@@ -68,16 +68,16 @@
         }
 
         .nav a.active {
-            background: #E7E5E4;
-            color: #1C1917;
+            background: #E8F2EE;
+            color: #10855E;
             font-weight: 600;
         }
 
         .sidebar .new-project {
             margin-top: auto;
-            border: 1px solid #E7E5E4;
-            color: #1C1917;
-            background: #fff;
+            border: none;
+            color: #fff;
+            background: #44403C;
             padding: 12px;
             border-radius: 10px;
             font-size: 15px;
@@ -316,7 +316,7 @@
 
         .card-info h3 {
             font-size: 17px;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             color: #1C1917;
         }
 
@@ -328,7 +328,7 @@
         .card-meta {
             font-size: 13px;
             color: #78716C;
-            margin-top: 8px;
+            margin-top: 14px;
         }
 
         .card-meta span {
@@ -346,14 +346,14 @@
         }
 
         .fila-contacto.tiene-contacto {
-            margin-top: 10px;
+            margin-top: 20px;
         }
 
         .boton-cliente-movil {
             display: none;
         }
 
-        .badge-movil {
+        .badge.badge-movil {
             display: none;
         }
 
@@ -401,7 +401,6 @@
             text-decoration: none;
             border-bottom: 1px solid #D6D3D1;
             padding-bottom: 1px;
-            white-space: nowrap;
             flex-shrink: 0;
             transition: color 0.15s, border-color 0.15s;
         }
@@ -494,7 +493,8 @@
         }
 
         .nav-movil a.active {
-            background: #F5F5F4;
+            background: #E8F2EE;
+            color: #10855E;
         }
 
         .user-movil {
@@ -529,6 +529,45 @@
             color: #78716C;
             text-decoration: none;
             font-size: 15px;
+        }
+
+        .overlay-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(28, 25, 23, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay-modal.abierto {
+            display: flex;
+        }
+
+        .modal-proyecto {
+            background: #FFFFFF;
+            border-radius: 14px;
+            padding: 24px;
+            width: 100%;
+            max-width: 360px;
+            margin: 20px;
+        }
+
+        .input-modal {
+            width: 100%;
+            padding: 10px 12px;
+            border: 0.5px solid #D6D3D1;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .input-modal.error {
+            border-color: #B5533A;
         }
 
         .score-num-movil {
@@ -647,6 +686,21 @@
                 color: #1C1917;
             }
 
+            .menu-movil .new-project {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                width: 100%;
+                padding: 12px 14px;
+                font-size: 15px;
+                border: none;
+                border-radius: 8px;
+                background: #44403C;
+                color: #fff;
+                text-align: left;
+                cursor: pointer;
+            }
+
             .card-titulo-fila {
                 display: flex;
                 justify-content: space-between;
@@ -669,7 +723,7 @@
                 color: #1C1917;
             }
 
-            .badge-movil {
+            .badge.badge-movil {
                 display: inline-block;
             }
 
@@ -700,11 +754,11 @@
             <a href="#" onclick="mostrarReports(); return false;"><i data-lucide="bar-chart-3" style="width:18px; height:18px;"></i> Informes</a>
             <a href="#" onclick="mostrarAjustes(); return false;"><i data-lucide="settings" style="width:18px; height:18px;"></i> Ajustes</a>
         </nav>
-        <button class="new-project">＋ Nuevo proyecto</button>
+        <button class="new-project" onclick="abrirModalProyecto()">＋ Nuevo proyecto</button>
     </aside>
 
     <header class="topbar-movil">
-        <a href="/" title="Ir al inicio"><img src="/static/auditia-logo.png" alt="AuditIA" style="height:32px; width:auto;"></a>
+        <a href="/" title="Ir al inicio"><img src="/static/auditia-logo.png" alt="AuditIA" style="height:38px; width:auto; display:block;"></a>
         <div class="topbar-movil-derecha">
             <div class="user-movil">
                 <div class="avatar-movil">{{ usuario[0]|upper }}</div>
@@ -725,8 +779,24 @@
             <a href="#" onclick="mostrarReports(); cerrarMenuMovil(); return false;"><i data-lucide="bar-chart-3" style="width:18px; height:18px;"></i> Informes</a>
             <a href="#" onclick="mostrarAjustes(); cerrarMenuMovil(); return false;"><i data-lucide="settings" style="width:18px; height:18px;"></i> Ajustes</a>
         </nav>
-        <button class="new-project" style="margin-top:12px;">＋ Nuevo proyecto</button>
+        <button class="new-project" style="margin-top:12px;" onclick="cerrarMenuMovil(); abrirModalProyecto();">＋ Nuevo proyecto</button>
         <a href="/logout" class="cerrar-sesion-movil"><i data-lucide="log-out" style="width:18px; height:18px;"></i> Cerrar sesión</a>
+    </div>
+
+    <div class="overlay-modal" id="overlay-proyecto" onclick="cerrarModalProyectoSiFondo(event)">
+        <div class="modal-proyecto" onclick="event.stopPropagation()">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <h3 style="font-size:17px; color:#1C1917; font-weight:500;">Nuevo proyecto</h3>
+                <button type="button" onclick="cerrarModalProyecto()" style="background:none; border:none; cursor:pointer; color:#78716C; font-size:20px; line-height:1;">×</button>
+            </div>
+            <p style="font-size:13px; color:#78716C; margin-top:6px; margin-bottom:18px;">Dale un nombre para agrupar tus auditorías.</p>
+            <label for="input-nuevo-proyecto" style="font-size:12px; color:#78716C; display:block; margin-bottom:6px;">Nombre del proyecto</label>
+            <input type="text" id="input-nuevo-proyecto" class="input-modal" placeholder="Ej: Campaña floristerías Madrid" onkeydown="if(event.key === 'Enter') crearProyectoDesdeModal();">
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <button type="button" class="buscar" onclick="cerrarModalProyecto()" style="background:#fff; border:0.5px solid #D6D3D1; color:#1C1917;">Cancelar</button>
+                <button type="button" class="buscar" onclick="crearProyectoDesdeModal()" style="background:#10855E; border:none; color:#fff;">Crear proyecto</button>
+            </div>
+        </div>
     </div>
 
     <div class="main">
@@ -893,7 +963,7 @@
         const HERRAMIENTAS = {
             hostinger: { id: "hostinger", nombre: "Hostinger", url: "https://www.hostinger.com?ref=auditia", boton: "Crear web con Hostinger" },
             semrush: { id: "semrush", nombre: "Semrush", url: "https://www.semrush.com?ref=auditia", boton: "Auditar SEO con Semrush" },
-            brevo: { id: "brevo", nombre: "Brevo", url: "https://www.brevo.com?ref=auditia", boton: "Gestionar reputación con Brevo" },
+            brevo: { id: "brevo", nombre: "Brevo", url: "https://www.brevo.com?ref=auditia", boton: "Gestionar reputación<br>con Brevo" },
             canva: { id: "canva", nombre: "Canva", url: "https://www.canva.com?ref=auditia", boton: "Diseñar con Canva" },
             elementor: { id: "elementor", nombre: "Elementor", url: "https://elementor.com?ref=auditia", boton: "Armar sitio con Elementor" },
             adobeExpress: { id: "adobeExpress", nombre: "Adobe Express", url: "https://www.adobe.com/express/?ref=auditia", boton: "Diseñar en Adobe Express" }
@@ -1027,12 +1097,13 @@
         function filaRecomendacion(r) {
             const enlaces = r.herramientas.map((h, i) => {
                 const texto = i === 0 ? h.boton : `o con ${h.nombre}`;
-                return `<a href="${h.url}" target="_blank" rel="noopener sponsored" class="enlace-recomendacion">${texto} <i data-lucide="external-link" style="width:13px; height:13px;"></i></a>`;
+                const contenidoTexto = texto.includes("<br>") ? `<span>${texto}</span>` : texto;
+                return `<a href="${h.url}" target="_blank" rel="noopener sponsored" class="enlace-recomendacion">${contenidoTexto} <i data-lucide="external-link" style="width:13px; height:13px;"></i></a>`;
             }).join("");
             return `
             <div class="fila-recomendacion" style="display:flex; align-items:center; justify-content:space-between; gap:20px; background:#FFFFFF; border-radius:0; padding-top:13px; padding-right:16px; padding-bottom:13px; margin-bottom:8px;">
                 <span style="font-size:14px; font-weight:500; color:#1C1917; flex:1; min-width:0;">${r.motivo}</span>
-                <div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px; flex-shrink:0;">${enlaces}</div>
+                <div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px; flex-shrink:1; min-width:0;">${enlaces}</div>
             </div>`;
         }
 
@@ -1056,6 +1127,95 @@
             const abierto = extra.style.display === "block";
             extra.style.display = abierto ? "none" : "block";
             link.textContent = abierto ? `Ver más recomendaciones (${n})` : "Ver menos";
+        }
+
+        function nivelOportunidad(oportunidad) {
+            if (oportunidad <= 20) return "baja";
+            if (oportunidad <= 60) return "media";
+            return "alta";
+        }
+
+        const ENCABEZADOS_CONCLUSION = {
+            caliente: {
+                alta: "Buen cliente: lo encuentran mucho, pero su web pierde oportunidades.",
+                media: "Buen cliente, con una web que ya tiene algo armado pero deja oportunidades sobre la mesa.",
+                baja: "Excelente prospecto y con una web bien resuelta: la oportunidad pasa más por la gestión comercial que por rehacer la web."
+            },
+            tibio: {
+                alta: "Cliente con potencial y una web floja: hay bastante margen para sumar valor.",
+                media: "Cliente con potencial parejo: su web cumple lo mínimo pero podría convertir más visitas en contactos.",
+                baja: "Cliente con potencial moderado y una web que ya cubre lo básico: la oportunidad es más chica de este lado."
+            },
+            frio: {
+                alta: "Su presencia en Google aún es limitada, pero su web tiene una oportunidad clara de mejora: optimizarla le ayudará a convertir mejor a sus futuros visitantes.",
+                media: "Prospecto frío con una web que cumple a medias: probablemente no sea prioridad, pero queda anotado.",
+                baja: "Prospecto frío y con una web bien resuelta: por ahora no hay mucho margen de venta."
+            }
+        };
+
+        function fraseFaltantes(señales) {
+            const nombres = {
+                formulario_contacto: "formulario",
+                email_visible: "email visible",
+                whatsapp: "WhatsApp",
+                https: "HTTPS",
+                favicon: "favicon"
+            };
+            const faltantes = Object.keys(nombres).filter(k => !señales[k]).map(k => "sin " + nombres[k]);
+            if (faltantes.length === 0) return "";
+            const frase = faltantes.length === 1
+                ? faltantes[0]
+                : faltantes.slice(0, -1).join(", ") + " y " + faltantes[faltantes.length - 1];
+            return frase.charAt(0).toUpperCase() + frase.slice(1) + ".";
+        }
+
+        function generarConclusion(lead, datos) {
+            const nivel = nivelOportunidad(datos.oportunidad_web);
+            const encabezado = ENCABEZADOS_CONCLUSION[lead.clasificacion][nivel];
+            const detalle = fraseFaltantes(datos.señales);
+            return detalle ? `${encabezado} ${detalle}` : encabezado;
+        }
+
+        function htmlOportunidadWeb(lead, datos) {
+            const items = [
+                { clave: "formulario_contacto", texto: "Formulario de contacto" },
+                { clave: "email_visible", texto: "Email visible" },
+                { clave: "whatsapp", texto: "Enlace a WhatsApp" },
+                { clave: "https", texto: "HTTPS" },
+                { clave: "favicon", texto: "Favicon" },
+            ];
+            const checklist = items.map(it => `
+                <div style="display:flex; align-items:center; gap:6px; font-size:13px; color:${datos.señales[it.clave] ? "#57534E" : "#B5533A"};">
+                    <i data-lucide="${datos.señales[it.clave] ? "check" : "x"}" style="width:14px; height:14px;"></i> ${it.texto}
+                </div>`).join("");
+            return `
+                <div style="font-size:30px; font-weight:500; color:#1C1917; margin-bottom:8px;">${datos.oportunidad_web}</div>
+                <div style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;">${checklist}</div>
+                <p style="font-size:13px; color:#44403C;">${generarConclusion(lead, datos)}</p>
+            `;
+        }
+
+        async function analizarWeb(idx) {
+            const lead = todosLosDatos[idx];
+            const contenedor = document.getElementById(`oportunidad-web-${idx}`);
+            contenedor.innerHTML = `<p style="color:#78716C; font-size:13px;"><i data-lucide="loader-circle" class="icono-girando" style="width:14px; height:14px; vertical-align:-2px;"></i> Analizando...</p>`;
+            lucide.createIcons();
+            try {
+                const response = await fetch("/analizar-web", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ web: lead.web })
+                });
+                const datos = await response.json();
+                if (!response.ok) {
+                    contenedor.innerHTML = `<p style="color:#B5533A; font-size:13px;">${datos.error || "No se pudo analizar la web."}</p>`;
+                    return;
+                }
+                contenedor.innerHTML = htmlOportunidadWeb(lead, datos);
+                lucide.createIcons();
+            } catch (e) {
+                contenedor.innerHTML = `<p style="color:#B5533A; font-size:13px;">No se pudo analizar la web. Probá de nuevo.</p>`;
+            }
         }
 
         function mostrarPagina() {
@@ -1091,8 +1251,18 @@
                 <div class="card-servicios">
                     <h4>Cómo ayudarle</h4>
                     ${htmlRecomendaciones(d, globalIdx)}
+                    <div style="margin-top:14px; padding-top:14px; border-top:1px solid #F5F5F4;">
+                        <h4>Oportunidad Web</h4>
+                        <div id="oportunidad-web-${globalIdx}">
+                            ${d.web !== "No tiene"
+                                ? `<button class="buscar" style="font-size:13px; padding:8px 14px; background:#44403C; color:#fff; border:none;" onclick="analizarWeb(${globalIdx})"><i data-lucide="search-check" style="width:16px; height:16px; vertical-align:-3px;"></i> Analizar web</button>`
+                                : `<p style="color:#78716C; font-size:13px;">Sin sitio web para analizar.</p>`
+                            }
+                        </div>
+                    </div>
                 </div>
                 <div class="card-score">
+                    <div style="font-size:12px; color:#78716C; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">Visibilidad</div>
                     <div class="score-num">${d.score}</div>
                     <button class="buscar" style="margin-top:8px; font-size:13px; padding:8px 14px; background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4;" onclick="agregarCliente(${(paginaActual - 1) * porPagina + idx})"><i data-lucide="user-plus" style="width:16px; height:16px; vertical-align:-3px;"></i> Cliente</button>
                     <div class="badge ${d.clasificacion}">${d.clasificacion.toUpperCase()}</div>
@@ -1238,6 +1408,41 @@
             });
             document.getElementById("nombre-proyecto").value = "";
             mostrarProyectos();
+        }
+
+        function abrirModalProyecto() {
+            const input = document.getElementById("input-nuevo-proyecto");
+            input.value = "";
+            input.classList.remove("error");
+            document.getElementById("overlay-proyecto").classList.add("abierto");
+            input.focus();
+        }
+
+        function cerrarModalProyecto() {
+            document.getElementById("overlay-proyecto").classList.remove("abierto");
+        }
+
+        function cerrarModalProyectoSiFondo(event) {
+            if (event.target === event.currentTarget) cerrarModalProyecto();
+        }
+
+        async function crearProyectoDesdeModal() {
+            const input = document.getElementById("input-nuevo-proyecto");
+            const nombre = input.value.trim();
+            if (!nombre) {
+                input.classList.add("error");
+                input.focus();
+                return;
+            }
+            await fetch("/proyectos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nombre: nombre })
+            });
+            cerrarModalProyecto();
+            if (document.getElementById("seccion-proyectos").style.display !== "none") {
+                mostrarProyectos();
+            }
         }
 
         async function borrarProyecto(nombre) {
