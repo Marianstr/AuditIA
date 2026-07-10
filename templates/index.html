@@ -318,8 +318,19 @@
         .fila-contacto {
             display: flex;
             gap: 8px;
-            margin-top: 10px;
             flex-wrap: wrap;
+        }
+
+        .fila-contacto.tiene-contacto {
+            margin-top: 10px;
+        }
+
+        .boton-cliente-movil {
+            display: none;
+        }
+
+        .badge-movil {
+            display: none;
         }
 
         .boton-contacto {
@@ -428,6 +439,78 @@
             color: #5E7A94;
         }
 
+        .topbar-movil {
+            display: none;
+        }
+
+        .menu-movil {
+            display: none;
+        }
+
+        .boton-hamburguesa {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #1C1917;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-movil a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            color: #1C1917;
+            text-decoration: none;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .nav-movil a.active {
+            background: #F5F5F4;
+        }
+
+        .user-movil {
+            display: none;
+        }
+
+        .topbar-movil-derecha {
+            display: none;
+        }
+
+        .user-movil .avatar-movil {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #292524;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .cerrar-sesion-movil {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            margin-top: 12px;
+            border-top: 0.5px solid #E7E5E4;
+            color: #78716C;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .score-num-movil {
+            display: none;
+        }
+
         @media (max-width: 800px) {
             .sidebar {
                 display: none;
@@ -439,6 +522,143 @@
 
             .card {
                 flex-direction: column;
+            }
+
+            .card-info {
+                width: 100%;
+            }
+
+            .topbar-movil {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 56px;
+                padding: 0 20px;
+                background: #FAFAF9;
+                border-bottom: 0.5px solid #E7E5E4;
+                z-index: 20;
+            }
+
+            .menu-movil {
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: #FAFAF9;
+                border-bottom: 0.5px solid #E7E5E4;
+                padding: 12px 16px 16px;
+                z-index: 20;
+                flex-direction: column;
+            }
+
+            .menu-movil.abierto {
+                display: flex;
+            }
+
+            .main {
+                padding-top: 76px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .topbar h1 {
+                font-size: 22px;
+            }
+
+            .topbar .titulos p {
+                font-size: 14px;
+            }
+
+            .user {
+                width: 100%;
+            }
+
+            .user .avatar {
+                flex-shrink: 0;
+            }
+
+            .user span {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .user a {
+                flex-shrink: 0;
+                white-space: nowrap;
+            }
+
+            .topbar .user {
+                display: none;
+            }
+
+            .topbar-movil-derecha {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .user-movil {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                max-width: 110px;
+            }
+
+            .user-movil span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 13px;
+                color: #1C1917;
+            }
+
+            .card-titulo-fila {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .score-badge-movil {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-shrink: 0;
+                margin-left: auto;
+            }
+
+            .score-num-movil {
+                display: block;
+                font-size: 26px;
+                font-weight: 500;
+                color: #1C1917;
+            }
+
+            .badge-movil {
+                display: inline-block;
+            }
+
+            .boton-cliente-movil {
+                display: inline-flex;
+            }
+
+            #cards .score-num {
+                display: none;
+            }
+
+            #cards .card-score {
+                display: none;
             }
         }
     </style>
@@ -458,6 +678,32 @@
         </nav>
         <button class="new-project">＋ Nuevo proyecto</button>
     </aside>
+
+    <header class="topbar-movil">
+        <a href="/" title="Ir al inicio"><img src="/static/auditia-logo.png" alt="AuditIA" style="height:32px; width:auto;"></a>
+        <div class="topbar-movil-derecha">
+            <div class="user-movil">
+                <div class="avatar-movil">{{ usuario[0]|upper }}</div>
+                <span>{{ usuario }}</span>
+            </div>
+            <button class="boton-hamburguesa" onclick="toggleMenuMovil()" aria-label="Abrir menú">
+                <i data-lucide="menu" style="width:22px; height:22px;"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="menu-movil" id="menu-movil">
+        <nav class="nav-movil">
+            <a href="#" class="active" onclick="mostrarDashboard(); cerrarMenuMovil(); return false;"><i data-lucide="layout-dashboard" style="width:18px; height:18px;"></i> Panel</a>
+            <a href="#" onclick="mostrarProyectos(); cerrarMenuMovil(); return false;"><i data-lucide="folder-kanban" style="width:18px; height:18px;"></i> Proyectos</a>
+            <a href="#" onclick="mostrarAudits(); cerrarMenuMovil(); return false;"><i data-lucide="search" style="width:18px; height:18px;"></i> Auditorías</a>
+            <a href="#" onclick="mostrarClientes(); cerrarMenuMovil(); return false;"><i data-lucide="users" style="width:18px; height:18px;"></i> Clientes</a>
+            <a href="#" onclick="mostrarReports(); cerrarMenuMovil(); return false;"><i data-lucide="bar-chart-3" style="width:18px; height:18px;"></i> Informes</a>
+            <a href="#" onclick="mostrarAjustes(); cerrarMenuMovil(); return false;"><i data-lucide="settings" style="width:18px; height:18px;"></i> Ajustes</a>
+        </nav>
+        <button class="new-project" style="margin-top:12px;">＋ Nuevo proyecto</button>
+        <a href="/logout" class="cerrar-sesion-movil"><i data-lucide="log-out" style="width:18px; height:18px;"></i> Cerrar sesión</a>
+    </div>
 
     <div class="main">
         <div class="topbar">
@@ -487,8 +733,9 @@
         <div class="loading" id="loading"><i data-lucide="loader-circle" class="icono-girando" style="width:16px; height:16px; vertical-align:-3px;"></i> Buscando negocios en Google Maps...</div>
         <div id="panel-grafico"
             style="background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:18px; margin-bottom:20px; display:none;">
-            <div style="font-size:14px; font-weight:bold; color: #1C1917; margin-bottom:10px;"><i data-lucide="trending-up" style="width:16px; height:16px; vertical-align:-3px;"></i> Captación de leads por
+            <div style="font-size:14px; font-weight:bold; color: #1C1917;"><i data-lucide="trending-up" style="width:16px; height:16px; vertical-align:-3px;"></i> Captación de leads por
                 auditoría</div>
+            <div style="font-size:13px; color:#78716C; margin-bottom:10px;">Últimas 5 búsquedas</div>
             <div style="position:relative; height:220px;"><canvas id="grafico-leads"></canvas></div>
         </div>
 
@@ -647,22 +894,27 @@
             return recs;
         }
 
-        function botonesContacto(lead) {
+        function botonesContacto(lead, indiceGlobal) {
             const digitos = (lead.telefono || "").replace(/\D/g, "");
-            if (!digitos) return "";
-            const telHref = `tel:+34${digitos}`;
-            const botones = [`<a href="${telHref}" class="boton-contacto boton-llamar"><i data-lucide="phone" style="width:14px; height:14px;"></i> Llamar</a>`];
-            const esMovil = digitos[0] === "6" || digitos[0] === "7";
-            if (esMovil) {
-                const recs = recomendaciones(lead);
-                if (recs.length > 0) {
-                    const motivo = recs[0].motivo.charAt(0).toLowerCase() + recs[0].motivo.slice(1);
-                    const mensaje = `Hola ${lead.nombre}, soy ${NOMBRE_CONTACTO} y trabajo en diseño web. Vi vuestra ficha en Google Maps y me llamó la atención que ${motivo}. ¿Te interesaría que hablemos?`;
-                    const waHref = `https://wa.me/34${digitos}?text=${encodeURIComponent(mensaje)}`;
-                    botones.push(`<a href="${waHref}" target="_blank" class="boton-contacto boton-whatsapp"><i data-lucide="message-circle" style="width:14px; height:14px;"></i> WhatsApp</a>`);
+            const botonCliente = `<a href="#" class="boton-contacto boton-llamar boton-cliente-movil" onclick="event.preventDefault(); agregarCliente(${indiceGlobal});"><i data-lucide="user-plus" style="width:14px; height:14px;"></i> Cliente</a>`;
+            const botones = [];
+            if (digitos) {
+                const telHref = `tel:+34${digitos}`;
+                botones.push(`<a href="${telHref}" class="boton-contacto boton-llamar"><i data-lucide="phone" style="width:14px; height:14px;"></i> Llamar</a>`);
+                const esMovil = digitos[0] === "6" || digitos[0] === "7";
+                if (esMovil) {
+                    const recs = recomendaciones(lead);
+                    if (recs.length > 0) {
+                        const motivo = recs[0].motivo.charAt(0).toLowerCase() + recs[0].motivo.slice(1);
+                        const mensaje = `Hola ${lead.nombre}, soy ${NOMBRE_CONTACTO} y trabajo en diseño web. Vi vuestra ficha en Google Maps y me llamó la atención que ${motivo}. ¿Te interesaría que hablemos?`;
+                        const waHref = `https://wa.me/34${digitos}?text=${encodeURIComponent(mensaje)}`;
+                        botones.push(`<a href="${waHref}" target="_blank" class="boton-contacto boton-whatsapp"><i data-lucide="message-circle" style="width:14px; height:14px;"></i> WhatsApp</a>`);
+                    }
                 }
             }
-            return `<div class="fila-contacto">${botones.join("")}</div>`;
+            botones.push(botonCliente);
+            const claseFila = digitos ? "fila-contacto tiene-contacto" : "fila-contacto";
+            return `<div class="${claseFila}">${botones.join("")}</div>`;
         }
 
         let todosLosDatos = [];
@@ -670,7 +922,19 @@
             document.querySelectorAll(".nav a").forEach((a, i) => {
                 a.classList.toggle("active", i === indice);
             });
+            document.querySelectorAll(".nav-movil a").forEach((a, i) => {
+                a.classList.toggle("active", i === indice);
+            });
         }
+
+        function toggleMenuMovil() {
+            document.getElementById("menu-movil").classList.toggle("abierto");
+        }
+
+        function cerrarMenuMovil() {
+            document.getElementById("menu-movil").classList.remove("abierto");
+        }
+
         let paginaActual = 1;
         const porPagina = 15;
 
@@ -750,7 +1014,13 @@
                 cards.innerHTML += `
             <div class="card">
                 <div class="card-info">
-                    <h3>${d.nombre}</h3>
+                    <div class="card-titulo-fila">
+                        <h3>${d.nombre}</h3>
+                        <div class="score-badge-movil">
+                            <div class="score-num-movil">${d.score}</div>
+                            <div class="badge ${d.clasificacion} badge-movil">${d.clasificacion.toUpperCase()}</div>
+                        </div>
+                    </div>
                     <p>${d.direccion}</p>
                     <div class="card-meta">
                         <span><i data-lucide="star" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.rating}</span>
@@ -759,7 +1029,7 @@
                         <span><i data-lucide="phone" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.telefono}</span>
                         ${emailBtn}
                     </div>
-                    ${botonesContacto(d)}
+                    ${botonesContacto(d, globalIdx)}
                 </div>
                 <div class="card-servicios">
                     <h4>Cómo ayudarle</h4>
@@ -1186,35 +1456,48 @@
                 document.getElementById("panel-grafico").style.display = "none";
                 return;
             }
-            const datos = audits.slice(0, 10).reverse();
+            const datos = audits.slice(0, 5);
             document.getElementById("panel-grafico").style.display = "block";
             const ctx = document.getElementById("grafico-leads");
             if (graficoLeads) graficoLeads.destroy();
+            const truncarEtiqueta = (texto) => texto.length > 22 ? texto.slice(0, 22) + "…" : texto;
             graficoLeads = new Chart(ctx, {
-                type: "line",
+                type: "bar",
                 data: {
-                    labels: datos.map(a => a.tipo + " (" + a.fecha.split(" ")[0] + ")"),
+                    labels: datos.map(a => truncarEtiqueta(a.tipo)),
                     datasets: [{
                         label: "Calientes",
                         data: datos.map(a => a.calientes),
-                        borderColor: "#B5533A",
-                        backgroundColor: "rgba(181, 83, 58, 0.10)",
-                        fill: true,
-                        tension: 0.35
+                        backgroundColor: "#B5533A",
+                        borderRadius: 4
                     }, {
                         label: "Tibios",
                         data: datos.map(a => a.tibios),
-                        borderColor: "#B8873D",
-                        backgroundColor: "rgba(184, 135, 61, 0.08)",
-                        fill: true,
-                        tension: 0.35
+                        backgroundColor: "#B8873D",
+                        borderRadius: 4
                     }]
                 },
                 options: {
+                    indexAxis: "y",
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: "bottom" } },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                    scales: {
+                        x: {
+                            stacked: true,
+                            display: false,
+                            grid: { display: false }
+                        },
+                        y: {
+                            stacked: true,
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: { usePointStyle: true, pointStyle: "rect" }
+                        }
+                    }
                 }
             });
         }
