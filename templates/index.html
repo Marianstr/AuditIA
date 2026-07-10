@@ -150,6 +150,30 @@
             font-size: 21px;
         }
 
+        .tabs-busqueda {
+            display: flex;
+            gap: 24px;
+            border-bottom: 0.5px solid #E7E5E4;
+            margin-bottom: 16px;
+        }
+
+        .tab-busqueda {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 0 0 10px 0;
+            font-size: 14px;
+            color: #78716C;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .tab-busqueda.activa {
+            color: #1C1917;
+            font-weight: 500;
+            border-bottom-color: #10855E;
+        }
+
         .inputs {
             display: flex;
             gap: 12px;
@@ -722,12 +746,21 @@
 
         <div class="search-box">
             <h2>Buscar negocios</h2>
-            <div class="inputs">
+            <div class="tabs-busqueda">
+                <button type="button" class="tab-busqueda activa" onclick="cambiarModoBusqueda('categoria', this)">Por categoría</button>
+                <button type="button" class="tab-busqueda" onclick="cambiarModoBusqueda('nombre', this)">Por nombre</button>
+            </div>
+            <div class="inputs" id="inputs-categoria">
                 <input type="text" id="tipo" placeholder="Tipo de negocio (ej: fontaneros)" />
                 <input type="text" id="ciudad" placeholder="Ciudad (ej: Madrid)" />
                 <input type="text" id="zona" placeholder="Zona o calle (opcional)" />
                 <button class="buscar" style="background:#44403C; color:#fff; border:none;" onclick="buscar()">Buscar leads</button>
             </div>
+            <div class="inputs" id="inputs-nombre" style="display:none;">
+                <input type="text" id="nombre_negocio" placeholder="Nombre del negocio (ej: Comida Vegana Pepita)" />
+                <button class="buscar" style="background:#44403C; color:#fff; border:none;" onclick="buscar()">Buscar leads</button>
+            </div>
+            <div id="nota-nombre-negocio" style="display:none; font-size:12px; color:#78716C; margin-top:8px;">Añadí la ciudad si el nombre es común. Ej: Librería Central Madrid.</div>
         </div>
 
         <div class="loading" id="loading"><i data-lucide="loader-circle" class="icono-girando" style="width:16px; height:16px; vertical-align:-3px;"></i> Buscando negocios en Google Maps...</div>
@@ -917,6 +950,11 @@
             return `<div class="${claseFila}">${botones.join("")}</div>`;
         }
 
+        function tituloAuditoria(a) {
+            if (!a.ciudad) return a.tipo;
+            return `${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}`;
+        }
+
         let todosLosDatos = [];
         function marcarMenu(indice) {
             document.querySelectorAll(".nav a").forEach((a, i) => {
@@ -938,18 +976,37 @@
         let paginaActual = 1;
         const porPagina = 15;
 
+        let modoBusqueda = "categoria";
+
+        function cambiarModoBusqueda(modo, boton) {
+            modoBusqueda = modo;
+            document.querySelectorAll(".tab-busqueda").forEach(t => t.classList.remove("activa"));
+            boton.classList.add("activa");
+            document.getElementById("inputs-categoria").style.display = modo === "categoria" ? "flex" : "none";
+            document.getElementById("inputs-nombre").style.display = modo === "nombre" ? "flex" : "none";
+            document.getElementById("nota-nombre-negocio").style.display = modo === "nombre" ? "block" : "none";
+        }
+
         async function buscar() {
-            const tipo = document.getElementById("tipo").value;
-            const ciudad = document.getElementById("ciudad").value;
-            const zona = document.getElementById("zona").value;
-            if (!tipo || !ciudad) { alert("Completa tipo y ciudad"); return; }
+            let payload;
+            if (modoBusqueda === "nombre") {
+                const nombreNegocio = document.getElementById("nombre_negocio").value;
+                if (!nombreNegocio) { alert("Completá el nombre del negocio"); return; }
+                payload = { modo: "nombre", nombre_negocio: nombreNegocio };
+            } else {
+                const tipo = document.getElementById("tipo").value;
+                const ciudad = document.getElementById("ciudad").value;
+                const zona = document.getElementById("zona").value;
+                if (!tipo || !ciudad) { alert("Completa tipo y ciudad"); return; }
+                payload = { modo: "categoria", tipo, ciudad, zona };
+            }
             document.getElementById("loading").style.display = "block";
             document.getElementById("resultados").style.display = "none";
             document.getElementById("btn-volver-historial").style.display = "none";
             const response = await fetch("/buscar", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tipo, ciudad, zona })
+                body: JSON.stringify(payload)
             });
             const datos = await response.json();
             document.getElementById("loading").style.display = "none";
@@ -1092,7 +1149,7 @@
             lista.innerHTML = auditsFiltrados.map(a => { const i = a.indice; return `
             <div class="card fila-historial" style="margin-bottom:10px;" onclick="verResultadosHistorial(${i})">
                 <div class="card-info">
-                    <h3>${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}</h3>
+                    <h3>${tituloAuditoria(a)}</h3>
                     <p><i data-lucide="calendar" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.fecha} · ${a.total} resultados</p>
                 </div>
                 <div class="card-score" style="display:flex; gap:10px; align-items:center;">
@@ -1276,7 +1333,7 @@
                 <div style="font-size:13px;">
                     ${top.length === 0 ? "<p style='color:#78716C;'>Todavía no hay auditorías.</p>" : top.map((a, idx) => `
                     <div onclick="mostrarAudits().then(() => verResultadosHistorial(${a.indice}))" style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F5F5F4; cursor:pointer;" title="Ver resultados de esta búsqueda">
-                        <span>${idx + 1}. ${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}</span>
+                        <span>${idx + 1}. ${tituloAuditoria(a)}</span>
                         <span style="color:#B5533A; font-weight:500;"><i data-lucide="flame" style="width:16px; height:16px; vertical-align:-3px;"></i> ${a.calientes || 0}</span>
                     </div>`).join("")}
                 </div>

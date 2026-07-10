@@ -7,8 +7,7 @@ from scoring.lead_scorer import calcular_score, clasificar_lead
 
 API_KEY = os.environ.get("GOOGLE_API_KEY")
 
-def buscar_negocios_google(tipo, ciudad, zona=None, limite=60):
-    print(f"Buscando {tipo} en {ciudad}...")
+def buscar_negocios_google(tipo=None, ciudad=None, zona=None, limite=60, consulta_directa=None):
     negocios = []
     url = "https://places.googleapis.com/v1/places:searchText?key=" + API_KEY
     headers = {
@@ -16,10 +15,15 @@ def buscar_negocios_google(tipo, ciudad, zona=None, limite=60):
         "X-Goog-Api-Key": API_KEY,
         "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,nextPageToken"
     }
-    if zona:
-        consulta = f"{tipo} cerca de {zona}, {ciudad}"
+    if consulta_directa:
+        print(f"Buscando negocio por nombre: {consulta_directa}")
+        consulta = consulta_directa
     else:
-        consulta = f"{tipo} en {ciudad}"
+        print(f"Buscando {tipo} en {ciudad}...")
+        if zona:
+            consulta = f"{tipo} cerca de {zona}, {ciudad}"
+        else:
+            consulta = f"{tipo} en {ciudad}"
     data = {
         "textQuery": consulta,
         "maxResultCount": 20,

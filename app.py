@@ -102,9 +102,11 @@ def index():
 @app.route("/buscar", methods=["POST"])
 @login_required
 def buscar():
+    modo = request.json.get("modo", "categoria")
     tipo = request.json.get("tipo")
     ciudad = request.json.get("ciudad")
     zona = request.json.get("zona")
+    nombre_negocio = request.json.get("nombre_negocio")
 
     auth = cargar_auth()
     registro_usuario = auth.get(session["usuario"])
@@ -114,7 +116,10 @@ def buscar():
         return jsonify({"error": "Has alcanzado el límite de búsquedas de tu plan."}), 403
 
     try:
-        negocios = buscar_negocios_google(tipo, ciudad, zona)
+        if modo == "nombre":
+            negocios = buscar_negocios_google(consulta_directa=nombre_negocio)
+        else:
+            negocios = buscar_negocios_google(tipo, ciudad, zona)
     except Exception:
         return jsonify({"error": "Ocurrió un error al buscar en Google Maps. Intentá de nuevo más tarde."}), 502
 
@@ -140,9 +145,10 @@ def buscar():
     resultados.sort(key=lambda x: x["score"], reverse=True)
     registro = {
         "fecha": datetime.now().strftime("%d/%m/%Y %H:%M"),
-        "tipo": tipo,
-        "ciudad": ciudad,
-        "zona": zona or "",
+        "tipo": nombre_negocio if modo == "nombre" else tipo,
+        "ciudad": "" if modo == "nombre" else ciudad,
+        "zona": "" if modo == "nombre" else (zona or ""),
+        "modo": modo,
         "total": len(resultados),
         "calientes": len([r for r in resultados if r["clasificacion"] == "caliente"]),
         "tibios": len([r for r in resultados if r["clasificacion"] == "tibio"]),
