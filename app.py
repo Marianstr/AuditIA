@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from functools import wraps
 import os
@@ -20,10 +21,10 @@ AUTH_FILE = "auth.json"
 def cargar_auth():
     if not os.path.exists(AUTH_FILE):
         datos = {
-            "admin": {"password": "auditia2026", "limite": None, "usadas": 0},
-            "ariel": {"password": "utn2026", "limite": 10, "usadas": 0},
-            "profe2": {"password": "utn2026", "limite": 10, "usadas": 0},
-            "visitante": {"password": "123", "limite": 15, "usadas": 0},
+            "admin": {"password": generate_password_hash("auditia2026", method="pbkdf2:sha256"), "limite": None, "usadas": 0},
+            "ariel": {"password": generate_password_hash("utn2026", method="pbkdf2:sha256"), "limite": 10, "usadas": 0},
+            "profe2": {"password": generate_password_hash("utn2026", method="pbkdf2:sha256"), "limite": 10, "usadas": 0},
+            "visitante": {"password": generate_password_hash("123", method="pbkdf2:sha256"), "limite": 15, "usadas": 0},
         }
         guardar_auth(datos)
         return datos
@@ -52,7 +53,7 @@ def login():
         usuario = request.form.get("usuario", "")
         password = request.form.get("password", "")
         registro = auth.get(usuario)
-        if registro and password == registro.get("password"):
+        if registro and check_password_hash(registro.get("password", ""), password):
             session["usuario"] = usuario
             return redirect(url_for("index"))
         error = "Usuario o contraseña incorrectos"
