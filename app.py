@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from functools import wraps
 import os
+import re
 import json
 from datetime import datetime
 import io
@@ -17,6 +18,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or "auditia-secret-key-cambiar-en-produccion"
 
 AUTH_FILE = "auth.json"
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 def cargar_auth():
     if not os.path.exists(AUTH_FILE):
@@ -58,6 +60,30 @@ def login():
             return redirect(url_for("index"))
         error = "Usuario o contraseña incorrectos"
     return render_template("login.html", error=error)
+
+@app.route("/registro", methods=["GET", "POST"])
+def registro():
+    error = None
+    if request.method == "POST":
+        auth = cargar_auth()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        if email in auth:
+            error = "Ese email ya está registrado."
+        elif not EMAIL_RE.match(email):
+            error = "Ingresá un email válido."
+        elif len(password) < 6:
+            error = "La contraseña debe tener al menos 6 caracteres."
+        else:
+            auth[email] = {
+                "password": generate_password_hash(password, method="pbkdf2:sha256"),
+                "limite": 5,
+                "usadas": 0
+            }
+            guardar_auth(auth)
+            session["usuario"] = email
+            return redirect(url_for("index"))
+    return render_template("registro.html", error=error)
 
 @app.route("/logout")
 def logout():
