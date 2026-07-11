@@ -4,3 +4,4 @@ openpyxl
 python-dotenv
 gunicorn
 beautifulsoup4
+anthropic

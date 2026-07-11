@@ -14,6 +14,7 @@ load_dotenv()
 from scraper import buscar_negocios_google
 from scoring.lead_scorer import calcular_score, clasificar_lead, recomendar_servicios
 from scoring.analizador_web import analizar_web
+from generador_propuesta import generar_propuesta
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or "auditia-secret-key-cambiar-en-produccion"
@@ -178,6 +179,17 @@ def analizar_web_ruta():
     if not resultado.get("ok"):
         return jsonify({"error": resultado.get("error", "No se pudo analizar la web.")}), 502
     return jsonify(resultado)
+
+@app.route("/generar-propuesta", methods=["POST"])
+@login_required
+def generar_propuesta_ruta():
+    datos = request.json
+    formato = datos.get("formato", "whatsapp")
+    datos_lead = datos.get("lead", {})
+    resultado = generar_propuesta(datos_lead, formato)
+    if not resultado.get("ok"):
+        return jsonify({"error": resultado.get("error", "No se pudo generar la propuesta.")}), 502
+    return jsonify({"texto": resultado["texto"]})
 
 @app.route("/historial/resultados/<int:indice>")
 @login_required

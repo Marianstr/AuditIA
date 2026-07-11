@@ -349,10 +349,6 @@
             margin-top: 20px;
         }
 
-        .boton-cliente-movil {
-            display: none;
-        }
-
         .badge.badge-movil {
             display: none;
         }
@@ -384,7 +380,8 @@
             flex: 2;
         }
 
-        .card-servicios h4 {
+        .card-servicios h4,
+        .card-fila-inferior h4 {
             font-size: 12px;
             color: #78716C;
             margin-bottom: 8px;
@@ -397,7 +394,7 @@
             align-items: center;
             gap: 6px;
             font-size: 13px;
-            color: #78716C;
+            color: #0B6446;
             text-decoration: none;
             border-bottom: 1px solid #D6D3D1;
             padding-bottom: 1px;
@@ -436,6 +433,50 @@
             font-size: 38px;
             font-weight: 500;
             color: #1C1917;
+        }
+
+        #cards .card {
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+        }
+
+        .card-fila-superior {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .card-visibilidad-arriba {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card-fila-inferior {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 0.5px solid #E7E5E4;
+        }
+
+        .card-col-oportunidad,
+        .card-col-propuesta {
+            flex: 1 1 45%;
+            min-width: 220px;
+        }
+
+        .buscar.boton-oportunidad-propuesta {
+            font-size: 13px;
+            padding: 8px 14px;
+            background: #44403C;
+            color: #fff;
+            border: none;
         }
 
         .badge {
@@ -727,16 +768,32 @@
                 display: inline-block;
             }
 
-            .boton-cliente-movil {
-                display: inline-flex;
-            }
-
-            #cards .score-num {
+            #cards .card-visibilidad-arriba {
                 display: none;
             }
 
-            #cards .card-score {
-                display: none;
+            .card-fila-superior {
+                flex-direction: column;
+            }
+
+            .card-col-oportunidad,
+            .card-col-propuesta {
+                min-width: 150px;
+            }
+
+            .card-fila-inferior h4 {
+                font-size: 10px;
+            }
+
+            .buscar.boton-oportunidad-propuesta {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .card-fila-inferior {
+                flex-direction: column;
             }
         }
     </style>
@@ -1026,6 +1083,9 @@
         }
 
         let todosLosDatos = [];
+        let categoriaBusqueda = "";
+        let analisisWebPorLead = {};
+        let propuestaPorLead = {};
         function marcarMenu(indice) {
             document.querySelectorAll(".nav a").forEach((a, i) => {
                 a.classList.toggle("active", i === indice);
@@ -1086,6 +1146,9 @@
             }
             todosLosDatos = datos.resultados;
             paginaActual = 1;
+            categoriaBusqueda = modoBusqueda === "categoria" ? payload.tipo : "";
+            analisisWebPorLead = {};
+            propuestaPorLead = {};
             document.getElementById("link-excel-resultados").href = `/descargar-excel/${datos.indice}`;
             document.getElementById("resultados").style.display = "block";
             document.getElementById("count-caliente").textContent = todosLosDatos.filter(d => d.clasificacion === "caliente").length;
@@ -1101,9 +1164,9 @@
                 return `<a href="${h.url}" target="_blank" rel="noopener sponsored" class="enlace-recomendacion">${contenidoTexto} <i data-lucide="external-link" style="width:13px; height:13px;"></i></a>`;
             }).join("");
             return `
-            <div class="fila-recomendacion" style="display:flex; align-items:center; justify-content:space-between; gap:20px; background:#FFFFFF; border-radius:0; padding-top:13px; padding-right:16px; padding-bottom:13px; margin-bottom:8px;">
-                <span style="font-size:14px; font-weight:500; color:#1C1917; flex:1; min-width:0;">${r.motivo}</span>
-                <div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px; flex-shrink:1; min-width:0;">${enlaces}</div>
+            <div class="fila-recomendacion" style="display:flex; align-items:center; justify-content:flex-start; gap:16px; background:#FFFFFF; border-radius:0; padding-top:9px; padding-right:16px; padding-bottom:9px; margin-bottom:6px;">
+                <span style="font-size:14px; font-weight:500; color:#1C1917; min-width:0;">${r.motivo}</span>
+                <div style="display:flex; flex-direction:column; align-items:flex-start; gap:6px; flex-shrink:0;">${enlaces}</div>
             </div>`;
         }
 
@@ -1198,6 +1261,11 @@
         async function analizarWeb(idx) {
             const lead = todosLosDatos[idx];
             const contenedor = document.getElementById(`oportunidad-web-${idx}`);
+            if (analisisWebPorLead[idx]) {
+                contenedor.innerHTML = htmlOportunidadWeb(lead, analisisWebPorLead[idx]);
+                lucide.createIcons();
+                return;
+            }
             contenedor.innerHTML = `<p style="color:#78716C; font-size:13px;"><i data-lucide="loader-circle" class="icono-girando" style="width:14px; height:14px; vertical-align:-2px;"></i> Analizando...</p>`;
             lucide.createIcons();
             try {
@@ -1211,11 +1279,89 @@
                     contenedor.innerHTML = `<p style="color:#B5533A; font-size:13px;">${datos.error || "No se pudo analizar la web."}</p>`;
                     return;
                 }
+                analisisWebPorLead[idx] = datos;
                 contenedor.innerHTML = htmlOportunidadWeb(lead, datos);
                 lucide.createIcons();
             } catch (e) {
                 contenedor.innerHTML = `<p style="color:#B5533A; font-size:13px;">No se pudo analizar la web. Probá de nuevo.</p>`;
             }
+        }
+
+        function escapeHtml(texto) {
+            const div = document.createElement("div");
+            div.textContent = texto;
+            return div.innerHTML;
+        }
+
+        function htmlPropuestaGenerada(idx, lead, texto) {
+            const digitos = (lead.telefono || "").replace(/\D/g, "");
+            const esMovil = digitos && (digitos[0] === "6" || digitos[0] === "7");
+            const botonWhatsapp = esMovil
+                ? `<a href="#" onclick="event.preventDefault(); enviarPropuestaPorWhatsapp(${idx});" class="boton-contacto boton-whatsapp" style="margin-top:10px;"><i data-lucide="message-circle" style="width:14px; height:14px;"></i> Enviar por WhatsApp</a>`
+                : "";
+            return `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:11px; color:#78716C; text-transform:uppercase; letter-spacing:.5px; font-weight:600;">Propuesta generada</span>
+                    <div style="display:flex; gap:8px;">
+                        <button class="buscar" style="font-size:12px; padding:5px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="copiarPropuesta(${idx})"><i data-lucide="copy" style="width:14px; height:14px; vertical-align:-2px;"></i> Copiar</button>
+                        <button class="buscar" style="font-size:12px; padding:5px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="generarPropuesta(${idx}, true)"><i data-lucide="refresh-cw" style="width:14px; height:14px; vertical-align:-2px;"></i> Regenerar</button>
+                    </div>
+                </div>
+                <textarea id="texto-propuesta-${idx}" style="width:100%; min-height:100px; padding:10px; background:#FAFAF9; border:1px solid #E7E5E4; border-radius:8px; font-family:inherit; font-size:13px; color:#1C1917; resize:vertical;">${escapeHtml(texto)}</textarea>
+                ${botonWhatsapp}
+            `;
+        }
+
+        async function generarPropuesta(idx, forzar = false) {
+            const lead = todosLosDatos[idx];
+            const contenedor = document.getElementById(`propuesta-ia-${idx}`);
+            if (!forzar && propuestaPorLead[idx]) {
+                contenedor.innerHTML = htmlPropuestaGenerada(idx, lead, propuestaPorLead[idx]);
+                lucide.createIcons();
+                return;
+            }
+            contenedor.innerHTML = `<p style="color:#78716C; font-size:13px;"><i data-lucide="loader-circle" class="icono-girando" style="width:14px; height:14px; vertical-align:-2px;"></i> Generando...</p>`;
+            lucide.createIcons();
+            try {
+                const response = await fetch("/generar-propuesta", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        formato: "whatsapp",
+                        lead: {
+                            nombre: lead.nombre,
+                            categoria: categoriaBusqueda,
+                            visibilidad: lead.score,
+                            clasificacion: lead.clasificacion,
+                            tiene_web: lead.web !== "No tiene",
+                            senales_oportunidad: analisisWebPorLead[idx] ? analisisWebPorLead[idx].señales : null,
+                            servicios: lead.servicios
+                        }
+                    })
+                });
+                const datos = await response.json();
+                if (!response.ok) {
+                    contenedor.innerHTML = `<p style="color:#B5533A; font-size:13px;">${datos.error || "No se pudo generar la propuesta."}</p>`;
+                    return;
+                }
+                propuestaPorLead[idx] = datos.texto;
+                contenedor.innerHTML = htmlPropuestaGenerada(idx, lead, datos.texto);
+                lucide.createIcons();
+            } catch (e) {
+                contenedor.innerHTML = `<p style="color:#B5533A; font-size:13px;">No se pudo generar la propuesta. Probá de nuevo.</p>`;
+            }
+        }
+
+        function copiarPropuesta(idx) {
+            const texto = document.getElementById(`texto-propuesta-${idx}`).value;
+            navigator.clipboard.writeText(texto);
+        }
+
+        function enviarPropuestaPorWhatsapp(idx) {
+            const lead = todosLosDatos[idx];
+            const digitos = (lead.telefono || "").replace(/\D/g, "");
+            const texto = document.getElementById(`texto-propuesta-${idx}`).value;
+            window.open(`https://wa.me/34${digitos}?text=${encodeURIComponent(texto)}`, "_blank");
         }
 
         function mostrarPagina() {
@@ -1230,42 +1376,53 @@
                 const emailBtn = d.web !== "No tiene" ? `<span><i data-lucide="mail" style="width:16px; height:16px; vertical-align:-3px;"></i> <a href="${d.web}/contacto" target="_blank" title="Abre la web del negocio para buscar su email">Buscar email</a></span>` : "";
                 cards.innerHTML += `
             <div class="card">
-                <div class="card-info">
-                    <div class="card-titulo-fila">
-                        <h3>${d.nombre}</h3>
-                        <div class="score-badge-movil">
-                            <div class="score-num-movil">${d.score}</div>
-                            <div class="badge ${d.clasificacion} badge-movil">${d.clasificacion.toUpperCase()}</div>
+                <div class="card-fila-superior">
+                    <div class="card-info">
+                        <div class="card-titulo-fila">
+                            <h3>${d.nombre}</h3>
+                            <div class="score-badge-movil">
+                                <div class="score-num-movil">${d.score}</div>
+                                <div class="badge ${d.clasificacion} badge-movil">${d.clasificacion.toUpperCase()}</div>
+                            </div>
                         </div>
+                        <p>${d.direccion}</p>
+                        <div class="card-meta">
+                            <span><i data-lucide="star" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.rating}</span>
+                            <span><i data-lucide="message-square" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.cantidad_resenas} reseñas</span>
+                            <span><i data-lucide="globe" style="width:16px; height:16px; vertical-align:-3px;"></i> ${webLink}</span>
+                            <span><i data-lucide="phone" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.telefono}</span>
+                            ${emailBtn}
+                        </div>
+                        ${botonesContacto(d, globalIdx)}
                     </div>
-                    <p>${d.direccion}</p>
-                    <div class="card-meta">
-                        <span><i data-lucide="star" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.rating}</span>
-                        <span><i data-lucide="message-square" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.cantidad_resenas} reseñas</span>
-                        <span><i data-lucide="globe" style="width:16px; height:16px; vertical-align:-3px;"></i> ${webLink}</span>
-                        <span><i data-lucide="phone" style="width:16px; height:16px; vertical-align:-3px;"></i> ${d.telefono}</span>
-                        ${emailBtn}
+                    <div class="card-servicios">
+                        <div class="card-visibilidad-arriba">
+                            <div>
+                                <div style="font-size:11px; color:#78716C; text-transform:uppercase; letter-spacing:.5px;">Visibilidad</div>
+                                <div class="score-num">${d.score}</div>
+                            </div>
+                            <div class="badge ${d.clasificacion}">${d.clasificacion.toUpperCase()}</div>
+                        </div>
+                        <h4>Cómo ayudarle</h4>
+                        ${htmlRecomendaciones(d, globalIdx)}
                     </div>
-                    ${botonesContacto(d, globalIdx)}
                 </div>
-                <div class="card-servicios">
-                    <h4>Cómo ayudarle</h4>
-                    ${htmlRecomendaciones(d, globalIdx)}
-                    <div style="margin-top:14px; padding-top:14px; border-top:1px solid #F5F5F4;">
+                <div class="card-fila-inferior">
+                    <div class="card-col-oportunidad">
                         <h4>Oportunidad Web</h4>
                         <div id="oportunidad-web-${globalIdx}">
                             ${d.web !== "No tiene"
-                                ? `<button class="buscar" style="font-size:13px; padding:8px 14px; background:#44403C; color:#fff; border:none;" onclick="analizarWeb(${globalIdx})"><i data-lucide="search-check" style="width:16px; height:16px; vertical-align:-3px;"></i> Analizar web</button>`
+                                ? `<button class="buscar boton-oportunidad-propuesta" onclick="analizarWeb(${globalIdx})"><i data-lucide="search-check" style="width:16px; height:16px; vertical-align:-3px;"></i> Analizar web</button>`
                                 : `<p style="color:#78716C; font-size:13px;">Sin sitio web para analizar.</p>`
                             }
                         </div>
                     </div>
-                </div>
-                <div class="card-score">
-                    <div style="font-size:12px; color:#78716C; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">Visibilidad</div>
-                    <div class="score-num">${d.score}</div>
-                    <button class="buscar" style="margin-top:8px; font-size:13px; padding:8px 14px; background:#F5F5F4; color:#44403C; border:1px solid #E7E5E4;" onclick="agregarCliente(${(paginaActual - 1) * porPagina + idx})"><i data-lucide="user-plus" style="width:16px; height:16px; vertical-align:-3px;"></i> Cliente</button>
-                    <div class="badge ${d.clasificacion}">${d.clasificacion.toUpperCase()}</div>
+                    <div class="card-col-propuesta">
+                        <h4>Propuesta con IA</h4>
+                        <div id="propuesta-ia-${globalIdx}">
+                            <button class="buscar boton-oportunidad-propuesta" onclick="generarPropuesta(${globalIdx})"><i data-lucide="sparkles" style="width:16px; height:16px; vertical-align:-3px;"></i> Generar propuesta con IA</button>
+                        </div>
+                    </div>
                 </div>
             </div>`;
             });
@@ -1345,6 +1502,9 @@
             if (!response.ok) { alert("No se pudieron cargar los resultados de esta auditoría."); return; }
             todosLosDatos = await response.json();
             paginaActual = 1;
+            categoriaBusqueda = "";
+            analisisWebPorLead = {};
+            propuestaPorLead = {};
             document.getElementById("seccion-audits").style.display = "none";
             document.getElementById("resultados").style.display = "block";
             document.getElementById("btn-volver-historial").style.display = "inline-block";
