@@ -268,19 +268,11 @@
             font-size: 14px;
         }
 
-        .caliente .pill {
-            background: #F5E9E5;
-            color: #B5533A;
-        }
-
-        .tibio .pill {
-            background: #F5EDDD;
-            color: #B8873D;
-        }
-
+        .caliente .pill,
+        .tibio .pill,
         .frio .pill {
-            background: #E8EDF2;
-            color: #5E7A94;
+            background: #F5F5F4;
+            color: #57534E;
         }
 
         /* ===== CARDS ===== */
@@ -343,9 +335,6 @@
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
-        }
-
-        .fila-contacto.tiene-contacto {
             margin-top: 20px;
         }
 
@@ -805,9 +794,9 @@
         <div class="logo"><a href="/" title="Ir al inicio" style="text-decoration:none; color:inherit; cursor:pointer;"><img src="/static/auditia-logo.png" alt="AuditIA" style="height:48px; width:auto;"></a></div>
         <nav class="nav">
             <a href="#" class="active" onclick="mostrarDashboard(); return false;"><i data-lucide="layout-dashboard" style="width:18px; height:18px;"></i> Panel</a>
-            <a href="#" onclick="mostrarProyectos(); return false;"><i data-lucide="folder-kanban" style="width:18px; height:18px;"></i> Proyectos</a>
             <a href="#" onclick="mostrarAudits(); return false;"><i data-lucide="search" style="width:18px; height:18px;"></i> Auditorías</a>
             <a href="#" onclick="mostrarClientes(); return false;"><i data-lucide="users" style="width:18px; height:18px;"></i> Clientes</a>
+            <a href="#" onclick="mostrarProyectos(); return false;"><i data-lucide="folder-kanban" style="width:18px; height:18px;"></i> Proyectos</a>
             <a href="#" onclick="mostrarReports(); return false;"><i data-lucide="bar-chart-3" style="width:18px; height:18px;"></i> Informes</a>
             <a href="#" onclick="mostrarAjustes(); return false;"><i data-lucide="settings" style="width:18px; height:18px;"></i> Ajustes</a>
         </nav>
@@ -830,9 +819,9 @@
     <div class="menu-movil" id="menu-movil">
         <nav class="nav-movil">
             <a href="#" class="active" onclick="mostrarDashboard(); cerrarMenuMovil(); return false;"><i data-lucide="layout-dashboard" style="width:18px; height:18px;"></i> Panel</a>
-            <a href="#" onclick="mostrarProyectos(); cerrarMenuMovil(); return false;"><i data-lucide="folder-kanban" style="width:18px; height:18px;"></i> Proyectos</a>
             <a href="#" onclick="mostrarAudits(); cerrarMenuMovil(); return false;"><i data-lucide="search" style="width:18px; height:18px;"></i> Auditorías</a>
             <a href="#" onclick="mostrarClientes(); cerrarMenuMovil(); return false;"><i data-lucide="users" style="width:18px; height:18px;"></i> Clientes</a>
+            <a href="#" onclick="mostrarProyectos(); cerrarMenuMovil(); return false;"><i data-lucide="folder-kanban" style="width:18px; height:18px;"></i> Proyectos</a>
             <a href="#" onclick="mostrarReports(); cerrarMenuMovil(); return false;"><i data-lucide="bar-chart-3" style="width:18px; height:18px;"></i> Informes</a>
             <a href="#" onclick="mostrarAjustes(); cerrarMenuMovil(); return false;"><i data-lucide="settings" style="width:18px; height:18px;"></i> Ajustes</a>
         </nav>
@@ -902,6 +891,7 @@
         <div class="resultados" id="resultados">
             <button class="buscar" id="btn-volver-historial" onclick="volverAlHistorial()"
                 style="display:none; margin-bottom:14px; background:#fff; color:#44403C; border:1px solid #E7E5E4;">← Volver al historial</button>
+            <span id="titulo-auditoria-historial" style="display:none; align-items:center; gap:8px; background:#F5F5F4; color:#57534E; font-size:14px; font-weight:500; padding:8px 16px; border-radius:8px; margin-bottom:16px;"></span>
             <div class="stats">
                 <div class="stat caliente">
                     <div>
@@ -1074,8 +1064,7 @@
             }
             botones.push(htmlAvisoDificilContacto(lead, indiceGlobal));
             botones.push(botonCliente);
-            const claseFila = digitos ? "fila-contacto tiene-contacto" : "fila-contacto";
-            return `<div class="${claseFila}">${botones.join("")}</div>`;
+            return `<div class="fila-contacto">${botones.join("")}</div>`;
         }
 
         function esDificilContactar(lead, indiceGlobal) {
@@ -1123,6 +1112,10 @@
         function tituloAuditoria(a) {
             if (!a.ciudad) return a.tipo;
             return `${a.tipo} — ${a.ciudad}${a.zona ? " (" + a.zona + ")" : ""}`;
+        }
+
+        function capitalizarTitulo(texto) {
+            return texto.replace(/\p{L}+/gu, palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1));
         }
 
         let todosLosDatos = [];
@@ -1176,6 +1169,7 @@
             document.getElementById("loading").style.display = "block";
             document.getElementById("resultados").style.display = "none";
             document.getElementById("btn-volver-historial").style.display = "none";
+            document.getElementById("titulo-auditoria-historial").style.display = "none";
             const response = await fetch("/buscar", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1464,8 +1458,9 @@
                     </div>
                     <div class="card-col-propuesta">
                         <h4>Propuesta con IA</h4>
-                        <div id="propuesta-ia-${globalIdx}">
+                        <div id="propuesta-ia-${globalIdx}" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                             <button class="buscar boton-oportunidad-propuesta" onclick="generarPropuesta(${globalIdx})"><i data-lucide="sparkles" style="width:16px; height:16px; vertical-align:-3px;"></i> Generar propuesta con IA</button>
+                            <span style="display:inline-flex; align-items:center; gap:8px; border:0.5px dashed #D6D3D1; background:#FAFAF9; color:#78716C; font-size:13px; font-weight:500; border-radius:8px; padding:8px 14px; cursor:default;"><i data-lucide="file-text" style="width:16px; height:16px; vertical-align:-3px;"></i> Propuesta profesional en PDF <span style="font-size:10px; font-weight:600; background:#E8F2EE; color:#0B6446; padding:2px 7px; border-radius:5px;">Próximamente</span></span>
                         </div>
                     </div>
                 </div>
@@ -1486,7 +1481,7 @@
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
         async function mostrarAudits(proyectoFiltro = null) {
-            marcarMenu(2);
+            marcarMenu(1);
             document.getElementById("titulo-seccion").textContent = "Auditorías";
             document.getElementById("descripcion-seccion").textContent = "Buscá empresas por zona y analizá su presencia digital.";
             const proyectos = await (await fetch("/proyectos")).json();
@@ -1557,6 +1552,11 @@
             document.getElementById("count-caliente").textContent = todosLosDatos.filter(d => d.clasificacion === "caliente").length;
             document.getElementById("count-tibio").textContent = todosLosDatos.filter(d => d.clasificacion === "tibio").length;
             document.getElementById("count-frio").textContent = todosLosDatos.filter(d => d.clasificacion === "frio").length;
+            const audits = await (await fetch("/historial")).json();
+            const auditoria = audits.find(a => a.indice === indice);
+            const tituloEl = document.getElementById("titulo-auditoria-historial");
+            tituloEl.innerHTML = auditoria ? `<i data-lucide="search" style="width:16px; height:16px; color:#0B6446;"></i> ${capitalizarTitulo(tituloAuditoria(auditoria))}` : "";
+            tituloEl.style.display = auditoria ? "inline-flex" : "none";
             mostrarPagina();
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
@@ -1567,7 +1567,7 @@
             document.getElementById("seccion-audits").style.display = "block";
         }
         async function mostrarProyectos() {
-            marcarMenu(1);
+            marcarMenu(3);
             document.getElementById("titulo-seccion").textContent = "Proyectos";
             document.getElementById("descripcion-seccion").textContent = "Organizá tus búsquedas en campañas de prospección.";
             document.getElementById("panel-grafico").style.display = "none";
@@ -1709,8 +1709,8 @@
             document.getElementById("contenido-reports").innerHTML = `
         
         <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
-            <div style="flex:1; min-width:140px; background:#F2F1F0; border:1px solid #E3E1DF; border-radius:12px; padding:12px 16px;">
-                <div style="font-size:12px; color:#78716C;"><i data-lucide="wallet" style="width:16px; height:16px; vertical-align:-3px;"></i> Facturado histórico</div>
+            <div style="flex:1; min-width:140px; background:#FFFFFF; border:0.5px solid #E7E5E4; border-radius:12px; padding:12px 16px;">
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="wallet" style="width:16px; height:16px; vertical-align:-3px; color:#78716C;"></i> Facturado histórico</div>
                 <div style="font-size:22px; font-weight:500; color:#1C1917;">${(resumen.facturado || 0).toLocaleString("es-ES")} €</div>
             </div>
             <div style="flex:1; min-width:140px; background:#fff; border:1px solid #E7E5E4; border-radius:12px; padding:12px 16px;">
@@ -1766,7 +1766,7 @@
             });
         }
         async function mostrarClientes() {
-            marcarMenu(3);
+            marcarMenu(2);
             document.getElementById("titulo-seccion").textContent = "Clientes";
             document.getElementById("descripcion-seccion").textContent = "Gestioná tu cartera de clientes y su estado comercial.";
             document.getElementById("panel-grafico").style.display = "none";
@@ -1891,24 +1891,24 @@
             const resp = await fetch("/resumen");
             const r = await resp.json();
             document.getElementById("tarjetas-resumen").innerHTML = `
-            <div style="flex:1.3; min-width:170px; background:#F2F1F0; border:1px solid #E3E1DF; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#78716C;"><i data-lucide="wallet" style="width:16px; height:16px; vertical-align:-3px;"></i> Total facturado general</div>
+            <div style="flex:1.3; min-width:170px; background:#FFFFFF; border:0.5px solid #E7E5E4; border-radius:12px; padding:14px 18px;">
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="wallet" style="width:16px; height:16px; vertical-align:-3px; color:#78716C;"></i> Total facturado general</div>
                 <div style="font-size:24px; font-weight:500; color:#1C1917;">${r.facturado.toLocaleString("es-ES")} €</div>
             </div>
-            <div style="flex:1; min-width:130px; background:#EDF2EC; border:1px solid #DCE5DA; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#78716C;"><i data-lucide="user-check" style="width:16px; height:16px; vertical-align:-3px;"></i> Clientes activos</div>
+            <div style="flex:1; min-width:130px; background:#FFFFFF; border:0.5px solid #E7E5E4; border-radius:12px; padding:14px 18px;">
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="user-check" style="width:16px; height:16px; vertical-align:-3px; color:#0B6446;"></i> Clientes activos</div>
                 <div style="font-size:24px; font-weight:500; color:#1C1917;">${r.clientes_activos}</div>
             </div>
-            <div style="flex:1; min-width:130px; background:#F7F3EC; border:1px solid #EAE2D4; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#78716C;"><i data-lucide="file-search" style="width:16px; height:16px; vertical-align:-3px;"></i> Auditorías realizadas</div>
+            <div style="flex:1; min-width:130px; background:#FFFFFF; border:0.5px solid #E7E5E4; border-radius:12px; padding:14px 18px;">
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="file-search" style="width:16px; height:16px; vertical-align:-3px; color:#B8873D;"></i> Auditorías realizadas</div>
                 <div style="font-size:24px; font-weight:500; color:#1C1917;">${r.auditorias}</div>
             </div>
-            <div style="flex:1; min-width:130px; background:#F6EDEA; border:1px solid #EBDCD6; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#78716C;"><i data-lucide="flag" style="width:16px; height:16px; vertical-align:-3px;"></i> Clientes cerrados</div>
+            <div style="flex:1; min-width:130px; background:#FFFFFF; border:0.5px solid #E7E5E4; border-radius:12px; padding:14px 18px;">
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="flag" style="width:16px; height:16px; vertical-align:-3px; color:#B5533A;"></i> Clientes cerrados</div>
                 <div style="font-size:24px; font-weight:500; color: #1C1917;">${r.cerrados}</div>
             </div>
-            <div style="flex:1; min-width:130px; background:#EBF1F4; border:1px solid #D9E4EA; border-radius:12px; padding:14px 18px;">
-                <div style="font-size:12px; color:#78716C;"><i data-lucide="handshake" style="width:16px; height:16px; vertical-align:-3px;"></i> En negociación</div>
+            <div style="flex:1; min-width:130px; background:#FFFFFF; border:0.5px solid #E7E5E4; border-radius:12px; padding:14px 18px;">
+                <div style="font-size:12px; color:#78716C;"><i data-lucide="handshake" style="width:16px; height:16px; vertical-align:-3px; color:#5E7A94;"></i> En negociación</div>
                 <div style="font-size:24px; font-weight:500; color: #1C1917;">${r.negociacion}</div>
             </div>`;
             lucide.createIcons();
