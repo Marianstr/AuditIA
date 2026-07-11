@@ -1072,9 +1072,52 @@
                     }
                 }
             }
+            botones.push(htmlAvisoDificilContacto(lead, indiceGlobal));
             botones.push(botonCliente);
             const claseFila = digitos ? "fila-contacto tiene-contacto" : "fila-contacto";
             return `<div class="${claseFila}">${botones.join("")}</div>`;
+        }
+
+        function esDificilContactar(lead, indiceGlobal) {
+            if (lead.clasificacion !== "caliente") return false;
+            const digitos = (lead.telefono || "").replace(/\D/g, "");
+            const esMovil = digitos && (digitos[0] === "6" || digitos[0] === "7");
+            if (esMovil) return false;
+            const analisis = analisisWebPorLead[indiceGlobal];
+            const tieneEmail = analisis && analisis.señales && analisis.señales.email_visible;
+            return !tieneEmail;
+        }
+
+        function htmlAvisoDificilContacto(lead, indiceGlobal) {
+            if (!esDificilContactar(lead, indiceGlobal)) return "";
+            const digitos = (lead.telefono || "").replace(/\D/g, "");
+            const texto = digitos
+                ? "Solo se encontró un teléfono fijo. No hay email, formulario ni WhatsApp para contactar online."
+                : "No se encontró ningún canal de contacto digital.";
+            return `
+            <div id="aviso-dificil-${indiceGlobal}" style="background:#FDF6EB; border:0.5px solid #F0DDB0; border-radius:10px; padding:12px 14px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <i data-lucide="alert-triangle" style="width:16px; height:16px; color:#8A6428;"></i>
+                    <span style="font-size:13px; color:#5C4A1E; font-weight:500;">Lead de alto potencial, difícil de contactar</span>
+                </div>
+                <a href="#" id="ver-detalle-dificil-${indiceGlobal}" onclick="event.preventDefault(); toggleAvisoDificil(${indiceGlobal});" style="font-size:12px; color:#8A6428; text-decoration:underline; display:block; margin-top:4px;">Ver detalle</a>
+                <div id="detalle-dificil-${indiceGlobal}" style="display:none; margin-top:10px;">
+                    <p style="font-size:12px; color:#78716C; margin-bottom:10px;">${texto}</p>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                        <button class="buscar" disabled style="background:#F5F5F4; color:#A8A29E; cursor:default; font-size:13px; padding:8px 14px; border:1px solid #E7E5E4;">Buscar contacto</button>
+                        <span style="font-size:10px; background:#E7E5E4; color:#78716C; font-weight:600; padding:3px 6px; border-radius:4px;">PRÓXIMAMENTE</span>
+                    </div>
+                    <a href="#" onclick="event.preventDefault(); toggleAvisoDificil(${indiceGlobal});" style="font-size:12px; color:#78716C; text-decoration:underline;">Ocultar</a>
+                </div>
+            </div>`;
+        }
+
+        function toggleAvisoDificil(indiceGlobal) {
+            const link = document.getElementById(`ver-detalle-dificil-${indiceGlobal}`);
+            const detalle = document.getElementById(`detalle-dificil-${indiceGlobal}`);
+            const expandido = detalle.style.display === "block";
+            detalle.style.display = expandido ? "none" : "block";
+            link.style.display = expandido ? "block" : "none";
         }
 
         function tituloAuditoria(a) {
@@ -1282,6 +1325,8 @@
                 analisisWebPorLead[idx] = datos;
                 contenedor.innerHTML = htmlOportunidadWeb(lead, datos);
                 lucide.createIcons();
+                const avisoEl = document.getElementById(`aviso-dificil-${idx}`);
+                if (avisoEl && !esDificilContactar(lead, idx)) avisoEl.remove();
             } catch (e) {
                 contenedor.innerHTML = `<p style="color:#B5533A; font-size:13px;">No se pudo analizar la web. Probá de nuevo.</p>`;
             }
