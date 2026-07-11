@@ -1,20 +1,21 @@
-from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
-from werkzeug.security import generate_password_hash, check_password_hash
-from dotenv import load_dotenv
-from functools import wraps
+import io
+import json
 import os
 import re
-import json
 from datetime import datetime
-import io
-import openpyxl
+from functools import wraps
 
-load_dotenv()
+import openpyxl
+from dotenv import load_dotenv
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from scraper import buscar_negocios_google
 from scoring.lead_scorer import calcular_score, clasificar_lead, recomendar_servicios
 from scoring.analizador_web import analizar_web
 from generador_propuesta import generar_propuesta
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or "auditia-secret-key-cambiar-en-produccion"
@@ -22,24 +23,40 @@ app.secret_key = os.environ.get("SECRET_KEY") or "auditia-secret-key-cambiar-en-
 AUTH_FILE = "auth.json"
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
+
 def cargar_auth():
     if not os.path.exists(AUTH_FILE):
         datos = {
-            "admin": {"password": generate_password_hash("auditia2026", method="pbkdf2:sha256"), "limite": None, "usadas": 0},
-            "ariel": {"password": generate_password_hash("utn2026", method="pbkdf2:sha256"), "limite": 10, "usadas": 0},
-            "profe2": {"password": generate_password_hash("utn2026", method="pbkdf2:sha256"), "limite": 10, "usadas": 0},
-            "visitante": {"password": generate_password_hash("123", method="pbkdf2:sha256"), "limite": 15, "usadas": 0},
+            "admin": {
+                "password": generate_password_hash("auditia2026", method="pbkdf2:sha256"),
+                "limite": None, "usadas": 0,
+            },
+            "ariel": {
+                "password": generate_password_hash("utn2026", method="pbkdf2:sha256"),
+                "limite": 10, "usadas": 0,
+            },
+            "profe2": {
+                "password": generate_password_hash("utn2026", method="pbkdf2:sha256"),
+                "limite": 10, "usadas": 0,
+            },
+            "visitante": {
+                "password": generate_password_hash("123", method="pbkdf2:sha256"),
+                "limite": 15, "usadas": 0,
+            },
         }
         guardar_auth(datos)
         return datos
     with open(AUTH_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
 def guardar_auth(datos):
     with open(AUTH_FILE, "w", encoding="utf-8") as f:
         json.dump(datos, f, ensure_ascii=False, indent=2)
 
+
 cargar_auth()
+
 
 def login_required(f):
     @wraps(f)
@@ -48,6 +65,7 @@ def login_required(f):
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorada
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -62,6 +80,7 @@ def login():
             return redirect(url_for("index"))
         error = "Usuario o contraseña incorrectos"
     return render_template("login.html", error=error)
+
 
 @app.route("/registro", methods=["GET", "POST"])
 def registro():
@@ -87,19 +106,23 @@ def registro():
             return redirect(url_for("index"))
     return render_template("registro.html", error=error)
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("landing"))
 
+
 @app.route("/")
 def landing():
     return render_template("landing.html")
+
 
 @app.route("/app")
 @login_required
 def index():
     return render_template("index.html", usuario=session["usuario"])
+
 
 @app.route("/buscar", methods=["POST"])
 @login_required
@@ -169,6 +192,7 @@ def buscar():
         json.dump(historial, f, ensure_ascii=False, indent=2)
     return jsonify({"resultados": resultados, "indice": indice})
 
+
 @app.route("/analizar-web", methods=["POST"])
 @login_required
 def analizar_web_ruta():
@@ -180,6 +204,7 @@ def analizar_web_ruta():
         return jsonify({"error": resultado.get("error", "No se pudo analizar la web.")}), 502
     return jsonify(resultado)
 
+
 @app.route("/generar-propuesta", methods=["POST"])
 @login_required
 def generar_propuesta_ruta():
@@ -190,6 +215,7 @@ def generar_propuesta_ruta():
     if not resultado.get("ok"):
         return jsonify({"error": resultado.get("error", "No se pudo generar la propuesta.")}), 502
     return jsonify({"texto": resultado["texto"]})
+
 
 @app.route("/historial/resultados/<int:indice>")
 @login_required
@@ -204,6 +230,7 @@ def resultados_historial(indice):
         return jsonify({"error": "Auditoría no encontrada"}), 404
     return jsonify(registro["resultados"])
 
+
 @app.route("/descargar-excel/<int:indice>")
 @login_required
 def descargar_excel_historial(indice):
@@ -217,8 +244,13 @@ def descargar_excel_historial(indice):
         return "Auditoría no encontrada.", 404
     wb = openpyxl.Workbook()
     ws = wb.active
+    if ws is None:
+        return "Error interno al generar el Excel.", 500
     ws.title = "Leads"
-    ws.append(["Nombre", "Direccion", "Telefono", "Web", "Rating", "Resenas", "Score", "Clasificacion", "Servicios recomendados"])
+    ws.append([
+        "Nombre", "Direccion", "Telefono", "Web", "Rating", "Resenas",
+        "Score", "Clasificacion", "Servicios recomendados"
+    ])
     for r in registro["resultados"]:
         ws.append([
             r["nombre"], r["direccion"], r["telefono"], r["web"],
@@ -234,6 +266,7 @@ def descargar_excel_historial(indice):
         download_name=f"leads_{registro['tipo']}_{registro['ciudad']}.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
 
 @app.route("/clientes", methods=["GET", "POST"])
 @login_required
@@ -254,6 +287,7 @@ def clientes():
             json.dump(lista, f, ensure_ascii=False, indent=2)
         return jsonify({"ok": True})
     return jsonify([c for c in lista if c.get("usuario", "admin") == usuario])
+
 
 @app.route("/proyectos", methods=["GET", "POST"])
 @login_required
@@ -335,6 +369,8 @@ def cambiar_estado_cliente():
     with open("clientes.json", "w", encoding="utf-8") as f:
         json.dump(lista, f, ensure_ascii=False, indent=2)
     return jsonify({"ok": True})
+
+
 @app.route("/perfil")
 @login_required
 def perfil():
@@ -364,6 +400,8 @@ def perfil():
         "clientes": len([c for c in clientes_lista if c.get("usuario", "admin") == usuario]),
         "proyectos": len([p for p in proyectos_lista if p.get("usuario", "admin") == usuario])
     })
+
+
 @app.route("/resumen")
 @login_required
 def resumen():
@@ -401,6 +439,8 @@ def resumen():
         "cerrados": len([c for c in clientes_lista if c.get("estado") == "cerrado"]),
         "negociacion": len([c for c in clientes_lista if c.get("estado") == "en negociación"])
     })
+
+
 @app.route("/clientes/presupuesto", methods=["POST"])
 @login_required
 def actualizar_presupuesto():
@@ -420,6 +460,8 @@ def actualizar_presupuesto():
     with open("clientes.json", "w", encoding="utf-8") as f:
         json.dump(lista, f, ensure_ascii=False, indent=2)
     return jsonify({"ok": True})
+
+
 @app.route("/clientes/borrar", methods=["POST"])
 @login_required
 def borrar_cliente():
@@ -458,6 +500,8 @@ def borrar_historial():
     with open("historial.json", "w", encoding="utf-8") as f:
         json.dump(lista, f, ensure_ascii=False, indent=2)
     return jsonify({"ok": True})
+
+
 @app.route("/historial")
 @login_required
 def historial():
@@ -474,6 +518,7 @@ def historial():
     ]
     resumen.reverse()
     return jsonify(resumen)
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

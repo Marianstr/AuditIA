@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+
 def calcular_score(lead):
     score = 0
 
