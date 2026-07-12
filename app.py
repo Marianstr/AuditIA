@@ -30,19 +30,19 @@ def cargar_auth():
         datos = {
             "admin": {
                 "password": generate_password_hash("auditia2026", method="pbkdf2:sha256"),
-                "limite": None, "usadas": 0,
+                "limite": None, "usadas": 0, "plan": "agency",
             },
             "ariel": {
                 "password": generate_password_hash("utn2026", method="pbkdf2:sha256"),
-                "limite": 10, "usadas": 0,
+                "limite": 10, "usadas": 0, "plan": "pro",
             },
             "profe2": {
                 "password": generate_password_hash("utn2026", method="pbkdf2:sha256"),
-                "limite": 10, "usadas": 0,
+                "limite": 10, "usadas": 0, "plan": "pro",
             },
             "visitante": {
                 "password": generate_password_hash("123", method="pbkdf2:sha256"),
-                "limite": 15, "usadas": 0,
+                "limite": 15, "usadas": 0, "plan": "free",
             },
         }
         guardar_auth(datos)
