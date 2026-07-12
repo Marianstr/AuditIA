@@ -58,6 +58,35 @@ def guardar_auth(datos):
 cargar_auth()
 
 
+# ---- Planes y control de acceso por plan ----
+PLANES = {
+    "free":   {"limite": 5,   "funciones": {"scoring", "export_excel"}},
+    "pro":    {"limite": 50,  "funciones": {"scoring", "export_excel", "crm", "proyectos", "export_pdf"}},
+    "agency": {"limite": 200, "funciones": {"scoring", "export_excel", "crm", "proyectos", "export_pdf", "multiusuario", "busquedas_extra"}},
+}
+
+def plan_de(registro_usuario):
+    """Devuelve el plan del usuario. Usa el campo 'plan' si existe;
+    si no, lo deduce del 'limite' ya guardado."""
+    if not registro_usuario:
+        return "free"
+    if registro_usuario.get("plan") in PLANES:
+        return registro_usuario["plan"]
+    limite = registro_usuario.get("limite")
+    if limite is None:
+        return "agency"
+    if limite >= 200:
+        return "agency"
+    if limite >= 50:
+        return "pro"
+    return "free"
+
+def plan_permite(registro_usuario, funcion):
+    """True si el plan del usuario incluye esa función."""
+    plan = plan_de(registro_usuario)
+    return funcion in PLANES[plan]["funciones"]
+
+
 def login_required(f):
     @wraps(f)
     def decorada(*args, **kwargs):
@@ -121,7 +150,8 @@ def landing():
 @app.route("/app")
 @login_required
 def index():
-    return render_template("index.html", usuario=session["usuario"])
+    plan_usuario = plan_de(cargar_auth().get(session["usuario"]))
+    return render_template("index.html", usuario=session["usuario"], plan=plan_usuario)
 
 
 @app.route("/buscar", methods=["POST"])
@@ -272,6 +302,9 @@ def descargar_excel_historial(indice):
 @login_required
 def clientes():
     usuario = session["usuario"]
+    registro_usuario = cargar_auth().get(usuario)
+    if not plan_permite(registro_usuario, "crm"):
+        return jsonify({"error": "El CRM de clientes está disponible en el plan Pro y Agency."}), 403
     try:
         with open("clientes.json", "r", encoding="utf-8") as f:
             lista = json.load(f)

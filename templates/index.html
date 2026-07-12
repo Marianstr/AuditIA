@@ -1019,6 +1019,16 @@
         const USUARIO_SESION = {{ usuario | tojson }};
         const NOMBRE_CONTACTO = USUARIO_SESION.includes("@") ? USUARIO_SESION.split("@")[0] : USUARIO_SESION;
 
+        const PLAN_USUARIO = "{{ plan }}";
+        const FUNCIONES_POR_PLAN = {
+            free:   ["scoring", "export_excel"],
+            pro:    ["scoring", "export_excel", "crm", "proyectos", "export_pdf"],
+            agency: ["scoring", "export_excel", "crm", "proyectos", "export_pdf", "multiusuario", "busquedas_extra"]
+        };
+        function planPermite(funcion) {
+            return FUNCIONES_POR_PLAN[PLAN_USUARIO] && FUNCIONES_POR_PLAN[PLAN_USUARIO].includes(funcion);
+        }
+
         function recomendaciones(lead) {
             if (lead.clasificacion === "frio") return [];
             const recs = [];
@@ -1046,7 +1056,9 @@
 
         function botonesContacto(lead, indiceGlobal) {
             const digitos = (lead.telefono || "").replace(/\D/g, "");
-            const botonCliente = `<a href="#" class="boton-contacto boton-llamar boton-cliente-movil" onclick="event.preventDefault(); agregarCliente(${indiceGlobal});"><i data-lucide="user-plus" style="width:14px; height:14px;"></i> Cliente</a>`;
+            const botonCliente = planPermite("crm")
+                ? `<a href="#" class="boton-contacto boton-llamar boton-cliente-movil" onclick="event.preventDefault(); agregarCliente(${indiceGlobal});"><i data-lucide="user-plus" style="width:14px; height:14px;"></i> Cliente</a>`
+                : `<a href="#" class="boton-contacto boton-llamar boton-cliente-movil" onclick="event.preventDefault(); alert('Agregar clientes al CRM está disponible en los planes Pro y Agency.');" style="opacity:0.55;"><i data-lucide="lock" style="width:14px; height:14px;"></i> Cliente</a>`;
             const botones = [];
             if (digitos) {
                 const telHref = `tel:+34${digitos}`;
