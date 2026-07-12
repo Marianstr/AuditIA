@@ -61,8 +61,8 @@ cargar_auth()
 # ---- Planes y control de acceso por plan ----
 PLANES = {
     "free":   {"limite": 5,   "funciones": {"scoring", "export_excel"}},
-    "pro":    {"limite": 50,  "funciones": {"scoring", "export_excel", "crm", "proyectos", "export_pdf"}},
-    "agency": {"limite": 200, "funciones": {"scoring", "export_excel", "crm", "proyectos", "export_pdf", "multiusuario", "busquedas_extra"}},
+    "pro":    {"limite": 50,  "funciones": {"scoring", "export_excel", "crm", "proyectos", "export_pdf", "propuesta_visual"}},
+    "agency": {"limite": 200, "funciones": {"scoring", "export_excel", "crm", "proyectos", "export_pdf", "multiusuario", "busquedas_extra", "propuesta_visual"}},
 }
 
 def plan_de(registro_usuario):
@@ -245,6 +245,23 @@ def generar_propuesta_ruta():
     if not resultado.get("ok"):
         return jsonify({"error": resultado.get("error", "No se pudo generar la propuesta.")}), 502
     return jsonify({"texto": resultado["texto"]})
+
+
+@app.route("/mockup")
+@login_required
+def mockup_propuesta():
+    registro_usuario = cargar_auth().get(session["usuario"])
+    if not plan_permite(registro_usuario, "propuesta_visual"):
+        return "Esta función está disponible en los planes Pro y Agency.", 403
+    nombre = request.args.get("nombre", "Tu Negocio")
+    categoria = request.args.get("categoria", "Tu rubro")
+    eslogan = request.args.get("eslogan", "Así podría verse tu negocio en internet.")
+    eslogan_corto = request.args.get("eslogan_corto", "Bienvenidos.")
+    return render_template("mockup.html",
+                           nombre=nombre,
+                           categoria=categoria,
+                           eslogan=eslogan,
+                           eslogan_corto=eslogan_corto)
 
 
 @app.route("/historial/resultados/<int:indice>")

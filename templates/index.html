@@ -1022,8 +1022,8 @@
         const PLAN_USUARIO = "{{ plan }}";
         const FUNCIONES_POR_PLAN = {
             free:   ["scoring", "export_excel"],
-            pro:    ["scoring", "export_excel", "crm", "proyectos", "export_pdf"],
-            agency: ["scoring", "export_excel", "crm", "proyectos", "export_pdf", "multiusuario", "busquedas_extra"]
+            pro:    ["scoring", "export_excel", "crm", "proyectos", "export_pdf", "propuesta_visual"],
+            agency: ["scoring", "export_excel", "crm", "proyectos", "export_pdf", "multiusuario", "busquedas_extra", "propuesta_visual"]
         };
         function planPermite(funcion) {
             return FUNCIONES_POR_PLAN[PLAN_USUARIO] && FUNCIONES_POR_PLAN[PLAN_USUARIO].includes(funcion);
