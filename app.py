@@ -14,6 +14,7 @@ from scraper import buscar_negocios_google
 from scoring.lead_scorer import calcular_score, clasificar_lead, recomendar_servicios
 from scoring.analizador_web import analizar_web
 from generador_propuesta import generar_propuesta
+from buscador_fotos import buscar_foto_categoria
 
 load_dotenv()
 
@@ -257,11 +258,13 @@ def mockup_propuesta():
     categoria = request.args.get("categoria", "Tu rubro")
     eslogan = request.args.get("eslogan", "Así podría verse tu negocio en internet.")
     eslogan_corto = request.args.get("eslogan_corto", "Bienvenidos.")
+    foto_url = buscar_foto_categoria(categoria) or "https://images.unsplash.com/photo-1528825871115-3581a5387919?w=1000&q=80"
     return render_template("mockup.html",
                            nombre=nombre,
                            categoria=categoria,
                            eslogan=eslogan,
-                           eslogan_corto=eslogan_corto)
+                           eslogan_corto=eslogan_corto,
+                           foto_url=foto_url)
 
 
 @app.route("/historial/resultados/<int:indice>")
