@@ -2049,10 +2049,10 @@
             const badge = document.getElementById("ajustes-badge-plan");
             const detalle = document.getElementById("ajustes-plan-detalle");
             if (perfil.limite === null) {
-                badge.textContent = "Ilimitado";
+                badge.textContent = ({free:"Free", pro:"Pro", agency:"Agency"})[PLAN_USUARIO] || "Ilimitado";
                 detalle.innerHTML = `<div style="font-size:13px; color:#78716C;">Sin límite de búsquedas.</div>`;
             } else {
-                badge.textContent = "Free";
+                badge.textContent = ({free:"Free", pro:"Pro", agency:"Agency"})[PLAN_USUARIO] || "Free";
                 const restantes = Math.max(perfil.limite - perfil.usadas, 0);
                 const pct = Math.min((perfil.usadas / perfil.limite) * 100, 100);
                 detalle.innerHTML = `
