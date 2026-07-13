@@ -26,7 +26,10 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 def cargar_auth():
-    if not os.path.exists(AUTH_FILE):
+    from db import cargar_auth_db, crear_tabla_usuarios, guardar_auth_db
+    crear_tabla_usuarios()
+    datos = cargar_auth_db()
+    if not datos:
         datos = {
             "admin": {
                 "password": generate_password_hash("auditia2026", method="pbkdf2:sha256"),
@@ -45,15 +48,12 @@ def cargar_auth():
                 "limite": 15, "usadas": 0, "plan": "free",
             },
         }
-        guardar_auth(datos)
-        return datos
-    with open(AUTH_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
+        guardar_auth_db(datos)
+    return datos
 
 def guardar_auth(datos):
-    with open(AUTH_FILE, "w", encoding="utf-8") as f:
-        json.dump(datos, f, ensure_ascii=False, indent=2)
+    from db import guardar_auth_db
+    guardar_auth_db(datos)
 
 
 cargar_auth()

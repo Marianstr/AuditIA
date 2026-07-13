@@ -5,3 +5,4 @@ python-dotenv
 gunicorn
 beautifulsoup4
 anthropic
+psycopg2-binary
