@@ -131,3 +131,39 @@ def guardar_clientes_db(lista):
     conn.commit()
     cur.close()
     conn.close()
+
+def crear_tabla_facturado():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS facturado (
+            id SERIAL PRIMARY KEY,
+            datos JSONB NOT NULL
+        )
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def cargar_facturado_db():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT datos FROM facturado ORDER BY id LIMIT 1")
+    fila = cur.fetchone()
+    cur.close()
+    conn.close()
+    return fila[0] if fila else {}
+
+def guardar_facturado_db(diccionario):
+    import json as _json
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM facturado LIMIT 1")
+    fila = cur.fetchone()
+    if fila:
+        cur.execute("UPDATE facturado SET datos = %s WHERE id = %s", (_json.dumps(diccionario), fila[0]))
+    else:
+        cur.execute("INSERT INTO facturado (datos) VALUES (%s)", (_json.dumps(diccionario),))
+    conn.commit()
+    cur.close()
+    conn.close()

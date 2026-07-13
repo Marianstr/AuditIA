@@ -27,6 +27,8 @@ from db import cargar_historial_db, guardar_historial_db, crear_tabla_historial
 crear_tabla_historial()
 from db import cargar_clientes_db, guardar_clientes_db, crear_tabla_clientes
 crear_tabla_clientes()
+from db import cargar_facturado_db, guardar_facturado_db, crear_tabla_facturado
+crear_tabla_facturado()
 
 
 def cargar_auth():
@@ -457,11 +459,7 @@ def resumen():
         historial_lista = [h for h in cargar_historial_db() if h.get("usuario", "admin") == usuario]
     except FileNotFoundError:
         historial_lista = []
-    try:
-        with open("facturado.json", "r", encoding="utf-8") as f:
-            facturado_todos = json.load(f)
-    except FileNotFoundError:
-        facturado_todos = {}
+    facturado_todos = cargar_facturado_db()
     facturado = facturado_todos.get(usuario, {"total": 0, "registrados": {}})
     for c in clientes_lista:
         monto = float(c.get("cerrado_en") or 0)
@@ -471,8 +469,7 @@ def resumen():
             facturado["total"] += monto - anterior
             facturado["registrados"][clave] = monto
     facturado_todos[usuario] = facturado
-    with open("facturado.json", "w", encoding="utf-8") as f:
-        json.dump(facturado_todos, f, ensure_ascii=False, indent=2)
+    guardar_facturado_db(facturado_todos)
     return jsonify({
         "facturado": facturado["total"],
         "clientes_activos": len(clientes_lista),
