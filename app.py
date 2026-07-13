@@ -23,6 +23,8 @@ app.secret_key = os.environ.get("SECRET_KEY") or "auditia-secret-key-cambiar-en-
 
 AUTH_FILE = "auth.json"
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+from db import cargar_historial_db, guardar_historial_db, crear_tabla_historial
+crear_tabla_historial()
 
 
 def cargar_auth():
@@ -213,14 +215,12 @@ def buscar():
         "usuario": session["usuario"]
     }
     try:
-        with open("historial.json", "r", encoding="utf-8") as f:
-            historial = json.load(f)
+        historial = cargar_historial_db()
     except FileNotFoundError:
         historial = []
     historial.append(registro)
     indice = len(historial) - 1
-    with open("historial.json", "w", encoding="utf-8") as f:
-        json.dump(historial, f, ensure_ascii=False, indent=2)
+    guardar_historial_db(historial)
     return jsonify({"resultados": resultados, "indice": indice})
 
 
@@ -271,8 +271,7 @@ def mockup_propuesta():
 @login_required
 def resultados_historial(indice):
     try:
-        with open("historial.json", "r", encoding="utf-8") as f:
-            historial = json.load(f)
+        historial = cargar_historial_db()
         registro = historial[indice]
     except (FileNotFoundError, IndexError):
         return jsonify({"error": "Auditoría no encontrada"}), 404
@@ -285,8 +284,7 @@ def resultados_historial(indice):
 @login_required
 def descargar_excel_historial(indice):
     try:
-        with open("historial.json", "r", encoding="utf-8") as f:
-            historial = json.load(f)
+        historial = cargar_historial_db()
         registro = historial[indice]
     except (FileNotFoundError, IndexError):
         return "Auditoría no encontrada.", 404
@@ -368,15 +366,13 @@ def asignar_proyecto():
     datos = request.json
     usuario = session["usuario"]
     try:
-        with open("historial.json", "r", encoding="utf-8") as f:
-            historial = json.load(f)
+        historial = cargar_historial_db()
     except FileNotFoundError:
         historial = []
     indice = datos.get("indice")
     if indice is not None and 0 <= indice < len(historial) and historial[indice].get("usuario", "admin") == usuario:
         historial[indice]["proyecto"] = datos.get("proyecto", "")
-        with open("historial.json", "w", encoding="utf-8") as f:
-            json.dump(historial, f, ensure_ascii=False, indent=2)
+        guardar_historial_db(historial)
     return jsonify({"ok": True})
 
 
@@ -394,13 +390,11 @@ def borrar_proyecto():
     with open("proyectos.json", "w", encoding="utf-8") as f:
         json.dump(lista, f, ensure_ascii=False, indent=2)
     try:
-        with open("historial.json", "r", encoding="utf-8") as f:
-            historial = json.load(f)
+        historial = cargar_historial_db()
         for a in historial:
             if a.get("proyecto") == nombre and a.get("usuario", "admin") == usuario:
                 a["proyecto"] = ""
-        with open("historial.json", "w", encoding="utf-8") as f:
-            json.dump(historial, f, ensure_ascii=False, indent=2)
+        guardar_historial_db(historial)
     except FileNotFoundError:
         pass
     return jsonify({"ok": True})
@@ -431,8 +425,7 @@ def perfil():
     auth = cargar_auth()
     registro = auth.get(usuario, {})
     try:
-        with open("historial.json", "r", encoding="utf-8") as f:
-            historial = json.load(f)
+        historial = cargar_historial_db()
     except FileNotFoundError:
         historial = []
     try:
@@ -465,8 +458,7 @@ def resumen():
     except FileNotFoundError:
         clientes_lista = []
     try:
-        with open("historial.json", "r", encoding="utf-8") as f:
-            historial_lista = [h for h in json.load(f) if h.get("usuario", "admin") == usuario]
+        historial_lista = [h for h in cargar_historial_db() if h.get("usuario", "admin") == usuario]
     except FileNotFoundError:
         historial_lista = []
     try:
@@ -540,8 +532,7 @@ def borrar_historial():
     datos = request.json
     usuario = session["usuario"]
     try:
-        with open("historial.json", "r", encoding="utf-8") as f:
-            lista = json.load(f)
+        lista = cargar_historial_db()
     except FileNotFoundError:
         return jsonify({"ok": False}), 404
     if datos.get("todo"):
@@ -550,8 +541,7 @@ def borrar_historial():
         indice = datos.get("indice")
         if indice is not None and 0 <= indice < len(lista) and lista[indice].get("usuario", "admin") == usuario:
             lista.pop(indice)
-    with open("historial.json", "w", encoding="utf-8") as f:
-        json.dump(lista, f, ensure_ascii=False, indent=2)
+    guardar_historial_db(lista)
     return jsonify({"ok": True})
 
 
@@ -559,8 +549,7 @@ def borrar_historial():
 @login_required
 def historial():
     try:
-        with open("historial.json", "r", encoding="utf-8") as f:
-            datos = json.load(f)
+        datos = cargar_historial_db()
     except FileNotFoundError:
         datos = []
     usuario = session["usuario"]
