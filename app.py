@@ -29,6 +29,8 @@ from db import cargar_clientes_db, guardar_clientes_db, crear_tabla_clientes
 crear_tabla_clientes()
 from db import cargar_facturado_db, guardar_facturado_db, crear_tabla_facturado
 crear_tabla_facturado()
+from db import cargar_proyectos_db, guardar_proyectos_db, crear_tabla_proyectos
+crear_tabla_proyectos()
 
 
 def cargar_auth():
@@ -347,8 +349,7 @@ def clientes():
 def proyectos():
     usuario = session["usuario"]
     try:
-        with open("proyectos.json", "r", encoding="utf-8") as f:
-            lista = json.load(f)
+        lista = cargar_proyectos_db()
     except FileNotFoundError:
         lista = []
     if request.method == "POST":
@@ -356,8 +357,7 @@ def proyectos():
         nuevo["fecha"] = datetime.now().strftime("%d/%m/%Y")
         nuevo["usuario"] = usuario
         lista.insert(0, nuevo)
-        with open("proyectos.json", "w", encoding="utf-8") as f:
-            json.dump(lista, f, ensure_ascii=False, indent=2)
+        guardar_proyectos_db(lista)
         return jsonify({"ok": True})
     return jsonify([p for p in lista if p.get("usuario", "admin") == usuario])
 
@@ -384,13 +384,11 @@ def borrar_proyecto():
     nombre = request.json.get("nombre", "")
     usuario = session["usuario"]
     try:
-        with open("proyectos.json", "r", encoding="utf-8") as f:
-            lista = json.load(f)
+        lista = cargar_proyectos_db()
     except FileNotFoundError:
         lista = []
     lista = [p for p in lista if not (p.get("nombre") == nombre and p.get("usuario", "admin") == usuario)]
-    with open("proyectos.json", "w", encoding="utf-8") as f:
-        json.dump(lista, f, ensure_ascii=False, indent=2)
+    guardar_proyectos_db(lista)
     try:
         historial = cargar_historial_db()
         for a in historial:
@@ -433,8 +431,7 @@ def perfil():
     except FileNotFoundError:
         clientes_lista = []
     try:
-        with open("proyectos.json", "r", encoding="utf-8") as f:
-            proyectos_lista = json.load(f)
+        proyectos_lista = cargar_proyectos_db()
     except FileNotFoundError:
         proyectos_lista = []
     return jsonify({

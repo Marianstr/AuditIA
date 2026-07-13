@@ -167,3 +167,39 @@ def guardar_facturado_db(diccionario):
     conn.commit()
     cur.close()
     conn.close()
+
+def crear_tabla_proyectos():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS proyectos (
+            id SERIAL PRIMARY KEY,
+            datos JSONB NOT NULL
+        )
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def cargar_proyectos_db():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT datos FROM proyectos ORDER BY id LIMIT 1")
+    fila = cur.fetchone()
+    cur.close()
+    conn.close()
+    return fila[0] if fila else []
+
+def guardar_proyectos_db(lista):
+    import json as _json
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM proyectos LIMIT 1")
+    fila = cur.fetchone()
+    if fila:
+        cur.execute("UPDATE proyectos SET datos = %s WHERE id = %s", (_json.dumps(lista), fila[0]))
+    else:
+        cur.execute("INSERT INTO proyectos (datos) VALUES (%s)", (_json.dumps(lista),))
+    conn.commit()
+    cur.close()
+    conn.close()
