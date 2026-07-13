@@ -25,6 +25,8 @@ AUTH_FILE = "auth.json"
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 from db import cargar_historial_db, guardar_historial_db, crear_tabla_historial
 crear_tabla_historial()
+from db import cargar_clientes_db, guardar_clientes_db, crear_tabla_clientes
+crear_tabla_clientes()
 
 
 def cargar_auth():
@@ -324,8 +326,7 @@ def clientes():
     if not plan_permite(registro_usuario, "crm"):
         return jsonify({"error": "El CRM de clientes está disponible en el plan Pro y Agency."}), 403
     try:
-        with open("clientes.json", "r", encoding="utf-8") as f:
-            lista = json.load(f)
+        lista = cargar_clientes_db()
     except FileNotFoundError:
         lista = []
     if request.method == "POST":
@@ -334,8 +335,7 @@ def clientes():
         nuevo["fecha_agregado"] = datetime.now().strftime("%d/%m/%Y")
         nuevo["usuario"] = usuario
         lista.insert(0, nuevo)
-        with open("clientes.json", "w", encoding="utf-8") as f:
-            json.dump(lista, f, ensure_ascii=False, indent=2)
+        guardar_clientes_db(lista)
         return jsonify({"ok": True})
     return jsonify([c for c in lista if c.get("usuario", "admin") == usuario])
 
@@ -406,15 +406,13 @@ def cambiar_estado_cliente():
     datos = request.json
     usuario = session["usuario"]
     try:
-        with open("clientes.json", "r", encoding="utf-8") as f:
-            lista = json.load(f)
+        lista = cargar_clientes_db()
     except FileNotFoundError:
         return jsonify({"ok": False}), 404
     for c in lista:
         if c["nombre"] == datos["nombre"] and c.get("usuario", "admin") == usuario:
             c["estado"] = datos["estado"]
-    with open("clientes.json", "w", encoding="utf-8") as f:
-        json.dump(lista, f, ensure_ascii=False, indent=2)
+    guardar_clientes_db(lista)
     return jsonify({"ok": True})
 
 
@@ -429,8 +427,7 @@ def perfil():
     except FileNotFoundError:
         historial = []
     try:
-        with open("clientes.json", "r", encoding="utf-8") as f:
-            clientes_lista = json.load(f)
+        clientes_lista = cargar_clientes_db()
     except FileNotFoundError:
         clientes_lista = []
     try:
@@ -453,8 +450,7 @@ def perfil():
 def resumen():
     usuario = session["usuario"]
     try:
-        with open("clientes.json", "r", encoding="utf-8") as f:
-            clientes_lista = [c for c in json.load(f) if c.get("usuario", "admin") == usuario]
+        clientes_lista = [c for c in cargar_clientes_db() if c.get("usuario", "admin") == usuario]
     except FileNotFoundError:
         clientes_lista = []
     try:
@@ -492,8 +488,7 @@ def actualizar_presupuesto():
     datos = request.json
     usuario = session["usuario"]
     try:
-        with open("clientes.json", "r", encoding="utf-8") as f:
-            lista = json.load(f)
+        lista = cargar_clientes_db()
     except FileNotFoundError:
         return jsonify({"ok": False}), 404
     for c in lista:
@@ -502,8 +497,7 @@ def actualizar_presupuesto():
                 c["presupuesto"] = datos["presupuesto"]
             if "cerrado_en" in datos:
                 c["cerrado_en"] = datos["cerrado_en"]
-    with open("clientes.json", "w", encoding="utf-8") as f:
-        json.dump(lista, f, ensure_ascii=False, indent=2)
+    guardar_clientes_db(lista)
     return jsonify({"ok": True})
 
 
@@ -513,16 +507,14 @@ def borrar_cliente():
     datos = request.json
     usuario = session["usuario"]
     try:
-        with open("clientes.json", "r", encoding="utf-8") as f:
-            lista = json.load(f)
+        lista = cargar_clientes_db()
     except FileNotFoundError:
         return jsonify({"ok": False}), 404
     if datos.get("todo"):
         lista = [c for c in lista if c.get("usuario", "admin") != usuario]
     else:
         lista = [c for c in lista if not (c["nombre"] == datos["nombre"] and c.get("usuario", "admin") == usuario)]
-    with open("clientes.json", "w", encoding="utf-8") as f:
-        json.dump(lista, f, ensure_ascii=False, indent=2)
+    guardar_clientes_db(lista)
     return jsonify({"ok": True})
 
 

@@ -95,3 +95,39 @@ def guardar_historial_db(lista):
     conn.commit()
     cur.close()
     conn.close()
+
+def crear_tabla_clientes():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS clientes (
+            id SERIAL PRIMARY KEY,
+            datos JSONB NOT NULL
+        )
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def cargar_clientes_db():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT datos FROM clientes ORDER BY id LIMIT 1")
+    fila = cur.fetchone()
+    cur.close()
+    conn.close()
+    return fila[0] if fila else []
+
+def guardar_clientes_db(lista):
+    import json as _json
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM clientes LIMIT 1")
+    fila = cur.fetchone()
+    if fila:
+        cur.execute("UPDATE clientes SET datos = %s WHERE id = %s", (_json.dumps(lista), fila[0]))
+    else:
+        cur.execute("INSERT INTO clientes (datos) VALUES (%s)", (_json.dumps(lista),))
+    conn.commit()
+    cur.close()
+    conn.close()
