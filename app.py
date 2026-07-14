@@ -2,10 +2,12 @@ import io
 import json
 import os
 import re
+import secrets
 from datetime import datetime
 from functools import wraps
 
 import openpyxl
+import requests
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -23,6 +25,9 @@ app.secret_key = os.environ.get("SECRET_KEY") or "auditia-secret-key-cambiar-en-
 
 AUTH_FILE = "auth.json"
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
+BREVO_SENDER_EMAIL = os.environ.get("BREVO_SENDER_EMAIL", "no-reply@auditia.digital")
+BREVO_SENDER_NOMBRE = os.environ.get("BREVO_SENDER_NOMBRE", "AuditIA")
 from db import cargar_historial_db, guardar_historial_db, crear_tabla_historial
 crear_tabla_historial()
 from db import cargar_clientes_db, guardar_clientes_db, crear_tabla_clientes
@@ -41,19 +46,19 @@ def cargar_auth():
         datos = {
             "admin": {
                 "password": generate_password_hash("auditia2026", method="pbkdf2:sha256"),
-                "limite": None, "usadas": 0, "plan": "agency",
+                "limite": None, "usadas": 0, "plan": "agency", "verificado": True,
             },
             "ariel": {
                 "password": generate_password_hash("utn2026", method="pbkdf2:sha256"),
-                "limite": 10, "usadas": 0, "plan": "pro",
+                "limite": 10, "usadas": 0, "plan": "pro", "verificado": True,
             },
             "profe2": {
                 "password": generate_password_hash("utn2026", method="pbkdf2:sha256"),
-                "limite": 10, "usadas": 0, "plan": "pro",
+                "limite": 10, "usadas": 0, "plan": "pro", "verificado": True,
             },
             "visitante": {
                 "password": generate_password_hash("123", method="pbkdf2:sha256"),
-                "limite": 15, "usadas": 0, "plan": "free",
+                "limite": 15, "usadas": 0, "plan": "free", "verificado": True,
             },
         }
         guardar_auth_db(datos)
@@ -96,6 +101,39 @@ def plan_permite(registro_usuario, funcion):
     return funcion in PLANES[plan]["funciones"]
 
 
+def enviar_email_verificacion(email, token):
+    """Envía el email de verificación de cuenta usando la API transaccional de Brevo."""
+    if not BREVO_API_KEY:
+        return
+    link = f"https://www.auditia.digital/verificar/{token}"
+    try:
+        response = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers={
+                "api-key": BREVO_API_KEY,
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            json={
+                "sender": {"name": BREVO_SENDER_NOMBRE, "email": BREVO_SENDER_EMAIL},
+                "to": [{"email": email}],
+                "subject": "Verificá tu cuenta de AuditIA",
+                "htmlContent": (
+                    "<p>Hola,</p>"
+                    "<p>Gracias por registrarte en AuditIA. Para activar tu cuenta, hacé clic en el siguiente enlace:</p>"
+                    f'<p><a href="{link}">Verificar mi cuenta</a></p>'
+                    "<p>Si el enlace no funciona, copiá y pegá esta dirección en tu navegador:</p>"
+                    f"<p>{link}</p>"
+                    "<p>Si no creaste esta cuenta, podés ignorar este email.</p>"
+                ),
+            },
+            timeout=10,
+        )
+        print(f"[Brevo] POST /smtp/email para {email} -> status_code={response.status_code}, response={response.text}")
+    except requests.RequestException as e:
+        print(f"[Brevo] Error de conexión al enviar email de verificación a {email}: {e}")
+
+
 def login_required(f):
     @wraps(f)
     def decorada(*args, **kwargs):
@@ -114,15 +152,20 @@ def login():
         password = request.form.get("password", "")
         registro = auth.get(usuario)
         if registro and check_password_hash(registro.get("password", ""), password):
-            session["usuario"] = usuario
-            return redirect(url_for("index"))
-        error = "Usuario o contraseña incorrectos"
+            if not registro.get("verificado", False):
+                error = "Todavía no verificaste tu email. Revisá tu bandeja de entrada (y spam) y hacé clic en el enlace de verificación antes de iniciar sesión."
+            else:
+                session["usuario"] = usuario
+                return redirect(url_for("index"))
+        else:
+            error = "Usuario o contraseña incorrectos"
     return render_template("login.html", error=error)
 
 
 @app.route("/registro", methods=["GET", "POST"])
 def registro():
     error = None
+    mensaje = None
     if request.method == "POST":
         auth = cargar_auth()
         email = request.form.get("email", "").strip()
@@ -134,15 +177,30 @@ def registro():
         elif len(password) < 6:
             error = "La contraseña debe tener al menos 6 caracteres."
         else:
+            token = secrets.token_urlsafe(32)
             auth[email] = {
                 "password": generate_password_hash(password, method="pbkdf2:sha256"),
                 "limite": 5,
-                "usadas": 0
+                "usadas": 0,
+                "verificado": False,
+                "token_verificacion": token,
             }
             guardar_auth(auth)
-            session["usuario"] = email
-            return redirect(url_for("index"))
-    return render_template("registro.html", error=error)
+            enviar_email_verificacion(email, token)
+            mensaje = f"¡Listo! Te enviamos un email a {email} para verificar tu cuenta. Revisá tu bandeja de entrada (y spam) y hacé clic en el enlace antes de iniciar sesión."
+    return render_template("registro.html", error=error, mensaje=mensaje)
+
+
+@app.route("/verificar/<token>")
+def verificar(token):
+    auth = cargar_auth()
+    for usuario, registro_usuario in auth.items():
+        if registro_usuario.get("token_verificacion") == token:
+            registro_usuario["verificado"] = True
+            registro_usuario["token_verificacion"] = None
+            guardar_auth(auth)
+            return render_template("verificado.html", exito=True)
+    return render_template("verificado.html", exito=False)
 
 
 @app.route("/logout")

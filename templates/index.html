@@ -461,8 +461,8 @@
         }
 
         .buscar.boton-oportunidad-propuesta {
-            font-size: 13px;
-            padding: 8px 14px;
+            font-size: 12px;
+            padding: 6px 12px;
             background: #44403C;
             color: #fff;
             border: none;
@@ -775,8 +775,8 @@
             }
 
             .buscar.boton-oportunidad-propuesta {
-                font-size: 12px;
-                padding: 6px 10px;
+                font-size: 11px;
+                padding: 5px 10px;
             }
         }
 
@@ -1361,16 +1361,35 @@
                 ? `<a href="#" onclick="event.preventDefault(); enviarPropuestaPorWhatsapp(${idx});" class="boton-contacto boton-whatsapp" style="margin-top:10px;"><i data-lucide="message-circle" style="width:14px; height:14px;"></i> Enviar por WhatsApp</a>`
                 : "";
             return `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="font-size:11px; color:#78716C; text-transform:uppercase; letter-spacing:.5px; font-weight:600;">Propuesta generada</span>
-                    <div style="display:flex; gap:8px;">
-                        <button class="buscar" style="font-size:12px; padding:5px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="copiarPropuesta(${idx})"><i data-lucide="copy" style="width:14px; height:14px; vertical-align:-2px;"></i> Copiar</button>
-                        <button class="buscar" style="font-size:12px; padding:5px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="generarPropuesta(${idx}, true)"><i data-lucide="refresh-cw" style="width:14px; height:14px; vertical-align:-2px;"></i> Regenerar</button>
+                <div style="padding-right:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px;">
+                        <span style="font-size:11px; color:#78716C; text-transform:uppercase; letter-spacing:.5px; font-weight:600;">Propuesta generada</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button id="boton-copiar-${idx}" class="buscar" style="font-size:12px; padding:5px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="copiarPropuesta(${idx})"><i data-lucide="copy" style="width:14px; height:14px; vertical-align:-2px;"></i> Copiar</button>
+                            <button class="buscar" style="font-size:12px; padding:5px 10px; background:#fff; color:#78716C; border:1px solid #E7E5E4;" onclick="generarPropuesta(${idx}, true)"><i data-lucide="refresh-cw" style="width:14px; height:14px; vertical-align:-2px;"></i> Regenerar</button>
+                            <button type="button" title="Cerrar" onclick="cerrarPropuesta(${idx})" style="background:none; border:none; cursor:pointer; color:#78716C; font-size:18px; line-height:1; padding:2px 4px;">×</button>
+                        </div>
                     </div>
+                    <textarea id="texto-propuesta-${idx}" style="width:100%; min-height:100px; padding:10px; background:#FAFAF9; border:1px solid #E7E5E4; border-radius:8px; font-family:inherit; font-size:13px; color:#1C1917; resize:vertical;">${escapeHtml(texto)}</textarea>
+                    ${botonWhatsapp}
                 </div>
-                <textarea id="texto-propuesta-${idx}" style="width:100%; min-height:100px; padding:10px; background:#FAFAF9; border:1px solid #E7E5E4; border-radius:8px; font-family:inherit; font-size:13px; color:#1C1917; resize:vertical;">${escapeHtml(texto)}</textarea>
-                ${botonWhatsapp}
             `;
+        }
+
+        function htmlBotonesPropuesta(idx) {
+            return `
+                <button class="buscar boton-oportunidad-propuesta" onclick="generarPropuesta(${idx})"><i data-lucide="sparkles" style="width:14px; height:14px; vertical-align:-2px;"></i> Generar propuesta con IA</button>
+                ${planPermite("propuesta_visual")
+                    ? `<button class="buscar boton-oportunidad-propuesta" onclick="generarMockup(${idx})"><i data-lucide="image" style="width:14px; height:14px; vertical-align:-2px;"></i> Generar propuesta visual</button>`
+                    : `<button class="buscar boton-oportunidad-propuesta" style="opacity:0.6;" onclick="alert('La propuesta visual está disponible en los planes Pro y Agency.')"><i data-lucide="lock" style="width:14px; height:14px; vertical-align:-2px;"></i> Propuesta visual (Pro)</button>`}
+                <span style="display:inline-flex; align-items:center; gap:8px; border:0.5px dashed #D6D3D1; background:#FAFAF9; color:#78716C; font-size:13px; font-weight:500; border-radius:8px; padding:8px 14px; cursor:default;"><i data-lucide="file-text" style="width:16px; height:16px; vertical-align:-3px;"></i> Propuesta profesional en PDF <span style="font-size:10px; font-weight:600; background:#E8F2EE; color:#0B6446; padding:2px 7px; border-radius:5px;">Próximamente</span></span>
+            `;
+        }
+
+        function cerrarPropuesta(idx) {
+            const contenedor = document.getElementById(`propuesta-ia-${idx}`);
+            contenedor.innerHTML = htmlBotonesPropuesta(idx);
+            lucide.createIcons();
         }
 
         async function generarPropuesta(idx, forzar = false) {
@@ -1421,8 +1440,38 @@
         }
 
         function copiarPropuesta(idx) {
-            const texto = document.getElementById(`texto-propuesta-${idx}`).value;
-            navigator.clipboard.writeText(texto);
+            const textarea = document.getElementById(`texto-propuesta-${idx}`);
+            const texto = textarea.value;
+            const boton = document.getElementById(`boton-copiar-${idx}`);
+
+            function mostrarCopiado() {
+                if (!boton) return;
+                const original = boton.innerHTML;
+                boton.innerHTML = '<i data-lucide="check" style="width:14px; height:14px; vertical-align:-2px;"></i> Copiado';
+                lucide.createIcons();
+                setTimeout(() => {
+                    boton.innerHTML = original;
+                    lucide.createIcons();
+                }, 1500);
+            }
+
+            function copiarConFallback() {
+                textarea.select();
+                textarea.setSelectionRange(0, 99999);
+                try {
+                    document.execCommand("copy");
+                    mostrarCopiado();
+                } catch (e) {
+                    // No se pudo copiar automáticamente
+                }
+                window.getSelection().removeAllRanges();
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(texto).then(mostrarCopiado).catch(copiarConFallback);
+            } else {
+                copiarConFallback();
+            }
         }
 
         function enviarPropuestaPorWhatsapp(idx) {
@@ -1487,12 +1536,8 @@
                     </div>
                     <div class="card-col-propuesta">
                         <h4>Propuesta con IA</h4>
-                        <div id="propuesta-ia-${globalIdx}" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                            <button class="buscar boton-oportunidad-propuesta" onclick="generarPropuesta(${globalIdx})"><i data-lucide="sparkles" style="width:16px; height:16px; vertical-align:-3px;"></i> Generar propuesta con IA</button>
-                            ${planPermite("propuesta_visual")
-                                ? `<button class="buscar boton-oportunidad-propuesta" onclick="generarMockup(${globalIdx})"><i data-lucide="image" style="width:16px; height:16px; vertical-align:-3px;"></i> Generar propuesta visual</button>`
-                                : `<button class="buscar boton-oportunidad-propuesta" style="opacity:0.6;" onclick="alert('La propuesta visual está disponible en los planes Pro y Agency.')"><i data-lucide="lock" style="width:16px; height:16px; vertical-align:-3px;"></i> Propuesta visual (Pro)</button>`}
-                            <span style="display:inline-flex; align-items:center; gap:8px; border:0.5px dashed #D6D3D1; background:#FAFAF9; color:#78716C; font-size:13px; font-weight:500; border-radius:8px; padding:8px 14px; cursor:default;"><i data-lucide="file-text" style="width:16px; height:16px; vertical-align:-3px;"></i> Propuesta profesional en PDF <span style="font-size:10px; font-weight:600; background:#E8F2EE; color:#0B6446; padding:2px 7px; border-radius:5px;">Próximamente</span></span>
+                        <div id="propuesta-ia-${globalIdx}" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding-right:8px;">
+                            ${htmlBotonesPropuesta(globalIdx)}
                         </div>
                     </div>
                 </div>

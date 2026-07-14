@@ -27,6 +27,14 @@ def crear_tabla_usuarios():
             plan TEXT DEFAULT 'free'
         )
     """)
+    cur.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS verificado BOOLEAN DEFAULT FALSE")
+    cur.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS token_verificacion TEXT")
+    # Los usuarios históricos (admin y cuentas de la cátedra) quedan verificados
+    # automáticamente para no romper su acceso al agregar la verificación de email.
+    cur.execute("""
+        UPDATE usuarios SET verificado = TRUE
+        WHERE username IN ('admin', 'ariel', 'profe2', 'visitante') AND verificado IS NOT TRUE
+    """)
     conn.commit()
     cur.close()
     conn.close()
@@ -34,13 +42,20 @@ def crear_tabla_usuarios():
 def cargar_auth_db():
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT username, password, limite, usadas, plan FROM usuarios")
+    cur.execute("SELECT username, password, limite, usadas, plan, verificado, token_verificacion FROM usuarios")
     filas = cur.fetchall()
     cur.close()
     conn.close()
     datos = {}
-    for username, password, limite, usadas, plan in filas:
-        datos[username] = {"password": password, "limite": limite, "usadas": usadas, "plan": plan}
+    for username, password, limite, usadas, plan, verificado, token_verificacion in filas:
+        datos[username] = {
+            "password": password,
+            "limite": limite,
+            "usadas": usadas,
+            "plan": plan,
+            "verificado": bool(verificado),
+            "token_verificacion": token_verificacion,
+        }
     return datos
 
 def guardar_auth_db(datos):
@@ -48,14 +63,19 @@ def guardar_auth_db(datos):
     cur = conn.cursor()
     for username, info in datos.items():
         cur.execute("""
-            INSERT INTO usuarios (username, password, limite, usadas, plan)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO usuarios (username, password, limite, usadas, plan, verificado, token_verificacion)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (username) DO UPDATE SET
                 password = EXCLUDED.password,
                 limite = EXCLUDED.limite,
                 usadas = EXCLUDED.usadas,
-                plan = EXCLUDED.plan
-        """, (username, info["password"], info.get("limite"), info.get("usadas", 0), info.get("plan", "free")))
+                plan = EXCLUDED.plan,
+                verificado = EXCLUDED.verificado,
+                token_verificacion = EXCLUDED.token_verificacion
+        """, (
+            username, info["password"], info.get("limite"), info.get("usadas", 0), info.get("plan", "free"),
+            info.get("verificado", False), info.get("token_verificacion"),
+        ))
     conn.commit()
     cur.close()
     conn.close()
