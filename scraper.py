@@ -13,7 +13,7 @@ def buscar_negocios_google(tipo=None, ciudad=None, zona=None, limite=60, consult
     headers = {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": API_KEY,
-        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,nextPageToken"
+        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.primaryType,places.primaryTypeDisplayName,places.types,nextPageToken"
     }
     if consulta_directa:
         print(f"Buscando negocio por nombre: {consulta_directa}")
@@ -50,6 +50,9 @@ def buscar_negocios_google(tipo=None, ciudad=None, zona=None, limite=60, consult
                 "rating": rating,
                 "cantidad_resenas": cantidad_resenas,
                 "tiene_sitio_web": tiene_web,
+                "primary_type": lugar.get("primaryType", ""),
+                "categoria_google": lugar.get("primaryTypeDisplayName", {}).get("text", "") if isinstance(lugar.get("primaryTypeDisplayName"), dict) else "",
+                "tipos": lugar.get("types", []),
             })
         token = respuesta.get("nextPageToken")
         if not token:

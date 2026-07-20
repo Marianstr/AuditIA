@@ -262,7 +262,10 @@ def buscar():
             "cantidad_resenas": negocio["cantidad_resenas"],
             "score": score,
             "clasificacion": clasificacion,
-            "servicios": servicios
+            "servicios": servicios,
+            "primary_type": negocio.get("primary_type", ""),
+            "categoria_google": negocio.get("categoria_google", ""),
+            "tipos": negocio.get("tipos", []),
         })
     resultados.sort(key=lambda x: x["score"], reverse=True)
     registro = {

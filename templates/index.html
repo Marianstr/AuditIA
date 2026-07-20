@@ -1115,8 +1115,12 @@
                 <div id="detalle-dificil-${indiceGlobal}" style="display:none; margin-top:10px;">
                     <p style="font-size:12px; color:#78716C; margin-bottom:10px;">${texto}</p>
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-                        <button class="buscar" disabled style="background:#F5F5F4; color:#A8A29E; cursor:default; font-size:13px; padding:8px 14px; border:1px solid #E7E5E4;">Buscar contacto</button>
-                        <span style="font-size:10px; background:#E7E5E4; color:#78716C; font-weight:600; padding:3px 6px; border-radius:4px;">PRÓXIMAMENTE</span>
+                        <a href="https://www.google.com/search?q=${encodeURIComponent(lead.nombre + ' instagram')}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:6px; background:#FDF6EB; color:#8A6428; font-size:13px; font-weight:500; padding:8px 14px; border:1px solid #F0DDB0; border-radius:10px; text-decoration:none;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A6428" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>Buscar Instagram</a>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <label for="instagram-input-${indiceGlobal}" style="display:block; font-size:12px; color:#8A6428; margin-bottom:4px;">Pegá el @usuario que encontraste</label>
+                        <input type="text" id="instagram-input-${indiceGlobal}" placeholder="Pegá el @usuario, ej: @solboutique" style="background:#FFFDF9; border:1px solid #F0DDB0; border-radius:8px; font-size:13px; padding:8px 10px; width:240px;">
+                        <button type="button" onclick="abrirDMInstagram(${indiceGlobal})" style="display:flex; justify-content:center; align-items:center; gap:6px; background:#FDF6EB; color:#8A6428; font-size:13px; font-weight:500; padding:8px 14px; border:1px solid #F0DDB0; border-radius:10px; margin-top:8px;"><i data-lucide="send" style="width:16px; height:16px;"></i>Abrir DM</button>
                     </div>
                     <a href="#" onclick="event.preventDefault(); toggleAvisoDificil(${indiceGlobal});" style="font-size:12px; color:#78716C; text-decoration:underline;">Ocultar</a>
                 </div>
@@ -1129,6 +1133,24 @@
             const expandido = detalle.style.display === "block";
             detalle.style.display = expandido ? "none" : "block";
             link.style.display = expandido ? "block" : "none";
+        }
+
+        function abrirDMInstagram(indiceGlobal) {
+            const input = document.getElementById(`instagram-input-${indiceGlobal}`);
+            let usuario = (input.value || "").trim();
+            if (usuario.includes("instagram.com")) {
+                usuario = usuario.split("instagram.com/")[1] || "";
+            }
+            usuario = usuario.trim();
+            if (usuario.startsWith("@")) {
+                usuario = usuario.slice(1);
+            }
+            usuario = usuario.split("/")[0].split("?")[0].trim();
+            if (!usuario) {
+                alert("Pegá primero el @usuario del negocio.");
+                return;
+            }
+            window.open(`https://ig.me/m/${usuario}`, "_blank");
         }
 
         function tituloAuditoria(a) {
@@ -1435,7 +1457,7 @@
         function generarMockup(idx) {
             const lead = todosLosDatos[idx];
             const nombre = encodeURIComponent(lead.nombre || "Tu Negocio");
-            const categoria = encodeURIComponent(categoriaBusqueda || "Tu rubro");
+            const categoria = encodeURIComponent(lead.primary_type || lead.categoria_google || categoriaBusqueda || "Tu rubro");
             window.open("/mockup?nombre=" + nombre + "&categoria=" + categoria, "_blank");
         }
 
