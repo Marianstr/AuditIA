@@ -10,23 +10,12 @@
 <style>
 
 :root{
-  --color-acento:#3f6b78;
-  --color-acento-suave:#cfdde2;
-  --color-acento-oscuro:#2b4c56;
   --color-acento-2:#7a8a5e;
   --color-acento-2-suave:#dfe4d1;
-  --color-fondo:#f5ead8;
-  --color-superficie:#fffaf1;
-  --color-texto:#201e1d;
-  --color-texto-suave:#6f665d;
   --color-oscuro:#241f1b;
   --color-oscuro-suave:#b9ada0;
   --color-linea:#e3d4bb;
   --color-foto:#e6ddcf;
-  --fuente-titulo:"Caprasimo",Georgia,serif;
-  --fuente-cuerpo:"Figtree","Helvetica Neue",sans-serif;
-  --radio:16px;
-  --radio-lg:32px;
   --radio-pill:999px;
   --sombra-sm:0 2px 6px rgba(32,30,29,.06);
   --sombra-md:0 10px 24px rgba(32,30,29,.09);
@@ -67,7 +56,6 @@ img,svg{display:block}
 #nav{position:sticky;top:0;z-index:20;background:var(--color-fondo);border-bottom:1px solid var(--color-linea)}
 .nav-in{display:flex;align-items:center;gap:32px;height:78px}
 .brand{font-family:var(--fuente-titulo);font-size:30px;color:var(--color-texto);letter-spacing:-.02em}
-.brand span{color:var(--color-acento)}
 .nav-links{display:flex;gap:30px;margin-left:auto;list-style:none;padding:0;margin-block:0}
 .nav-links a{font-weight:600;font-size:16px;color:var(--color-texto);padding:6px 0;border-bottom:2px solid transparent}
 .nav-links a:hover{color:var(--color-acento-oscuro);border-bottom-color:var(--color-acento)}
@@ -224,16 +212,17 @@ img,svg{display:block}
   --color-superficie:{{ estilo.superficie }};
   --color-texto:{{ estilo.texto }};
   --color-texto-suave:{{ estilo.texto_suave }};
-  --fuente-titulo:{{ estilo.fuente_titulo }};
-  --fuente-cuerpo:{{ estilo.fuente_cuerpo }};
+  --fuente-titulo:{{ estilo.fuente_titulo|safe }};
+  --fuente-cuerpo:{{ estilo.fuente_cuerpo|safe }};
   --radio:{{ estilo.radio }};
+  --radio-lg:calc({{ estilo.radio }} * 2);
 }</style>
 </head>
 <body>
 
 <section id="nav">
   <div class="wrap nav-in">
-    <div class="brand">{{ negocio.nombre[:-1] }}<span>{{ negocio.nombre[-1] }}</span></div>
+    <div class="brand">{{ negocio.nombre }}</div>
     <ul class="nav-links">
       {% for l in c.nav %}<li><a href="{{ l.ancla }}">{{ l.texto }}</a></li>{% endfor %}
     </ul>
@@ -390,7 +379,7 @@ img,svg{display:block}
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-brand">
-        <div class="brand">{{ negocio.nombre[:-1] }}<span>{{ negocio.nombre[-1] }}</span></div>
+        <div class="brand">{{ negocio.nombre }}</div>
         <p>{{ c.footer_texto }}</p>
       </div>
       {% for col in c.footer_columnas %}<div class="foot-col">

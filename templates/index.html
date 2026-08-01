@@ -1404,6 +1404,9 @@
                 ${planPermite("propuesta_visual")
                     ? `<button class="buscar boton-oportunidad-propuesta" onclick="generarMockup(${idx})"><i data-lucide="image" style="width:14px; height:14px; vertical-align:-2px;"></i> Generar propuesta visual</button>`
                     : `<button class="buscar boton-oportunidad-propuesta" style="opacity:0.6;" onclick="alert('La propuesta visual está disponible en los planes Pro y Agency.')"><i data-lucide="lock" style="width:14px; height:14px; vertical-align:-2px;"></i> Propuesta visual (Pro)</button>`}
+                ${planPermite("propuesta_visual")
+                    ? `<button class="buscar boton-oportunidad-propuesta" onclick="generarLanding(${idx})"><i data-lucide="layout-template" style="width:14px; height:14px; vertical-align:-2px;"></i> Generar landing con IA</button>`
+                    : `<button class="buscar boton-oportunidad-propuesta" style="opacity:0.6;" onclick="alert('La propuesta visual está disponible en los planes Pro y Agency.')"><i data-lucide="lock" style="width:14px; height:14px; vertical-align:-2px;"></i> Landing con IA (Pro)</button>`}
                 <span style="display:inline-flex; align-items:center; gap:8px; border:0.5px dashed #D6D3D1; background:#FAFAF9; color:#78716C; font-size:13px; font-weight:500; border-radius:8px; padding:8px 14px; cursor:default;"><i data-lucide="file-text" style="width:16px; height:16px; vertical-align:-3px;"></i> Propuesta profesional en PDF <span style="font-size:10px; font-weight:600; background:#E8F2EE; color:#0B6446; padding:2px 7px; border-radius:5px;">Próximamente</span></span>
             `;
         }
@@ -1459,6 +1462,23 @@
             const nombre = encodeURIComponent(lead.nombre || "Tu Negocio");
             const categoria = encodeURIComponent(lead.primary_type || lead.categoria_google || categoriaBusqueda || "Tu rubro");
             window.open("/mockup?nombre=" + nombre + "&categoria=" + categoria, "_blank");
+        }
+
+        function generarLanding(idx) {
+            const lead = todosLosDatos[idx];
+            const parametros = new URLSearchParams({
+                nombre: lead.nombre ?? "",
+                direccion: lead.direccion ?? "",
+                telefono: lead.telefono ?? "",
+                web: lead.web ?? "",
+                rating: lead.rating ?? "",
+                cantidad_resenas: lead.cantidad_resenas ?? "",
+                score: lead.score ?? "",
+                clasificacion: lead.clasificacion ?? "",
+                primary_type: lead.primary_type ?? "",
+                categoria_google: lead.categoria_google ?? ""
+            });
+            window.open("/mockup-landing?" + parametros.toString(), "_blank");
         }
 
         function copiarPropuesta(idx) {

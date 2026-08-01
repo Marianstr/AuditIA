@@ -106,7 +106,8 @@ Reglas obligatorias:
 - El "preset" tiene que ser uno de los ids de la lista de arriba, el que mejor encaje con el rubro del negocio.
 - Los textos tienen que ser concretos y creíbles para este negocio en particular, no genéricos de relleno.
 - Los campos "ancla" tienen que ser anclas internas de la propia página (empiezan con "#"), por ejemplo #servicios, #metodologia, #contacto.
-- El campo "etiqueta" de cada servicio va en null salvo que tengas una razón real para destacarlo (no inventes ofertas)."""
+- El campo "etiqueta" de cada servicio va en null salvo que tengas una razón real para destacarlo (no inventes ofertas).
+- "nav_boton" tiene que ser una llamada a la acción, tipo "Pedir cita", "Llamar ahora" o "Pedir presupuesto". Nunca puede repetir el texto de ninguno de los enlaces de "nav"."""
 
 
 def _limitar_rubro(texto):
@@ -158,7 +159,7 @@ def _contenido_de_reserva(lead):
         "hero_sub": f"Así podría verse la presencia online de {nombre}.",
         "cta_1": "Ver servicios",
         "cta_2": "Cómo trabajamos",
-        "nav_boton": "Contactar",
+        "nav_boton": "Pedir cita",
         "cta_servicio": "Más información",
         "hero_tags": ["Atención cercana", "Presencia digital", "Fácil de contactar"],
         "nav": [

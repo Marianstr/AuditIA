@@ -17,7 +17,8 @@ from scoring.lead_scorer import calcular_score, clasificar_lead, recomendar_serv
 from scoring.analizador_web import analizar_web
 from generador_propuesta import generar_propuesta
 from generador_landing import generar_contenido_landing
-from presets import preset_por_id, google_fonts_url
+from presets import preset_por_id, google_fonts_url, listar_presets
+from tipografias import pareja_por_id, url_fuentes_pareja, url_fuentes_libres, css_familia, listar_parejas
 from buscador_fotos import buscar_foto_categoria
 
 load_dotenv()
@@ -375,8 +376,29 @@ def mockup_landing():
     }
 
     c = generar_contenido_landing(lead)
-    estilo = preset_por_id(c.get("preset"))
-    fuentes_url = google_fonts_url(c.get("preset"))
+
+    preset_solicitado = request.args.get("preset")
+    ids_validos = {p["id"] for p in listar_presets()}
+    id_preset = preset_solicitado if preset_solicitado in ids_validos else c.get("preset")
+
+    estilo = dict(preset_por_id(id_preset))
+    fuentes_url = google_fonts_url(id_preset)
+
+    tipografia_solicitada = request.args.get("tipografia")
+    ids_tipografia_validas = {p["id"] for p in listar_parejas()}
+    if tipografia_solicitada in ids_tipografia_validas:
+        pareja = pareja_por_id(tipografia_solicitada)
+        estilo["fuente_titulo"] = pareja["titulo"]
+        estilo["fuente_cuerpo"] = pareja["cuerpo"]
+        fuentes_url = url_fuentes_pareja(tipografia_solicitada)
+
+    fuente_titulo_libre = (request.args.get("fuente_titulo") or "").strip()
+    fuente_cuerpo_libre = (request.args.get("fuente_cuerpo") or "").strip()
+    if fuente_titulo_libre:
+        estilo["fuente_titulo"] = css_familia(fuente_titulo_libre)
+        if fuente_cuerpo_libre:
+            estilo["fuente_cuerpo"] = css_familia(fuente_cuerpo_libre)
+        fuentes_url = url_fuentes_libres(fuente_titulo_libre, fuente_cuerpo_libre or None)
 
     negocio = {
         "nombre": lead["nombre"],
