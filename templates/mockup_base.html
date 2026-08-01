@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ negocio.nombre }} — {{ negocio.rubro }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="{{ fuentes_url }}" rel="stylesheet">
+<style>
+
+:root{
+  --color-acento:#3f6b78;
+  --color-acento-suave:#cfdde2;
+  --color-acento-oscuro:#2b4c56;
+  --color-acento-2:#7a8a5e;
+  --color-acento-2-suave:#dfe4d1;
+  --color-fondo:#f5ead8;
+  --color-superficie:#fffaf1;
+  --color-texto:#201e1d;
+  --color-texto-suave:#6f665d;
+  --color-oscuro:#241f1b;
+  --color-oscuro-suave:#b9ada0;
+  --color-linea:#e3d4bb;
+  --color-foto:#e6ddcf;
+  --fuente-titulo:"Caprasimo",Georgia,serif;
+  --fuente-cuerpo:"Figtree","Helvetica Neue",sans-serif;
+  --radio:16px;
+  --radio-lg:32px;
+  --radio-pill:999px;
+  --sombra-sm:0 2px 6px rgba(32,30,29,.06);
+  --sombra-md:0 10px 24px rgba(32,30,29,.09);
+  --sombra-lg:0 22px 50px rgba(32,30,29,.13);
+  --ancho:1180px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--color-fondo);color:var(--color-texto);font-family:var(--fuente-cuerpo);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;text-wrap:pretty}
+h1,h2,h3,h4{font-family:var(--fuente-titulo);font-weight:400;line-height:1.02;margin:0;letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--color-acento-oscuro);text-decoration:none}
+a:hover{color:var(--color-acento)}
+::selection{background:var(--color-acento-suave);color:var(--color-texto)}
+:focus-visible{outline:2px solid var(--color-acento);outline-offset:2px;border-radius:var(--radio)}
+img,svg{display:block}
+.wrap{width:100%;max-width:var(--ancho);margin:0 auto;padding:0 28px}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--fuente-cuerpo);font-size:16px;font-weight:700;padding:15px 30px;border-radius:var(--radio-pill);border:2px solid transparent;cursor:pointer;transition:background .16s ease,color .16s ease,border-color .16s ease,transform .16s ease;text-decoration:none}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--color-acento);color:var(--color-superficie);border-color:var(--color-acento)}
+.btn-primary:hover{background:var(--color-acento-oscuro);border-color:var(--color-acento-oscuro);color:var(--color-superficie)}
+.btn-secondary{background:transparent;color:var(--color-texto);border-color:var(--color-texto)}
+.btn-secondary:hover{background:var(--color-texto);color:var(--color-fondo)}
+.btn-light{background:var(--color-superficie);color:var(--color-acento-oscuro);border-color:var(--color-superficie)}
+.btn-light:hover{background:var(--color-acento-suave);border-color:var(--color-acento-suave);color:var(--color-acento-oscuro)}
+.btn-sm{padding:11px 22px;font-size:15px}
+.tag{display:inline-flex;align-items:center;font-family:var(--fuente-cuerpo);font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;border-radius:var(--radio-pill)}
+.tag-acento{background:var(--color-acento);color:var(--color-superficie)}
+.tag-sage{background:var(--color-acento-2);color:var(--color-superficie)}
+.tag-suave{background:var(--color-acento-2-suave);color:var(--color-texto)}
+.kicker{font-family:var(--fuente-cuerpo);font-size:13px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--color-acento-oscuro)}
+.foto{position:relative;background:var(--color-foto);border-radius:var(--radio-lg);overflow:hidden}
+.foto::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 30% 30%, rgba(32,30,29,.05), transparent 60%),
+  radial-gradient(circle at 75% 70%, rgba(32,30,29,.05), transparent 55%)}
+.foto::after{content:attr(data-foto);position:absolute;left:16px;bottom:14px;font-family:var(--fuente-cuerpo);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--color-texto-suave);opacity:.75}
+
+/* nav */
+#nav{position:sticky;top:0;z-index:20;background:var(--color-fondo);border-bottom:1px solid var(--color-linea)}
+.nav-in{display:flex;align-items:center;gap:32px;height:78px}
+.brand{font-family:var(--fuente-titulo);font-size:30px;color:var(--color-texto);letter-spacing:-.02em}
+.brand span{color:var(--color-acento)}
+.nav-links{display:flex;gap:30px;margin-left:auto;list-style:none;padding:0;margin-block:0}
+.nav-links a{font-weight:600;font-size:16px;color:var(--color-texto);padding:6px 0;border-bottom:2px solid transparent}
+.nav-links a:hover{color:var(--color-acento-oscuro);border-bottom-color:var(--color-acento)}
+
+/* hero */
+#hero{padding:84px 0 96px}
+.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:64px;align-items:stretch}
+.hero-h1{font-size:clamp(46px,6vw,86px)}
+.hero-h1 em{font-style:normal;color:var(--color-acento)}
+.hero-sub{margin-top:26px;font-size:20px;color:var(--color-texto-suave);max-width:30em}
+.hero-btns{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}
+.hero-foto{flex:1;min-height:600px;border-radius:var(--radio-lg)}
+.hero-art{position:relative;display:flex;flex-direction:column;padding:26px 26px 0}
+.blob{position:absolute;width:190px;height:190px;border-radius:var(--radio-pill);background:var(--color-acento-2-suave);right:-8px;top:-8px;z-index:-1}
+.badge{position:absolute;left:52px;bottom:44px;background:var(--color-superficie);border-radius:var(--radio-lg);padding:18px 24px;box-shadow:var(--sombra-md)}
+.badge b{display:block;font-family:var(--fuente-titulo);font-size:34px;color:var(--color-acento)}
+.badge small{font-size:14px;color:var(--color-texto-suave);font-weight:600}
+
+/* ventajas */
+#ventajas{padding:12px 0 96px}
+.ventajas-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.ventaja{background:var(--color-superficie);border-radius:var(--radio-lg);padding:30px 26px 32px}
+.ic{width:52px;height:52px;border-radius:var(--radio-pill);display:grid;place-items:center;background:var(--color-acento-suave);color:var(--color-acento-oscuro);margin-bottom:18px}
+.ic-sage{background:var(--color-acento-2-suave);color:var(--color-acento-2)}
+.ventaja h3{font-size:23px;margin-bottom:8px}
+.ventaja p{font-size:15.5px;color:var(--color-texto-suave)}
+
+/* cursos */
+#cursos{padding:0 0 100px}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;margin-bottom:40px}
+.sec-head h2{font-size:clamp(38px,4.4vw,58px);margin-top:14px}
+.sec-head p{color:var(--color-texto-suave);max-width:26em}
+.cursos-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;align-items:stretch}
+.curso{background:var(--color-superficie);border-radius:var(--radio-lg);padding:16px 16px 26px;display:flex;flex-direction:column;transition:transform .18s ease,box-shadow .18s ease}
+.curso:hover{transform:translateY(-4px);box-shadow:var(--sombra-lg)}
+.curso-foto{aspect-ratio:16/10;border-radius:var(--radio)}
+.curso-tag{position:absolute;top:14px;left:14px;z-index:1}
+.curso-body{padding:22px 12px 0;display:flex;flex-direction:column;flex:1}
+.curso h3{font-size:27px;margin-bottom:14px;min-height:2.05em}
+.curso-datos{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;min-height:34px}
+.curso-pie .precio{min-height:78px;display:flex;flex-direction:column;justify-content:center}
+.dato{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--color-texto-suave);background:var(--color-fondo);padding:7px 13px;border-radius:var(--radio-pill)}
+.curso-pie{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:auto;padding-top:18px;border-top:1px solid var(--color-linea)}
+.precio{font-family:var(--fuente-titulo);font-size:31px;color:var(--color-texto);line-height:1;min-width:0;flex:1}
+.precio small{display:block;font-family:var(--fuente-cuerpo);font-size:13px;font-weight:600;color:var(--color-texto-suave);margin-top:6px}
+.tachado{display:block;font-family:var(--fuente-cuerpo);font-size:16px;font-weight:600;color:var(--color-texto-suave);text-decoration:line-through;margin-top:6px}
+.curso-pie .btn{flex:none;white-space:nowrap}
+
+/* promo */
+#promo{background:var(--color-acento);color:var(--color-superficie);padding:74px 0}
+.promo-grid{display:flex;align-items:center;justify-content:space-between;gap:48px;flex-wrap:wrap}
+.promo h2{font-size:clamp(38px,5vw,68px);color:var(--color-superficie);max-width:12em}
+.promo p{margin-top:20px;font-size:19px;max-width:34em;color:var(--color-acento-suave)}
+.codigo{display:inline-block;font-family:var(--fuente-cuerpo);font-weight:800;letter-spacing:.14em;background:var(--color-superficie);color:var(--color-acento-oscuro);padding:5px 14px;border-radius:var(--radio-pill)}
+
+/* metodologia */
+#metodologia{padding:100px 0}
+.pasos{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:44px}
+.paso{border-top:3px solid var(--color-linea);padding-top:22px}
+.paso .num{font-family:var(--fuente-titulo);font-size:76px;line-height:.9;color:var(--color-acento);display:block;margin-bottom:14px}
+.paso:nth-child(even) .num{color:var(--color-acento-2)}
+.paso h3{font-size:24px;margin-bottom:10px}
+.paso p{font-size:15.5px;color:var(--color-texto-suave)}
+
+/* testimonio */
+#testimonio{padding:0 0 100px}
+.quote{background:var(--color-acento-2);color:var(--color-superficie);border-radius:var(--radio-lg);padding:76px clamp(32px,6vw,88px)}
+.quote blockquote{margin:0;font-family:var(--fuente-titulo);font-size:clamp(30px,3.9vw,52px);line-height:1.14;max-width:17em}
+.quote .mark{font-family:var(--fuente-titulo);font-size:84px;line-height:.6;display:block;opacity:.55}
+.quote figcaption{margin-top:38px;font-size:17px;font-weight:600}
+.quote figcaption span{display:block;font-weight:400;opacity:.8;font-size:15.5px;margin-top:4px}
+
+/* contacto */
+#contacto{padding:0 0 100px}
+.contacto-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:56px;align-items:start}
+.datos{list-style:none;padding:0;margin:36px 0 0;display:grid;gap:22px}
+.datos li{display:flex;gap:16px;align-items:flex-start}
+.datos b{display:block;font-size:15px}
+.datos span{color:var(--color-texto-suave);font-size:15.5px}
+.mapa{aspect-ratio:4/3.2;border-radius:var(--radio-lg);min-height:320px}
+
+/* footer */
+#footer{background:var(--color-oscuro);color:var(--color-superficie);padding:74px 0 30px}
+#footer a{color:var(--color-oscuro-suave)}
+#footer a:hover{color:var(--color-superficie)}
+.foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
+.foot-brand .brand{color:var(--color-superficie)}
+.foot-brand p{margin-top:16px;color:var(--color-oscuro-suave);font-size:15.5px;max-width:26em}
+.foot-col h4{font-family:var(--fuente-cuerpo);font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--color-acento);margin-bottom:18px}
+.foot-col ul{list-style:none;padding:0;margin:0;display:grid;gap:11px;font-size:15.5px}
+.news{margin-top:52px;padding-top:38px;border-top:1px solid rgba(245,234,216,.16);display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap}
+.news h3{font-size:30px;color:var(--color-superficie)}
+.news p{color:var(--color-oscuro-suave);font-size:15.5px;margin-top:8px}
+.news-form{display:flex;gap:12px;flex-wrap:wrap}
+.input{font-family:var(--fuente-cuerpo);font-size:16px;padding:15px 22px;border-radius:var(--radio-pill);border:2px solid rgba(245,234,216,.24);background:transparent;color:var(--color-superficie);min-width:260px}
+.input::placeholder{color:var(--color-oscuro-suave)}
+.input:focus{outline:2px solid var(--color-acento);outline-offset:2px;border-color:transparent}
+.foot-bottom{margin-top:38px;padding-top:26px;border-top:1px solid rgba(245,234,216,.16);display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;color:var(--color-oscuro-suave);font-size:14.5px}
+.social{display:flex;gap:12px}
+.social a{width:44px;height:44px;border-radius:var(--radio-pill);display:grid;place-items:center;border:2px solid rgba(245,234,216,.24);color:var(--color-superficie)}
+.social a:hover{background:var(--color-acento);border-color:var(--color-acento)}
+
+@media (max-width:1000px){
+  .hero-grid,.contacto-grid{grid-template-columns:1fr;gap:44px}
+  .ventajas-grid,.pasos{grid-template-columns:repeat(2,1fr)}
+  .cursos-grid{grid-template-columns:1fr 1fr}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .hero-grid>*{min-width:0}
+  .hero-foto{aspect-ratio:auto;min-height:340px}
+  .nav-links{display:none}
+  #nav .btn{margin-left:auto}
+}
+@media (max-width:660px){
+  body{font-size:16px}
+  .wrap{padding:0 20px}
+  .ventajas-grid,.pasos,.cursos-grid,.foot-grid{grid-template-columns:1fr}
+  #hero{padding:56px 0 64px}
+  .badge{left:12px}
+  .sec-head{flex-direction:column;align-items:flex-start;gap:14px}
+  .quote{padding:48px 26px}
+  .hero-btns .btn,#promo .btn{width:100%;justify-content:center}
+  .blob{right:-10px;width:130px;height:130px}
+  .nav-in{gap:14px}
+  .brand{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  #nav .btn{flex-shrink:0}
+}
+
+@media print{
+  @page{size:A4 portrait;margin:14mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:var(--color-fondo);font-size:11pt}
+  section{page-break-inside:avoid;break-inside:avoid}
+  #nav{position:static}
+  .wrap{max-width:none;padding:0}
+  #hero,#ventajas,#cursos,#metodologia,#testimonio,#contacto{padding:14pt 0}
+  #promo,#footer{padding:20pt 0}
+  .hero-h1{font-size:34pt}
+  .sec-head h2,.promo h2{font-size:26pt}
+  .quote blockquote{font-size:20pt}
+  .paso .num{font-size:40pt}
+  .curso:hover{transform:none;box-shadow:none}
+  .hero-foto,.curso-foto,.mapa{min-height:0;aspect-ratio:16/7}
+  .btn,.input{box-shadow:none}
+  .news-form,.social{display:none}
+}
+
+</style>
+<style>:root{
+  --color-acento:{{ estilo.acento }};
+  --color-acento-suave:{{ estilo.acento_suave }};
+  --color-acento-oscuro:{{ estilo.acento_oscuro }};
+  --color-fondo:{{ estilo.fondo }};
+  --color-superficie:{{ estilo.superficie }};
+  --color-texto:{{ estilo.texto }};
+  --color-texto-suave:{{ estilo.texto_suave }};
+  --fuente-titulo:{{ estilo.fuente_titulo }};
+  --fuente-cuerpo:{{ estilo.fuente_cuerpo }};
+  --radio:{{ estilo.radio }};
+}</style>
+</head>
+<body>
+
+<section id="nav">
+  <div class="wrap nav-in">
+    <div class="brand">{{ negocio.nombre[:-1] }}<span>{{ negocio.nombre[-1] }}</span></div>
+    <ul class="nav-links">
+      {% for l in c.nav %}<li><a href="{{ l.ancla }}">{{ l.texto }}</a></li>{% endfor %}
+    </ul>
+    <a class="btn btn-primary btn-sm" href="#servicios">{{ c.nav_boton }}</a>
+  </div>
+</section>
+
+<section id="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="kicker">{{ negocio.rubro }}</span>
+      <h1 class="hero-h1">{% for l in c.hero_titulo %}{% if loop.last %}<em>{{ l }}</em>{% else %}{{ l }}<br>{% endif %}{% endfor %}</h1>
+      <p class="hero-sub">{{ c.hero_sub }}</p>
+      <div class="hero-btns">
+        <a class="btn btn-primary" href="#servicios">{{ c.cta_1 }}</a>
+        <a class="btn btn-secondary" href="#metodologia">{{ c.cta_2 }}</a>
+      </div>
+      <div class="hero-meta">
+        {% for t in c.hero_tags %}<span class="tag tag-suave">{{ t }}</span>{% endfor %}
+      </div>
+    </div>
+    <div class="hero-art">
+      <div class="blob"></div>
+      <div class="foto hero-foto" data-foto="hero"></div>
+      {% if c.destacado %}<div class="badge">
+        <b>{{ c.destacado.valor }}</b>
+        <small>{{ c.destacado.texto }}</small>
+      </div>{% endif %}
+    </div>
+  </div>
+</section>
+
+<section id="ventajas">
+  <div class="wrap ventajas-grid">
+    <div class="ventaja">
+      <div class="ic"><svg width="26" height="26" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m10 8 6 4-6 4Z"></path><rect x="2" y="4" width="20" height="16" rx="4"></rect></svg></div>
+      <h3>{{ c.ventajas[0].titulo }}</h3>
+      <p>{{ c.ventajas[0].texto }}</p>
+    </div>
+    <div class="ventaja">
+      <div class="ic ic-sage"><svg width="26" height="26" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+      <h3>{{ c.ventajas[1].titulo }}</h3>
+      <p>{{ c.ventajas[1].texto }}</p>
+    </div>
+    <div class="ventaja">
+      <div class="ic"><svg width="26" height="26" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"></circle><path d="M8.2 14.3 7 22l5-2.6L17 22l-1.2-7.7"></path></svg></div>
+      <h3>{{ c.ventajas[2].titulo }}</h3>
+      <p>{{ c.ventajas[2].texto }}</p>
+    </div>
+    <div class="ventaja">
+      <div class="ic ic-sage"><svg width="26" height="26" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4"></rect><path d="M2 10h20"></path><path d="M6 15h4"></path></svg></div>
+      <h3>{{ c.ventajas[3].titulo }}</h3>
+      <p>{{ c.ventajas[3].texto }}</p>
+    </div>
+  </div>
+</section>
+
+<section id="servicios">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <span class="kicker">{{ c.servicios_kicker }}</span>
+        <h2>{{ c.servicios_titulo }}</h2>
+      </div>
+      <p>{{ c.servicios_intro }}</p>
+    </div>
+    <div class="cursos-grid">
+      {% for s in c.servicios %}<article class="curso">
+        <div class="foto curso-foto" data-foto="servicio-{{ loop.index }}">{% if s.etiqueta %}<span class="tag {{ s.etiqueta_clase|default('tag-acento') }} curso-tag">{{ s.etiqueta }}</span>{% endif %}</div>
+        <div class="curso-body">
+          <h3>{{ s.nombre }}</h3>
+          <div class="curso-datos">
+            {% if s.dato_1 %}<span class="dato"><svg width="15" height="15" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{ s.dato_1 }}</span>{% endif %}
+            {% if s.dato_2 %}<span class="dato"><svg width="15" height="15" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"></path><path d="M10 19V5"></path><path d="M16 19v-7"></path><path d="M22 19H2"></path></svg>{{ s.dato_2 }}</span>{% endif %}
+          </div>
+          <div class="curso-pie">
+            {% if s.precio %}<div class="precio">{{ s.precio }}{% if s.precio_antes %}<span class="tachado">{{ s.precio_antes }}</span>{% endif %}{% if s.precio_nota %}<small>{{ s.precio_nota }}</small>{% endif %}</div>{% endif %}
+            <a class="btn btn-primary btn-sm" href="#contacto">{{ c.cta_servicio }}</a>
+          </div>
+        </div>
+      </article>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if c.promo %}<section id="promo">
+  <div class="wrap promo-grid promo">
+    <div>
+      <h2>{{ c.promo.titulo }}</h2>
+      <p>{{ c.promo.texto_1 }} <span class="codigo">{{ c.promo.codigo }}</span> {{ c.promo.texto_2 }}</p>
+    </div>
+    <a class="btn btn-light" href="#servicios">{{ c.promo.boton }}</a>
+  </div>
+</section>{% endif %}
+
+<section id="metodologia">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <span class="kicker">{{ c.metodo_kicker }}</span>
+        <h2>{{ c.metodo_titulo }}</h2>
+      </div>
+      <p>{{ c.metodo_intro }}</p>
+    </div>
+    <div class="pasos">
+      {% for pa in c.pasos %}<div class="paso">
+        <span class="num">{{ "%02d"|format(loop.index) }}</span>
+        <h3>{{ pa.titulo }}</h3>
+        <p>{{ pa.texto }}</p>
+      </div>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if c.testimonio %}<section id="testimonio">
+  <div class="wrap">
+    <figure class="quote">
+      <span class="mark">“</span>
+      <blockquote>{{ c.testimonio.cita }}</blockquote>
+      <figcaption>{{ c.testimonio.autor }}<span>{{ c.testimonio.rol }}</span></figcaption>
+    </figure>
+  </div>
+</section>{% endif %}
+
+<section id="contacto">
+  <div class="wrap contacto-grid">
+    <div>
+      <span class="kicker">{{ c.contacto_kicker }}</span>
+      <h2 style="font-size:clamp(36px,4.2vw,54px);margin-top:14px">{{ c.contacto_titulo }}</h2>
+      <ul class="datos">
+        <li>
+          <div class="ic" style="width:44px;height:44px;margin:0"><svg width="21" height="21" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>
+          <div><b>{{ c.etq_direccion }}</b><span>{{ negocio.direccion }}</span></div>
+        </li>
+        {% if negocio.horario %}<li>
+          <div class="ic ic-sage" style="width:44px;height:44px;margin:0"><svg width="21" height="21" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></div>
+          <div><b>{{ c.etq_horario }}</b><span>{{ negocio.horario }}</span></div>
+        </li>{% endif %}
+        <li>
+          <div class="ic" style="width:44px;height:44px;margin:0"><svg width="21" height="21" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h3l2 5-2.5 1.5a12 12 0 0 0 6 6L15 13l5 2v3a2 2 0 0 1-2.2 2A16 16 0 0 1 3 5.2 2 2 0 0 1 5 3Z"></path></svg></div>
+          <div><b>{{ c.etq_telefono }}</b><span>{{ negocio.telefono }}</span></div>
+        </li>
+        {% if negocio.email %}<li>
+          <div class="ic ic-sage" style="width:44px;height:44px;margin:0"><svg width="21" height="21" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="4"></rect><path d="m3 7 9 6 9-6"></path></svg></div>
+          <div><b>{{ c.etq_email }}</b><span>{{ negocio.email }}</span></div>
+        </li>{% endif %}
+      </ul>
+    </div>
+    <div class="foto mapa" data-foto="mapa"></div>
+  </div>
+</section>
+
+<section id="footer">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="brand">{{ negocio.nombre[:-1] }}<span>{{ negocio.nombre[-1] }}</span></div>
+        <p>{{ c.footer_texto }}</p>
+      </div>
+      {% for col in c.footer_columnas %}<div class="foot-col">
+        <h4>{{ col.titulo }}</h4>
+        <ul>
+          {% for e in col.enlaces %}<li><a href="{{ e.ancla }}">{{ e.texto }}</a></li>{% endfor %}
+        </ul>
+      </div>{% endfor %}
+    </div>
+    <div class="news">
+      <div>
+        <h3>{{ c.news_titulo }}</h3>
+        <p>{{ c.news_texto }}</p>
+      </div>
+      <form class="news-form">
+        <input class="input" type="email" placeholder="tu@email.com" aria-label="Email" required="required">
+        <button class="btn btn-primary" type="submit">{{ c.news_boton }}</button>
+      </form>
+    </div>
+    <div class="foot-bottom">
+      <span>© {{ c.anio }} {{ negocio.nombre }}. Todos los derechos reservados.</span>
+      <div class="social">
+        <a href="#footer" aria-label="Instagram"><svg width="20" height="20" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><path d="M17.5 6.5h.01"></path></svg></a>
+        <a href="#footer" aria-label="YouTube"><svg width="20" height="20" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="5"></rect><path d="m10 9 5 3-5 3Z"></path></svg></a>
+        <a href="#footer" aria-label="LinkedIn"><svg width="20" height="20" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"></rect><path d="M8 11v5"></path><path d="M8 8h.01"></path><path d="M12 16v-3a2 2 0 0 1 4 0v3"></path></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

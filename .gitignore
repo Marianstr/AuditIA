@@ -10,3 +10,5 @@ facturado.json
 proyectos.json
 auth.json
 auth.json.bak-*
+.DS_Store
+plantillas_diseno/

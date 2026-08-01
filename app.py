@@ -16,6 +16,8 @@ from scraper import buscar_negocios_google
 from scoring.lead_scorer import calcular_score, clasificar_lead, recomendar_servicios
 from scoring.analizador_web import analizar_web
 from generador_propuesta import generar_propuesta
+from generador_landing import generar_contenido_landing
+from presets import preset_por_id, google_fonts_url
 from buscador_fotos import buscar_foto_categoria
 
 load_dotenv()
@@ -332,6 +334,64 @@ def mockup_propuesta():
                            eslogan=eslogan,
                            eslogan_corto=eslogan_corto,
                            foto_url=foto_url)
+
+
+@app.route("/mockup-landing")
+@login_required
+def mockup_landing():
+    registro_usuario = cargar_auth().get(session["usuario"])
+    if not plan_permite(registro_usuario, "propuesta_visual"):
+        return "Esta función está disponible en los planes Pro y Agency.", 403
+
+    def _lista(nombre_campo):
+        valores = request.args.getlist(nombre_campo)
+        if valores:
+            return valores
+        crudo = request.args.get(nombre_campo)
+        return [v.strip() for v in crudo.split(",") if v.strip()] if crudo else []
+
+    def _numero(nombre_campo, tipo):
+        crudo = request.args.get(nombre_campo)
+        if crudo in (None, ""):
+            return None
+        try:
+            return tipo(crudo)
+        except (TypeError, ValueError):
+            return None
+
+    lead = {
+        "nombre": request.args.get("nombre", "Tu Negocio"),
+        "direccion": request.args.get("direccion", ""),
+        "telefono": request.args.get("telefono", ""),
+        "web": request.args.get("web", ""),
+        "rating": _numero("rating", float),
+        "cantidad_resenas": _numero("cantidad_resenas", int),
+        "score": _numero("score", float),
+        "clasificacion": request.args.get("clasificacion", ""),
+        "servicios": _lista("servicios"),
+        "primary_type": request.args.get("primary_type", ""),
+        "categoria_google": request.args.get("categoria_google", ""),
+        "tipos": _lista("tipos"),
+    }
+
+    c = generar_contenido_landing(lead)
+    estilo = preset_por_id(c.get("preset"))
+    fuentes_url = google_fonts_url(c.get("preset"))
+
+    negocio = {
+        "nombre": lead["nombre"],
+        "direccion": lead["direccion"],
+        "telefono": lead["telefono"],
+        "rubro": c.get("rubro", ""),
+        "horario": "",
+        "email": "",
+    }
+
+    return render_template("mockup_base.html",
+                           negocio=negocio,
+                           c=c,
+                           estilo=estilo,
+                           fuentes_url=fuentes_url)
 
 
 @app.route("/historial/resultados/<int:indice>")
