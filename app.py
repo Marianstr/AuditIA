@@ -18,7 +18,7 @@ from scoring.analizador_web import analizar_web
 from generador_propuesta import generar_propuesta
 from generador_landing import generar_contenido_landing
 from presets import preset_por_id, google_fonts_url, listar_presets
-from tipografias import pareja_por_id, url_fuentes_pareja, url_fuentes_libres, css_familia, listar_parejas
+from tipografias import pareja_por_id, url_fuentes_pareja, url_fuentes_libres, css_familia, listar_parejas, GRUPOS
 from buscador_fotos import buscar_foto_categoria
 
 load_dotenv()
@@ -400,6 +400,32 @@ def mockup_landing():
             estilo["fuente_cuerpo"] = css_familia(fuente_cuerpo_libre)
         fuentes_url = url_fuentes_libres(fuente_titulo_libre, fuente_cuerpo_libre or None)
 
+    def _hex_valido(valor):
+        return bool(re.match(r"^#[0-9a-fA-F]{6}$", valor or ""))
+
+    def _radio_valido(valor):
+        try:
+            numero = float(valor)
+        except (TypeError, ValueError):
+            return None
+        return numero if 0 <= numero <= 30 else None
+
+    campos_color = {
+        "color_acento": "acento",
+        "color_fondo": "fondo",
+        "color_superficie": "superficie",
+        "color_texto": "texto",
+        "color_texto_suave": "texto_suave",
+    }
+    for parametro, clave_estilo in campos_color.items():
+        valor = request.args.get(parametro)
+        if _hex_valido(valor):
+            estilo[clave_estilo] = valor
+
+    radio_valido = _radio_valido(request.args.get("radio"))
+    if radio_valido is not None:
+        estilo["radio"] = f"{radio_valido:g}px"
+
     negocio = {
         "nombre": lead["nombre"],
         "direccion": lead["direccion"],
@@ -413,7 +439,13 @@ def mockup_landing():
                            negocio=negocio,
                            c=c,
                            estilo=estilo,
-                           fuentes_url=fuentes_url)
+                           fuentes_url=fuentes_url,
+                           presets=listar_presets(),
+                           parejas=listar_parejas(),
+                           grupos=GRUPOS,
+                           preset_por_id=preset_por_id,
+                           pareja_por_id=pareja_por_id,
+                           preset_actual=id_preset)
 
 
 @app.route("/historial/resultados/<int:indice>")

@@ -6,7 +6,7 @@
 <title>{{ negocio.nombre }} — {{ negocio.rubro }}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="{{ fuentes_url }}" rel="stylesheet">
+<link href="{{ fuentes_url }}" rel="stylesheet" id="enlace-fuentes">
 <style>
 
 :root{
@@ -201,6 +201,7 @@ img,svg{display:block}
   .hero-foto,.curso-foto,.mapa{min-height:0;aspect-ratio:16/7}
   .btn,.input{box-shadow:none}
   .news-form,.social{display:none}
+  #panel-edicion{display:none !important}
 }
 
 </style>
@@ -217,6 +218,52 @@ img,svg{display:block}
   --radio:{{ estilo.radio }};
   --radio-lg:calc({{ estilo.radio }} * 2);
 }</style>
+<style>
+/* Panel de edición: independiente del preset, siempre neutro. */
+#panel-edicion,#panel-edicion *{box-sizing:border-box}
+#panel-edicion{position:fixed;right:20px;bottom:20px;z-index:2000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.4;color:#1c1917;text-align:left}
+#panel-lanzador{width:46px;height:46px;border-radius:50%;border:1px solid #e7e5e4;background:#ffffff;box-shadow:0 6px 18px rgba(0,0,0,.18);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+#panel-lanzador:hover{background:#f5f5f4}
+#panel-lanzador[hidden]{display:none}
+#panel-cuerpo{width:302px;max-height:82vh;overflow-y:auto;background:#ffffff;border:1px solid #e7e5e4;border-radius:14px;box-shadow:0 12px 34px rgba(0,0,0,.2);padding:16px}
+#panel-cuerpo[hidden]{display:none}
+.panel-cabecera{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #e7e5e4}
+.panel-cabecera strong{font-size:14px}
+#panel-cerrar{border:none;background:transparent;font-size:15px;cursor:pointer;color:#78716c;line-height:1;padding:4px}
+#panel-cerrar:hover{color:#1c1917}
+.panel-seccion{margin-bottom:16px}
+.panel-seccion:last-of-type{margin-bottom:0}
+.panel-seccion h4{margin:0 0 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#57534e}
+.panel-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.panel-preset-muestra{display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;cursor:pointer;padding:5px 2px;border-radius:8px;font-family:inherit}
+.panel-preset-muestra:hover{background:#f5f5f4}
+.panel-preset-muestra.activo{background:#eef2f6;box-shadow:inset 0 0 0 2px #57534e}
+.panel-preset-circulo{width:24px;height:24px;border-radius:50%;border:1px solid rgba(0,0,0,.12);background:var(--muestra-color)}
+.panel-preset-nombre{font-size:9.5px;text-align:center;color:#44403c;line-height:1.15}
+.panel-seccion select,.panel-seccion input[type=text]{width:100%;padding:7px 9px;border:1px solid #d6d3d1;border-radius:7px;font-size:12.5px;font-family:inherit;background:#fff;color:#1c1917}
+.panel-avanzado{margin-top:8px;border-top:1px dashed #e7e5e4;padding-top:8px}
+.panel-avanzado summary{cursor:pointer;font-size:12px;font-weight:600;color:#44403c}
+.panel-avanzado label{display:block;margin-top:8px;font-size:11.5px;color:#57534e}
+.panel-avanzado button{margin-top:8px;width:100%;padding:7px;border:1px solid #1c1917;background:#1c1917;color:#fff;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.panel-colores{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.panel-colores label{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9px;color:#57534e;text-align:center}
+.panel-colores input[type=color]{width:30px;height:30px;padding:0;border:1px solid #d6d3d1;border-radius:6px;cursor:pointer;background:none}
+.panel-aviso{margin-top:8px;font-size:11px;color:#9a3412;background:#fff2e8;border:1px solid #fdba8c;border-radius:6px;padding:6px 8px}
+.panel-aviso[hidden]{display:none}
+.panel-radio-fila{display:flex;align-items:center;gap:10px}
+.panel-radio-fila input[type=range]{flex:1}
+.panel-radio-fila span{font-size:11.5px;color:#57534e;min-width:34px;text-align:right}
+.panel-checkbox{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#292524;margin-bottom:6px;cursor:pointer}
+.panel-checkbox:last-child{margin-bottom:0}
+.panel-checkbox input:disabled{cursor:not-allowed}
+.panel-checkbox input:disabled ~ span{color:#a8a29e}
+.panel-botones{display:flex;gap:8px;margin-top:4px}
+.panel-botones button{flex:1;padding:8px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+#panel-restablecer{border:1px solid #d6d3d1;background:#fff;color:#1c1917}
+#panel-restablecer:hover{background:#f5f5f4}
+#panel-ocultar{border:1px solid #1c1917;background:#1c1917;color:#fff}
+#panel-ocultar:hover{background:#292524}
+</style>
 </head>
 <body>
 
@@ -409,6 +456,407 @@ img,svg{display:block}
     </div>
   </div>
 </section>
+
+<div id="panel-edicion">
+  <button type="button" id="panel-lanzador" title="Editar diseño" aria-label="Abrir editor de diseño" hidden>🎨</button>
+  <div id="panel-cuerpo">
+    <div class="panel-cabecera">
+      <strong>Editor de diseño</strong>
+      <button type="button" id="panel-cerrar" aria-label="Plegar panel">✕</button>
+    </div>
+
+    <div class="panel-seccion">
+      <h4>Preset</h4>
+      <div class="panel-presets" id="panel-presets">
+        {% for p in presets %}
+        {% set completo = preset_por_id(p.id) %}
+        <button type="button" class="panel-preset-muestra" data-id="{{ p.id }}"
+                data-acento="{{ completo.acento }}"
+                data-acento-suave="{{ completo.acento_suave }}"
+                data-acento-oscuro="{{ completo.acento_oscuro }}"
+                data-fondo="{{ completo.fondo }}"
+                data-superficie="{{ completo.superficie }}"
+                data-texto="{{ completo.texto }}"
+                data-texto-suave="{{ completo.texto_suave }}"
+                data-radio="{{ completo.radio }}"
+                style="--muestra-color:{{ p.acento }}"
+                title="{{ p.nombre }}">
+          <span class="panel-preset-circulo"></span>
+          <span class="panel-preset-nombre">{{ p.nombre }}</span>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="panel-seccion">
+      <h4>Tipografía</h4>
+      <select id="panel-tipografia">
+        <option value="">— Mantener actual —</option>
+        {% for grupo in grupos %}
+        {% set opciones = parejas|selectattr('grupo', 'equalto', grupo)|list %}
+        {% if opciones %}
+        <optgroup label="{{ grupo }}">
+          {% for par in opciones %}
+          {% set completo = pareja_por_id(par.id) %}
+          <option value="{{ par.id }}"
+                  data-titulo="{{ completo.titulo }}"
+                  data-cuerpo="{{ completo.cuerpo }}"
+                  data-g-titulo="{{ completo.g_titulo }}"
+                  data-g-cuerpo="{{ completo.g_cuerpo }}">{{ par.nombre }}</option>
+          {% endfor %}
+        </optgroup>
+        {% endif %}
+        {% endfor %}
+      </select>
+
+      <details class="panel-avanzado">
+        <summary>Modo avanzado</summary>
+        <label>Fuente de títulos
+          <input type="text" id="panel-fuente-titulo" placeholder="Ej: Josefin Sans">
+        </label>
+        <label>Fuente de cuerpo
+          <input type="text" id="panel-fuente-cuerpo" placeholder="Ej: Karla (opcional)">
+        </label>
+        <button type="button" id="panel-fuente-aplicar">Aplicar</button>
+        <p class="panel-aviso" id="panel-fuente-aviso" hidden>Puede que ese nombre de fuente no sea correcto: no se cargó a tiempo.</p>
+      </details>
+    </div>
+
+    <div class="panel-seccion">
+      <h4>Colores a medida</h4>
+      <div class="panel-colores">
+        <label>Acento<input type="color" id="panel-color-acento" value="{{ estilo.acento }}"></label>
+        <label>Fondo<input type="color" id="panel-color-fondo" value="{{ estilo.fondo }}"></label>
+        <label>Superficie<input type="color" id="panel-color-superficie" value="{{ estilo.superficie }}"></label>
+        <label>Texto<input type="color" id="panel-color-texto" value="{{ estilo.texto }}"></label>
+        <label>Texto suave<input type="color" id="panel-color-texto-suave" value="{{ estilo.texto_suave }}"></label>
+      </div>
+      <p class="panel-aviso" id="panel-contraste-aviso" hidden>El contraste entre el texto y el fondo es bajo: puede costar leerlo.</p>
+    </div>
+
+    <div class="panel-seccion">
+      <h4>Redondeo</h4>
+      <div class="panel-radio-fila">
+        <input type="range" id="panel-radio" min="0" max="30" step="1" value="{{ estilo.radio|replace('px','') }}">
+        <span id="panel-radio-valor">{{ estilo.radio }}</span>
+      </div>
+    </div>
+
+    <div class="panel-seccion">
+      <h4>Secciones</h4>
+      <label class="panel-checkbox"><input type="checkbox" id="panel-seccion-promo" checked><span>Promoción</span></label>
+      <label class="panel-checkbox"><input type="checkbox" id="panel-seccion-testimonio" checked><span>Testimonio</span></label>
+      <label class="panel-checkbox"><input type="checkbox" id="panel-seccion-precios" checked><span>Precios en servicios</span></label>
+    </div>
+
+    <div class="panel-botones">
+      <button type="button" id="panel-restablecer">Restablecer</button>
+      <button type="button" id="panel-ocultar">Ocultar panel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const PRESET_ACTUAL = {{ preset_actual|tojson }};
+
+  const raiz = document.documentElement;
+  function fijarVariable(nombre, valor) {
+    if (valor === null || valor === undefined || valor === "") return;
+    raiz.style.setProperty(nombre, valor);
+  }
+
+  const VARIABLES_A_RECORDAR = [
+    "--color-acento", "--color-acento-suave", "--color-acento-oscuro",
+    "--color-fondo", "--color-superficie", "--color-texto", "--color-texto-suave",
+    "--fuente-titulo", "--fuente-cuerpo", "--radio", "--radio-lg"
+  ];
+  const variablesOriginales = {};
+  VARIABLES_A_RECORDAR.forEach(function (v) {
+    variablesOriginales[v] = getComputedStyle(raiz).getPropertyValue(v).trim();
+  });
+  const enlaceFuentesOriginal = document.getElementById("enlace-fuentes").href;
+
+  const estadoUrl = {
+    preset: PRESET_ACTUAL || null,
+    tipografia: null,
+    fuente_titulo: null,
+    fuente_cuerpo: null,
+    color_acento: null,
+    color_fondo: null,
+    color_superficie: null,
+    color_texto: null,
+    color_texto_suave: null,
+    radio: null
+  };
+
+  function aplicarEstadoUrl() {
+    const url = new URL(window.location.href);
+    Object.keys(estadoUrl).forEach(function (clave) {
+      const valor = estadoUrl[clave];
+      if (valor === null || valor === undefined || valor === "") {
+        url.searchParams.delete(clave);
+      } else {
+        url.searchParams.set(clave, valor);
+      }
+    });
+    history.replaceState(null, "", url);
+  }
+
+  function actualizarEnlaceFuentes(url) {
+    document.getElementById("enlace-fuentes").href = url;
+  }
+
+  // ---- Preset ----
+  const botonesPreset = Array.prototype.slice.call(document.querySelectorAll(".panel-preset-muestra"));
+
+  function marcarPresetActivo(idPreset) {
+    botonesPreset.forEach(function (b) {
+      b.classList.toggle("activo", b.dataset.id === idPreset);
+    });
+  }
+
+  function aplicarColoresDePreset(datos) {
+    fijarVariable("--color-acento", datos.acento);
+    fijarVariable("--color-acento-suave", datos.acentoSuave);
+    fijarVariable("--color-acento-oscuro", datos.acentoOscuro);
+    fijarVariable("--color-fondo", datos.fondo);
+    fijarVariable("--color-superficie", datos.superficie);
+    fijarVariable("--color-texto", datos.texto);
+    fijarVariable("--color-texto-suave", datos.textoSuave);
+    document.getElementById("panel-color-acento").value = datos.acento;
+    document.getElementById("panel-color-fondo").value = datos.fondo;
+    document.getElementById("panel-color-superficie").value = datos.superficie;
+    document.getElementById("panel-color-texto").value = datos.texto;
+    document.getElementById("panel-color-texto-suave").value = datos.textoSuave;
+  }
+
+  function aplicarRadioValor(px) {
+    fijarVariable("--radio", px + "px");
+    fijarVariable("--radio-lg", (px * 2) + "px");
+    document.getElementById("panel-radio").value = px;
+    document.getElementById("panel-radio-valor").textContent = px + "px";
+  }
+
+  botonesPreset.forEach(function (boton) {
+    boton.addEventListener("click", function () {
+      aplicarColoresDePreset(boton.dataset);
+      aplicarRadioValor(parseFloat(boton.dataset.radio));
+      marcarPresetActivo(boton.dataset.id);
+      estadoUrl.preset = boton.dataset.id;
+      estadoUrl.color_acento = null;
+      estadoUrl.color_fondo = null;
+      estadoUrl.color_superficie = null;
+      estadoUrl.color_texto = null;
+      estadoUrl.color_texto_suave = null;
+      estadoUrl.radio = null;
+      aplicarEstadoUrl();
+      verificarContraste();
+    });
+  });
+  if (PRESET_ACTUAL) marcarPresetActivo(PRESET_ACTUAL);
+
+  // ---- Tipografía del catálogo ----
+  const selectTipografia = document.getElementById("panel-tipografia");
+  const inputFuenteTitulo = document.getElementById("panel-fuente-titulo");
+  const inputFuenteCuerpo = document.getElementById("panel-fuente-cuerpo");
+  const avisoFuente = document.getElementById("panel-fuente-aviso");
+
+  function construirUrlPareja(gTitulo, gCuerpo) {
+    const familias = [gTitulo];
+    if (gCuerpo) familias.push(gCuerpo);
+    return "https://fonts.googleapis.com/css2?" + familias.map(function (f) { return "family=" + f; }).join("&") + "&display=swap";
+  }
+
+  selectTipografia.addEventListener("change", function () {
+    const opcion = selectTipografia.selectedOptions[0];
+    if (!opcion || !opcion.value) return;
+    const d = opcion.dataset;
+    fijarVariable("--fuente-titulo", d.titulo);
+    fijarVariable("--fuente-cuerpo", d.cuerpo);
+    actualizarEnlaceFuentes(construirUrlPareja(d.gTitulo, d.gCuerpo));
+    inputFuenteTitulo.value = "";
+    inputFuenteCuerpo.value = "";
+    avisoFuente.hidden = true;
+    estadoUrl.tipografia = opcion.value;
+    estadoUrl.fuente_titulo = null;
+    estadoUrl.fuente_cuerpo = null;
+    aplicarEstadoUrl();
+  });
+
+  // ---- Tipografía en modo avanzado (Google Fonts libre) ----
+  function cssFamilia(nombre) {
+    return '"' + nombre.trim() + '", "Helvetica Neue", sans-serif';
+  }
+
+  function especificarLibre(nombre) {
+    return nombre.trim().replace(/ /g, "+") + ":wght@300;400;500;600;700";
+  }
+
+  function urlFuentesLibres(familiaTitulo, familiaCuerpo) {
+    const familias = [especificarLibre(familiaTitulo)];
+    if (familiaCuerpo) familias.push(especificarLibre(familiaCuerpo));
+    return "https://fonts.googleapis.com/css2?" + familias.map(function (f) { return "family=" + f; }).join("&") + "&display=swap";
+  }
+
+  function verificarCargaFuente(nombreFamilia) {
+    avisoFuente.hidden = true;
+    if (!("fonts" in document)) return;
+    let resuelto = false;
+    document.fonts.load('16px "' + nombreFamilia + '"').then(function (fuentes) {
+      resuelto = true;
+      if (!fuentes.length) avisoFuente.hidden = false;
+    }).catch(function () {
+      resuelto = true;
+      avisoFuente.hidden = false;
+    });
+    setTimeout(function () {
+      if (!resuelto) avisoFuente.hidden = false;
+    }, 3000);
+  }
+
+  document.getElementById("panel-fuente-aplicar").addEventListener("click", function () {
+    const titulo = inputFuenteTitulo.value.trim();
+    const cuerpo = inputFuenteCuerpo.value.trim();
+    if (!titulo) return;
+    fijarVariable("--fuente-titulo", cssFamilia(titulo));
+    if (cuerpo) fijarVariable("--fuente-cuerpo", cssFamilia(cuerpo));
+    actualizarEnlaceFuentes(urlFuentesLibres(titulo, cuerpo || null));
+    selectTipografia.value = "";
+    estadoUrl.tipografia = null;
+    estadoUrl.fuente_titulo = titulo;
+    estadoUrl.fuente_cuerpo = cuerpo || null;
+    aplicarEstadoUrl();
+    verificarCargaFuente(titulo);
+  });
+
+  // ---- Colores a medida ----
+  function luminanciaRelativa(hex) {
+    const limpio = hex.replace("#", "");
+    const canales = [0, 2, 4].map(function (i) {
+      let v = parseInt(limpio.substr(i, 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * canales[0] + 0.7152 * canales[1] + 0.0722 * canales[2];
+  }
+
+  function ratioContraste(hex1, hex2) {
+    const l1 = luminanciaRelativa(hex1);
+    const l2 = luminanciaRelativa(hex2);
+    const claro = Math.max(l1, l2);
+    const oscuro = Math.min(l1, l2);
+    return (claro + 0.05) / (oscuro + 0.05);
+  }
+
+  const avisoContraste = document.getElementById("panel-contraste-aviso");
+  const colorTexto = document.getElementById("panel-color-texto");
+  const colorFondo = document.getElementById("panel-color-fondo");
+
+  function verificarContraste() {
+    const ratio = ratioContraste(colorTexto.value, colorFondo.value);
+    avisoContraste.hidden = ratio >= 4.5;
+  }
+
+  function conectarSelectorColor(inputId, varCss, claveUrl) {
+    const input = document.getElementById(inputId);
+    input.addEventListener("input", function () {
+      fijarVariable(varCss, input.value);
+      estadoUrl[claveUrl] = input.value;
+      aplicarEstadoUrl();
+      verificarContraste();
+    });
+  }
+
+  conectarSelectorColor("panel-color-acento", "--color-acento", "color_acento");
+  conectarSelectorColor("panel-color-fondo", "--color-fondo", "color_fondo");
+  conectarSelectorColor("panel-color-superficie", "--color-superficie", "color_superficie");
+  conectarSelectorColor("panel-color-texto", "--color-texto", "color_texto");
+  conectarSelectorColor("panel-color-texto-suave", "--color-texto-suave", "color_texto_suave");
+  verificarContraste();
+
+  // ---- Redondeo ----
+  document.getElementById("panel-radio").addEventListener("input", function (e) {
+    const px = Number(e.target.value);
+    aplicarRadioValor(px);
+    estadoUrl.radio = px;
+    aplicarEstadoUrl();
+  });
+
+  // ---- Secciones ----
+  const seccionPromo = document.getElementById("promo");
+  const seccionTestimonio = document.getElementById("testimonio");
+  const elementosPrecio = Array.prototype.slice.call(document.querySelectorAll(".precio"));
+
+  const chkPromo = document.getElementById("panel-seccion-promo");
+  const chkTestimonio = document.getElementById("panel-seccion-testimonio");
+  const chkPrecios = document.getElementById("panel-seccion-precios");
+
+  if (!seccionPromo) { chkPromo.checked = false; chkPromo.disabled = true; }
+  if (!seccionTestimonio) { chkTestimonio.checked = false; chkTestimonio.disabled = true; }
+  if (!elementosPrecio.length) { chkPrecios.checked = false; chkPrecios.disabled = true; }
+
+  chkPromo.addEventListener("change", function () {
+    if (seccionPromo) seccionPromo.style.display = chkPromo.checked ? "" : "none";
+  });
+  chkTestimonio.addEventListener("change", function () {
+    if (seccionTestimonio) seccionTestimonio.style.display = chkTestimonio.checked ? "" : "none";
+  });
+  chkPrecios.addEventListener("change", function () {
+    elementosPrecio.forEach(function (el) { el.style.display = chkPrecios.checked ? "" : "none"; });
+  });
+
+  // ---- Plegar / desplegar ----
+  const lanzador = document.getElementById("panel-lanzador");
+  const cuerpoPanel = document.getElementById("panel-cuerpo");
+
+  function plegarPanel() {
+    cuerpoPanel.hidden = true;
+    lanzador.hidden = false;
+  }
+  function desplegarPanel() {
+    cuerpoPanel.hidden = false;
+    lanzador.hidden = true;
+  }
+  lanzador.addEventListener("click", desplegarPanel);
+  document.getElementById("panel-cerrar").addEventListener("click", plegarPanel);
+  document.getElementById("panel-ocultar").addEventListener("click", plegarPanel);
+
+  // ---- Restablecer ----
+  document.getElementById("panel-restablecer").addEventListener("click", function () {
+    VARIABLES_A_RECORDAR.forEach(function (v) { fijarVariable(v, variablesOriginales[v]); });
+    actualizarEnlaceFuentes(enlaceFuentesOriginal);
+
+    document.getElementById("panel-color-acento").value = variablesOriginales["--color-acento"];
+    document.getElementById("panel-color-fondo").value = variablesOriginales["--color-fondo"];
+    document.getElementById("panel-color-superficie").value = variablesOriginales["--color-superficie"];
+    document.getElementById("panel-color-texto").value = variablesOriginales["--color-texto"];
+    document.getElementById("panel-color-texto-suave").value = variablesOriginales["--color-texto-suave"];
+
+    const radioOriginal = parseFloat(variablesOriginales["--radio"]);
+    document.getElementById("panel-radio").value = radioOriginal;
+    document.getElementById("panel-radio-valor").textContent = variablesOriginales["--radio"];
+
+    selectTipografia.value = "";
+    inputFuenteTitulo.value = "";
+    inputFuenteCuerpo.value = "";
+    avisoFuente.hidden = true;
+
+    if (seccionPromo) { chkPromo.checked = true; seccionPromo.style.display = ""; }
+    if (seccionTestimonio) { chkTestimonio.checked = true; seccionTestimonio.style.display = ""; }
+    if (elementosPrecio.length) {
+      chkPrecios.checked = true;
+      elementosPrecio.forEach(function (el) { el.style.display = ""; });
+    }
+
+    marcarPresetActivo(PRESET_ACTUAL);
+
+    Object.keys(estadoUrl).forEach(function (clave) { estadoUrl[clave] = null; });
+    estadoUrl.preset = PRESET_ACTUAL || null;
+    aplicarEstadoUrl();
+    verificarContraste();
+  });
+})();
+</script>
 
 </body>
 </html>
