@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es"{% set clases_html = [] %}{% if tratamiento_foto == 'duotono' %}{% set _ = clases_html.append('trat-duotono') %}{% elif tratamiento_foto == 'bn' %}{% set _ = clases_html.append('trat-bn') %}{% endif %}{% if fondo_foto == 'liso' %}{% set _ = clases_html.append('fondo-foto-liso') %}{% elif fondo_foto == 'acento' %}{% set _ = clases_html.append('fondo-foto-acento') %}{% endif %}{% if clases_html %} class="{{ clases_html|join(' ') }}"{% endif %}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,7 +15,6 @@
   --color-oscuro:#241f1b;
   --color-oscuro-suave:#b9ada0;
   --color-linea:#e3d4bb;
-  --color-foto:#e6ddcf;
   --radio-pill:999px;
   --sombra-sm:0 2px 6px rgba(32,30,29,.06);
   --sombra-md:0 10px 24px rgba(32,30,29,.09);
@@ -46,10 +45,12 @@ img,svg{display:block}
 .tag-sage{background:var(--color-acento-2);color:var(--color-superficie)}
 .tag-suave{background:var(--color-acento-2-suave);color:var(--color-texto)}
 .kicker{font-family:var(--fuente-cuerpo);font-size:calc(13px * var(--escala-cuerpo));font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--color-acento-oscuro)}
-.foto{position:relative;background:var(--color-foto);border-radius:var(--radio-lg);overflow:hidden}
-.foto::before{content:"";position:absolute;inset:0;background:
-  radial-gradient(circle at 30% 30%, rgba(32,30,29,.05), transparent 60%),
-  radial-gradient(circle at 75% 70%, rgba(32,30,29,.05), transparent 55%)}
+.foto{position:relative;background:var(--color-superficie);background-image:var(--foto-url, none);border-radius:var(--radio-lg);overflow:hidden}
+.foto::before{content:"";position:absolute;inset:0;background-image:var(--foto-url, none);background-position:var(--foto-pos-x) var(--foto-pos-y);background-size:cover;transform:scale(calc(var(--foto-zoom) / 100))}
+.fondo-foto-liso .foto{background-image:none}
+.fondo-foto-acento .foto{background-image:none;background-color:var(--color-acento-suave)}
+.trat-bn .foto{filter:grayscale(1)}
+.trat-duotono .foto::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,var(--color-acento),var(--color-fondo));mix-blend-mode:color;pointer-events:none}
 
 /* nav */
 #nav{position:sticky;top:0;z-index:20;background:var(--color-fondo);border-bottom:1px solid var(--color-linea)}
@@ -67,7 +68,7 @@ img,svg{display:block}
 .hero-sub{margin-top:26px;font-size:calc(20px * var(--escala-cuerpo));color:var(--color-texto-suave);max-width:30em}
 .hero-btns{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
 .hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}
-.hero-foto{flex:1;min-height:600px;border-radius:var(--radio-lg)}
+.hero-foto{flex:1;min-height:460px;border-radius:var(--radio-lg)}
 .hero-art{position:relative;display:flex;flex-direction:column;padding:26px 26px 0}
 .blob{position:absolute;width:190px;height:190px;border-radius:var(--radio-pill);background:var(--color-acento-2-suave);right:-8px;top:-8px;z-index:-1}
 .badge{position:absolute;left:52px;bottom:44px;background:var(--color-superficie);border-radius:var(--radio-lg);padding:18px 24px;box-shadow:var(--sombra-md)}
@@ -77,7 +78,7 @@ img,svg{display:block}
 /* hero foto */
 #hero.hero-foto-full{padding:0}
 .heroF{position:relative;min-height:88vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:var(--color-superficie)}
-.heroF-fondo{position:absolute;inset:0;background:var(--color-acento-suave)}
+.heroF-fondo{position:absolute;inset:0;background:var(--color-superficie);background-image:var(--foto-url, none)}
 .heroF-velo{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.52))}
 .heroF-inner{position:relative;z-index:1;max-width:56rem;padding:120px 24px}
 .heroF .hero-h1{font-size:calc(clamp(48px,7vw,96px) * var(--escala-titulo));color:var(--color-superficie)}
@@ -94,7 +95,7 @@ img,svg{display:block}
 .heroT-h1 em{font-style:normal;color:var(--color-acento)}
 .heroT-pie{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:36px;margin-top:44px;padding-bottom:64px}
 .heroT-pie .hero-sub{margin-top:0;font-size:calc(19px * var(--escala-cuerpo));max-width:26em}
-.heroT-banda{height:clamp(280px,42vh,460px);border-radius:var(--radio-lg) var(--radio-lg) 0 0;position:relative;overflow:hidden;background:var(--color-acento-suave)}
+.heroT-banda{height:clamp(280px,42vh,460px);border-radius:var(--radio-lg) var(--radio-lg) 0 0;position:relative;overflow:hidden;background:var(--color-superficie);background-image:var(--foto-url, none)}
 .heroT-banda .badge{left:auto;right:44px;bottom:36px}
 
 @media(max-width:860px){
@@ -248,6 +249,9 @@ img,svg{display:block}
   --radio-lg:calc({{ estilo.radio }} * 2);
   --escala-titulo:{{ estilo.escala_titulo }};
   --escala-cuerpo:{{ estilo.escala_cuerpo }};
+  --foto-pos-x:{{ estilo.foto_pos_x }}%;
+  --foto-pos-y:{{ estilo.foto_pos_y }}%;
+  --foto-zoom:{{ estilo.foto_zoom }};
 }</style>
 <style>
 /* Panel de edición: independiente del preset, siempre neutro. */
@@ -258,7 +262,9 @@ img,svg{display:block}
 #panel-lanzador[hidden]{display:none}
 #panel-cuerpo{width:302px;max-height:82vh;overflow-y:auto;background:#ffffff;border:1px solid #e7e5e4;border-radius:14px;box-shadow:0 12px 34px rgba(0,0,0,.2);padding:16px}
 #panel-cuerpo[hidden]{display:none}
-.panel-cabecera{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #e7e5e4}
+.panel-cabecera{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #e7e5e4;cursor:grab;touch-action:none;user-select:none}
+.panel-cabecera.arrastrando{cursor:grabbing}
+body.panel-arrastrando,body.panel-arrastrando *{cursor:grabbing !important}
 .panel-cabecera strong{font-size:14px}
 #panel-cerrar{border:none;background:transparent;font-size:15px;cursor:pointer;color:#78716c;line-height:1;padding:4px}
 #panel-cerrar:hover{color:#1c1917}
@@ -284,6 +290,8 @@ img,svg{display:block}
 .panel-aviso[hidden]{display:none}
 .panel-radio-fila{display:flex;align-items:center;gap:10px}
 .panel-radio-fila input[type=range]{flex:1}
+.panel-subetiqueta{display:block;font-size:11.5px;color:#57534e;margin:10px 0 4px}
+.panel-subetiqueta:first-of-type{margin-top:0}
 .panel-radio-fila span{font-size:11.5px;color:#57534e;min-width:34px;text-align:right}
 .panel-checkbox{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#292524;margin-bottom:6px;cursor:pointer}
 .panel-checkbox:last-child{margin-bottom:0}
@@ -312,7 +320,7 @@ img,svg{display:block}
 {% if estructura == 'foto' %}
 <section id="hero" class="hero-foto-full">
   <div class="heroF">
-    <div class="heroF-fondo foto" data-foto="hero"{% if fotos and fotos|length > 0 %} style="background-image:url('{{ fotos[0] }}');background-size:cover;background-position:center"{% endif %}></div>
+    <div class="heroF-fondo foto" data-foto="hero"{% if fotos and fotos|length > 0 %} style="--foto-url:url('{{ fotos[0] }}')"{% endif %}></div>
     <div class="heroF-velo"></div>
     <div class="heroF-inner">
       <span class="kicker">{{ negocio.rubro }}</span>
@@ -348,7 +356,7 @@ img,svg{display:block}
     </div>
   </div>
   <div class="wrap">
-    <div class="heroT-banda foto" data-foto="hero"{% if fotos and fotos|length > 0 %} style="background-image:url('{{ fotos[0] }}');background-size:cover;background-position:center"{% endif %}>
+    <div class="heroT-banda foto" data-foto="hero"{% if fotos and fotos|length > 0 %} style="--foto-url:url('{{ fotos[0] }}')"{% endif %}>
       {% if c.destacado %}<div class="badge">
         <b>{{ c.destacado.valor }}</b>
         <small>{{ c.destacado.texto }}</small>
@@ -374,7 +382,7 @@ img,svg{display:block}
     </div>
     <div class="hero-art">
       <div class="blob"></div>
-      <div class="foto hero-foto" data-foto="hero"{% if fotos and fotos|length > 0 %} style="background-image:url('{{ fotos[0] }}');background-size:cover;background-position:center"{% endif %}></div>
+      <div class="foto hero-foto" data-foto="hero"{% if fotos and fotos|length > 0 %} style="--foto-url:url('{{ fotos[0] }}')"{% endif %}></div>
       {% if c.destacado %}<div class="badge">
         <b>{{ c.destacado.valor }}</b>
         <small>{{ c.destacado.texto }}</small>
@@ -420,7 +428,7 @@ img,svg{display:block}
     </div>
     <div class="cursos-grid">
       {% for s in c.servicios %}<article class="curso">
-        <div class="foto curso-foto" data-foto="servicio-{{ loop.index }}"{% if fotos and fotos|length > loop.index %} style="background-image:url('{{ fotos[loop.index] }}');background-size:cover;background-position:center"{% endif %}>{% if s.etiqueta %}<span class="tag {{ s.etiqueta_clase|default('tag-acento') }} curso-tag">{{ s.etiqueta }}</span>{% endif %}</div>
+        <div class="foto curso-foto" data-foto="servicio-{{ loop.index }}"{% if fotos and fotos|length > loop.index %} style="--foto-url:url('{{ fotos[loop.index] }}')"{% endif %}>{% if s.etiqueta %}<span class="tag {{ s.etiqueta_clase|default('tag-acento') }} curso-tag">{{ s.etiqueta }}</span>{% endif %}</div>
         <div class="curso-body">
           <h3>{{ s.nombre }}</h3>
           <div class="curso-datos">
@@ -625,6 +633,36 @@ img,svg{display:block}
     </div>
 
     <div class="panel-seccion">
+      <h4>Tratamiento de foto</h4>
+      <label class="panel-checkbox"><input type="radio" name="panel-tratamiento-foto" id="panel-tratamiento-sin" value="sin"{% if tratamiento_foto == 'sin' %} checked{% endif %}><span>Sin tratamiento</span></label>
+      <label class="panel-checkbox"><input type="radio" name="panel-tratamiento-foto" id="panel-tratamiento-duotono" value="duotono"{% if tratamiento_foto == 'duotono' %} checked{% endif %}><span>Duotono</span></label>
+      <label class="panel-checkbox"><input type="radio" name="panel-tratamiento-foto" id="panel-tratamiento-bn" value="bn"{% if tratamiento_foto == 'bn' %} checked{% endif %}><span>Blanco y negro</span></label>
+    </div>
+
+    <div class="panel-seccion">
+      <h4>Encuadre de fotos</h4>
+      <label class="panel-subetiqueta" for="panel-foto-pos-x">Horizontal</label>
+      <div class="panel-radio-fila">
+        <input type="range" id="panel-foto-pos-x" min="0" max="100" step="1" value="{{ estilo.foto_pos_x }}">
+        <span id="panel-foto-pos-x-valor">{{ estilo.foto_pos_x }}%</span>
+      </div>
+      <label class="panel-subetiqueta" for="panel-foto-pos-y">Vertical</label>
+      <div class="panel-radio-fila">
+        <input type="range" id="panel-foto-pos-y" min="0" max="100" step="1" value="{{ estilo.foto_pos_y }}">
+        <span id="panel-foto-pos-y-valor">{{ estilo.foto_pos_y }}%</span>
+      </div>
+      <label class="panel-subetiqueta" for="panel-foto-zoom">Zoom</label>
+      <div class="panel-radio-fila">
+        <input type="range" id="panel-foto-zoom" min="50" max="200" step="5" value="{{ estilo.foto_zoom }}">
+        <span id="panel-foto-zoom-valor">{{ estilo.foto_zoom }}%</span>
+      </div>
+      <span class="panel-subetiqueta">Fondo</span>
+      <label class="panel-checkbox"><input type="radio" name="panel-fondo-foto" id="panel-fondo-foto-ampliada" value="ampliada"{% if fondo_foto == 'ampliada' %} checked{% endif %}><span>Foto ampliada</span></label>
+      <label class="panel-checkbox"><input type="radio" name="panel-fondo-foto" id="panel-fondo-foto-liso" value="liso"{% if fondo_foto == 'liso' %} checked{% endif %}><span>Color liso</span></label>
+      <label class="panel-checkbox"><input type="radio" name="panel-fondo-foto" id="panel-fondo-foto-acento" value="acento"{% if fondo_foto == 'acento' %} checked{% endif %}><span>Color de acento</span></label>
+    </div>
+
+    <div class="panel-seccion">
       <h4>Tamaño de titulares</h4>
       <div class="panel-radio-fila">
         <input type="range" id="panel-escala-titulo" min="0.8" max="1.2" step="0.05" value="{{ estilo.escala_titulo }}">
@@ -667,7 +705,8 @@ img,svg{display:block}
   const VARIABLES_A_RECORDAR = [
     "--color-acento", "--color-acento-suave", "--color-acento-oscuro",
     "--color-fondo", "--color-superficie", "--color-texto", "--color-texto-suave",
-    "--fuente-titulo", "--fuente-cuerpo", "--radio", "--radio-lg", "--escala-titulo", "--escala-cuerpo"
+    "--fuente-titulo", "--fuente-cuerpo", "--radio", "--radio-lg", "--escala-titulo", "--escala-cuerpo",
+    "--foto-pos-x", "--foto-pos-y", "--foto-zoom"
   ];
   const variablesOriginales = {};
   VARIABLES_A_RECORDAR.forEach(function (v) {
@@ -687,7 +726,12 @@ img,svg{display:block}
     color_texto_suave: null,
     radio: null,
     escala_titulo: null,
-    escala_cuerpo: null
+    escala_cuerpo: null,
+    tratamiento_foto: null,
+    foto_pos_x: null,
+    foto_pos_y: null,
+    foto_zoom: null,
+    fondo_foto: null
   };
 
   function aplicarEstadoUrl() {
@@ -736,6 +780,20 @@ img,svg{display:block}
     fijarVariable("--radio-lg", (px * 2) + "px");
     document.getElementById("panel-radio").value = px;
     document.getElementById("panel-radio-valor").textContent = px + "px";
+  }
+
+  function aplicarTratamientoFoto(valor) {
+    raiz.classList.remove("trat-duotono", "trat-bn");
+    if (valor === "duotono" || valor === "bn") raiz.classList.add("trat-" + valor);
+    const input = document.getElementById("panel-tratamiento-" + valor);
+    if (input) input.checked = true;
+  }
+
+  function aplicarFondoFoto(valor) {
+    raiz.classList.remove("fondo-foto-liso", "fondo-foto-acento");
+    if (valor === "liso" || valor === "acento") raiz.classList.add("fondo-foto-" + valor);
+    const input = document.getElementById("panel-fondo-foto-" + valor);
+    if (input) input.checked = true;
   }
 
   botonesPreset.forEach(function (boton) {
@@ -882,6 +940,47 @@ img,svg{display:block}
     aplicarEstadoUrl();
   });
 
+  // ---- Tratamiento de foto ----
+  document.querySelectorAll('input[name="panel-tratamiento-foto"]').forEach(function (input) {
+    input.addEventListener("change", function () {
+      if (!input.checked) return;
+      aplicarTratamientoFoto(input.value);
+      estadoUrl.tratamiento_foto = input.value;
+      aplicarEstadoUrl();
+    });
+  });
+
+  // ---- Encuadre de fotos ----
+  function conectarDeslizadorFoto(inputId, valorId, varCss, claveUrl, sufijoVar) {
+    const input = document.getElementById(inputId);
+    const etiqueta = document.getElementById(valorId);
+    function aplicar(valor) {
+      fijarVariable(varCss, valor + sufijoVar);
+      input.value = valor;
+      etiqueta.textContent = valor + "%";
+    }
+    input.addEventListener("input", function (e) {
+      const valor = Number(e.target.value);
+      aplicar(valor);
+      estadoUrl[claveUrl] = valor;
+      aplicarEstadoUrl();
+    });
+    return aplicar;
+  }
+
+  const aplicarFotoPosX = conectarDeslizadorFoto("panel-foto-pos-x", "panel-foto-pos-x-valor", "--foto-pos-x", "foto_pos_x", "%");
+  const aplicarFotoPosY = conectarDeslizadorFoto("panel-foto-pos-y", "panel-foto-pos-y-valor", "--foto-pos-y", "foto_pos_y", "%");
+  const aplicarFotoZoom = conectarDeslizadorFoto("panel-foto-zoom", "panel-foto-zoom-valor", "--foto-zoom", "foto_zoom", "");
+
+  document.querySelectorAll('input[name="panel-fondo-foto"]').forEach(function (input) {
+    input.addEventListener("change", function () {
+      if (!input.checked) return;
+      aplicarFondoFoto(input.value);
+      estadoUrl.fondo_foto = input.value;
+      aplicarEstadoUrl();
+    });
+  });
+
   // ---- Escala de titulares y de texto ----
   function conectarSelectorEscala(inputId, valorId, varCss, claveUrl) {
     const input = document.getElementById(inputId);
@@ -942,6 +1041,54 @@ img,svg{display:block}
   document.getElementById("panel-cerrar").addEventListener("click", plegarPanel);
   document.getElementById("panel-ocultar").addEventListener("click", plegarPanel);
 
+  // ---- Panel arrastrable ----
+  const panelEdicion = document.getElementById("panel-edicion");
+  const cabeceraPanel = document.querySelector(".panel-cabecera");
+  let arrastrandoPanel = false;
+  let offsetArrastreX = 0;
+  let offsetArrastreY = 0;
+
+  function moverPanelA(x, y) {
+    const rect = panelEdicion.getBoundingClientRect();
+    const maxX = Math.max(window.innerWidth - rect.width, 0);
+    const maxY = Math.max(window.innerHeight - rect.height, 0);
+    panelEdicion.style.left = Math.min(Math.max(x, 0), maxX) + "px";
+    panelEdicion.style.top = Math.min(Math.max(y, 0), maxY) + "px";
+    panelEdicion.style.right = "auto";
+    panelEdicion.style.bottom = "auto";
+  }
+
+  cabeceraPanel.addEventListener("pointerdown", function (e) {
+    if (e.target.closest("#panel-cerrar")) return;
+    const rect = panelEdicion.getBoundingClientRect();
+    offsetArrastreX = e.clientX - rect.left;
+    offsetArrastreY = e.clientY - rect.top;
+    arrastrandoPanel = true;
+    cabeceraPanel.setPointerCapture(e.pointerId);
+    cabeceraPanel.classList.add("arrastrando");
+    document.body.classList.add("panel-arrastrando");
+    e.preventDefault();
+  });
+
+  cabeceraPanel.addEventListener("pointermove", function (e) {
+    if (!arrastrandoPanel) return;
+    moverPanelA(e.clientX - offsetArrastreX, e.clientY - offsetArrastreY);
+  });
+
+  function soltarPanel() {
+    arrastrandoPanel = false;
+    cabeceraPanel.classList.remove("arrastrando");
+    document.body.classList.remove("panel-arrastrando");
+  }
+  cabeceraPanel.addEventListener("pointerup", soltarPanel);
+  cabeceraPanel.addEventListener("pointercancel", soltarPanel);
+
+  window.addEventListener("resize", function () {
+    if (panelEdicion.style.left === "" && panelEdicion.style.top === "") return;
+    const rect = panelEdicion.getBoundingClientRect();
+    moverPanelA(rect.left, rect.top);
+  });
+
   // ---- Restablecer ----
   document.getElementById("panel-restablecer").addEventListener("click", function () {
     VARIABLES_A_RECORDAR.forEach(function (v) { fijarVariable(v, variablesOriginales[v]); });
@@ -959,6 +1106,13 @@ img,svg{display:block}
 
     aplicarEscalaTitulo(1);
     aplicarEscalaCuerpo(1);
+
+    aplicarTratamientoFoto("sin");
+
+    aplicarFotoPosX(50);
+    aplicarFotoPosY(50);
+    aplicarFotoZoom(100);
+    aplicarFondoFoto("ampliada");
 
     selectTipografia.value = "";
     inputFuenteTitulo.value = "";

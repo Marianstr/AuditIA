@@ -417,6 +417,20 @@ def mockup_landing():
             return None
         return numero if 0.8 <= numero <= 1.2 else None
 
+    def _foto_pos_valida(valor):
+        try:
+            numero = float(valor)
+        except (TypeError, ValueError):
+            return None
+        return numero if 0 <= numero <= 100 else None
+
+    def _foto_zoom_valido(valor):
+        try:
+            numero = float(valor)
+        except (TypeError, ValueError):
+            return None
+        return numero if 50 <= numero <= 200 else None
+
     campos_color = {
         "color_acento": "acento",
         "color_fondo": "fondo",
@@ -443,9 +457,32 @@ def mockup_landing():
     if escala_cuerpo_valida is not None:
         estilo["escala_cuerpo"] = f"{escala_cuerpo_valida:g}"
 
+    estilo["foto_pos_x"] = "50"
+    foto_pos_x_valida = _foto_pos_valida(request.args.get("foto_pos_x"))
+    if foto_pos_x_valida is not None:
+        estilo["foto_pos_x"] = f"{foto_pos_x_valida:g}"
+
+    estilo["foto_pos_y"] = "50"
+    foto_pos_y_valida = _foto_pos_valida(request.args.get("foto_pos_y"))
+    if foto_pos_y_valida is not None:
+        estilo["foto_pos_y"] = f"{foto_pos_y_valida:g}"
+
+    estilo["foto_zoom"] = "100"
+    foto_zoom_valido = _foto_zoom_valido(request.args.get("foto_zoom"))
+    if foto_zoom_valido is not None:
+        estilo["foto_zoom"] = f"{foto_zoom_valido:g}"
+
     estructura = request.args.get("estructura", "partido")
     if estructura not in ("partido", "foto", "tipografica"):
         estructura = "partido"
+
+    tratamiento_foto = request.args.get("tratamiento_foto", "sin")
+    if tratamiento_foto not in ("sin", "duotono", "bn"):
+        tratamiento_foto = "sin"
+
+    fondo_foto = request.args.get("fondo_foto", "ampliada")
+    if fondo_foto not in ("ampliada", "liso", "acento"):
+        fondo_foto = "ampliada"
 
     negocio = {
         "nombre": lead["nombre"],
@@ -475,7 +512,9 @@ def mockup_landing():
                            pareja_por_id=pareja_por_id,
                            preset_actual=id_preset,
                            estructura=estructura,
-                           fotos=fotos)
+                           fotos=fotos,
+                           tratamiento_foto=tratamiento_foto,
+                           fondo_foto=fondo_foto)
 
 
 @app.route("/historial/resultados/<int:indice>")
