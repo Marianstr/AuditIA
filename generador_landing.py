@@ -80,6 +80,7 @@ Devolvé SOLO un JSON válido, sin backticks, sin markdown y sin texto antes ni 
 {{
   "preset": "<id de preset>",
   "rubro": "<tipo de negocio o especialidad, sin ciudad ni barrio>",
+  "termino_foto": "tex mex restaurant interior",
   "hero_titulo": ["Cocina italiana", "hecha en casa", "cada día"],
   "hero_sub": "...",
   "cta_1": "...", "cta_2": "...", "nav_boton": "...", "cta_servicio": "...",
@@ -109,7 +110,8 @@ Reglas obligatorias:
 - Los campos "ancla" tienen que ser anclas internas de la propia página (empiezan con "#"), por ejemplo #servicios, #metodologia, #contacto.
 - El campo "etiqueta" de cada servicio va en null salvo que tengas una razón real para destacarlo (no inventes ofertas).
 - "nav_boton" tiene que ser una llamada a la acción, tipo "Pedir cita", "Llamar ahora" o "Pedir presupuesto". Nunca puede repetir el texto de ninguno de los enlaces de "nav".
-- "hero_tags" son 3 etiquetas cortas de 2 a 4 palabras que describan cualidades o servicios del negocio. PROHIBIDO incluir años, fechas, cifras, antigüedad, número de clientes o cualquier dato numérico: no tenés esa información y sería inventada. Nada de "Desde 1998", "Más de 20 años" ni "+500 clientes"."""
+- "hero_tags" son 3 etiquetas cortas de 2 a 4 palabras que describan cualidades o servicios del negocio. PROHIBIDO incluir años, fechas, cifras, antigüedad, número de clientes o cualquier dato numérico: no tenés esa información y sería inventada. Nada de "Desde 1998", "Más de 20 años" ni "+500 clientes".
+- "termino_foto" es un término de búsqueda EN INGLÉS para encontrar fotos de stock que representen este negocio. De 2 a 4 palabras. Tiene que describir el TIPO de local o actividad, no el nombre propio del negocio ni la ciudad. Sé específico: mejor "tex mex restaurant interior" que "restaurant", mejor "artisan bakery counter" que "bakery". Piensa en qué foto quedaría bien en la cabecera de la web de este negocio."""
 
 
 def _limitar_rubro(texto):
@@ -157,6 +159,7 @@ def _contenido_de_reserva(lead):
     return {
         "preset": "corporativo_sobrio",
         "rubro": _limitar_rubro(rubro),
+        "termino_foto": "modern business storefront",
         "hero_titulo": [nombre, "en internet,", "de forma profesional"],
         "hero_sub": f"Así podría verse la presencia online de {nombre}.",
         "cta_1": "Ver servicios",

@@ -44,10 +44,14 @@ def _normalizar(texto):
     return texto
 
 
-def termino_busqueda(categoria):
-    """Convierte una categoría en español al mejor término de búsqueda en inglés."""
+def termino_busqueda(categoria, ya_en_ingles=False):
+    """Convierte una categoría en español al mejor término de búsqueda en inglés.
+    Si ya_en_ingles=True (por ejemplo, un término elegido por la IA), se devuelve
+    la categoría tal cual, sin pasar por el diccionario de traducciones."""
     if not categoria:
         return TERMINO_POR_DEFECTO
+    if ya_en_ingles:
+        return categoria
     norm = _normalizar(categoria)
     if norm in TRADUCCIONES:
         return TRADUCCIONES[norm]
@@ -59,7 +63,7 @@ def termino_busqueda(categoria):
     return TERMINO_POR_DEFECTO
 
 
-def buscar_fotos_categoria(categoria, cantidad=4):
+def buscar_fotos_categoria(categoria, cantidad=4, ya_en_ingles=False):
     """Busca varias fotos de calidad de la categoría en Pexels. Devuelve hasta
     `cantidad` URLs distintas, descartando fotos pequeñas o demasiado cuadradas.
     Devuelve lista vacía si algo falla (red de seguridad para no romper el mockup)."""
@@ -67,7 +71,7 @@ def buscar_fotos_categoria(categoria, cantidad=4):
         api_key = os.environ.get("PEXELS_API_KEY")
         if not api_key:
             return []
-        query = termino_busqueda(categoria)
+        query = termino_busqueda(categoria, ya_en_ingles=ya_en_ingles)
         resp = requests.get(
             "https://api.pexels.com/v1/search",
             headers={"Authorization": api_key},
