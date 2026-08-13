@@ -80,10 +80,10 @@ Devolvé SOLO un JSON válido, sin backticks, sin markdown y sin texto antes ni 
 {{
   "preset": "<id de preset>",
   "rubro": "<tipo de negocio o especialidad, sin ciudad ni barrio>",
-  "hero_titulo": ["línea 1", "línea 2", "línea 3"],
+  "hero_titulo": ["Cocina italiana", "hecha en casa", "cada día"],
   "hero_sub": "...",
   "cta_1": "...", "cta_2": "...", "nav_boton": "...", "cta_servicio": "...",
-  "hero_tags": ["...", "...", "..."],
+  "hero_tags": ["Atención personalizada", "Producto de temporada", "Reserva por teléfono"],
   "nav": [{{"texto": "...", "ancla": "#servicios"}}],
   "ventajas": [{{"titulo": "...", "texto": "..."}}],
   "servicios_kicker": "...", "servicios_titulo": "...", "servicios_intro": "...",
@@ -101,13 +101,15 @@ Reglas obligatorias:
 - Escribí todo el texto en español de España.
 - "rubro" tiene que ser una etiqueta corta de máximo 5 palabras que describa el TIPO de negocio o su especialidad, tipo "Peluquería y estética", "Taller mecánico multimarca", "Clínica dental familiar" o "Panadería artesana". No menciones ciudad, barrio ni dirección: esa información ya aparece en la sección de contacto. Nunca una frase larga ni con punto final.
 - "hero_titulo" tiene que tener exactamente 3 líneas y "hero_tags" exactamente 3 etiquetas.
+- Cada línea de "hero_titulo" tiene un máximo de 4 palabras y no puede pasar de 22 caracteres. El titular completo no puede pasar de 10 palabras en total. Tiene que leerse como un lema corto y rotundo, no como una frase larga partida en trozos. Nada de repetir el nombre del negocio si ya aparece en otra línea.
 - "ventajas" tiene que tener exactamente 4 elementos, "servicios" exactamente 3, "pasos" exactamente 4 y "footer_columnas" exactamente 3 (cada columna con al menos un enlace).
 - No inventes precios, testimonios, datos de contacto, estadísticas, años de fundación ni número de clientes. Si no tenés un dato real, no lo menciones.
 - El "preset" tiene que ser uno de los ids de la lista de arriba, el que mejor encaje con el rubro del negocio.
 - Los textos tienen que ser concretos y creíbles para este negocio en particular, no genéricos de relleno.
 - Los campos "ancla" tienen que ser anclas internas de la propia página (empiezan con "#"), por ejemplo #servicios, #metodologia, #contacto.
 - El campo "etiqueta" de cada servicio va en null salvo que tengas una razón real para destacarlo (no inventes ofertas).
-- "nav_boton" tiene que ser una llamada a la acción, tipo "Pedir cita", "Llamar ahora" o "Pedir presupuesto". Nunca puede repetir el texto de ninguno de los enlaces de "nav"."""
+- "nav_boton" tiene que ser una llamada a la acción, tipo "Pedir cita", "Llamar ahora" o "Pedir presupuesto". Nunca puede repetir el texto de ninguno de los enlaces de "nav".
+- "hero_tags" son 3 etiquetas cortas de 2 a 4 palabras que describan cualidades o servicios del negocio. PROHIBIDO incluir años, fechas, cifras, antigüedad, número de clientes o cualquier dato numérico: no tenés esa información y sería inventada. Nada de "Desde 1998", "Más de 20 años" ni "+500 clientes"."""
 
 
 def _limitar_rubro(texto):

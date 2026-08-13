@@ -410,6 +410,13 @@ def mockup_landing():
             return None
         return numero if 0 <= numero <= 30 else None
 
+    def _escala_valida(valor):
+        try:
+            numero = float(valor)
+        except (TypeError, ValueError):
+            return None
+        return numero if 0.8 <= numero <= 1.2 else None
+
     campos_color = {
         "color_acento": "acento",
         "color_fondo": "fondo",
@@ -425,6 +432,20 @@ def mockup_landing():
     radio_valido = _radio_valido(request.args.get("radio"))
     if radio_valido is not None:
         estilo["radio"] = f"{radio_valido:g}px"
+
+    estilo["escala_titulo"] = "1"
+    escala_titulo_valida = _escala_valida(request.args.get("escala_titulo"))
+    if escala_titulo_valida is not None:
+        estilo["escala_titulo"] = f"{escala_titulo_valida:g}"
+
+    estilo["escala_cuerpo"] = "1"
+    escala_cuerpo_valida = _escala_valida(request.args.get("escala_cuerpo"))
+    if escala_cuerpo_valida is not None:
+        estilo["escala_cuerpo"] = f"{escala_cuerpo_valida:g}"
+
+    estructura = request.args.get("estructura", "partido")
+    if estructura not in ("partido", "foto", "tipografica"):
+        estructura = "partido"
 
     negocio = {
         "nombre": lead["nombre"],
@@ -445,7 +466,8 @@ def mockup_landing():
                            grupos=GRUPOS,
                            preset_por_id=preset_por_id,
                            pareja_por_id=pareja_por_id,
-                           preset_actual=id_preset)
+                           preset_actual=id_preset,
+                           estructura=estructura)
 
 
 @app.route("/historial/resultados/<int:indice>")
