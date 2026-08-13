@@ -19,7 +19,7 @@ from generador_propuesta import generar_propuesta
 from generador_landing import generar_contenido_landing
 from presets import preset_por_id, google_fonts_url, listar_presets
 from tipografias import pareja_por_id, url_fuentes_pareja, url_fuentes_libres, css_familia, listar_parejas, GRUPOS
-from buscador_fotos import buscar_foto_categoria
+from buscador_fotos import buscar_foto_categoria, buscar_fotos_categoria
 
 load_dotenv()
 
@@ -456,6 +456,9 @@ def mockup_landing():
         "email": "",
     }
 
+    categoria_fotos = (lead.get("categoria_google") or "").strip() or (lead.get("primary_type") or "").strip()
+    fotos = buscar_fotos_categoria(categoria_fotos, cantidad=4)
+
     return render_template("mockup_base.html",
                            negocio=negocio,
                            c=c,
@@ -467,7 +470,8 @@ def mockup_landing():
                            preset_por_id=preset_por_id,
                            pareja_por_id=pareja_por_id,
                            preset_actual=id_preset,
-                           estructura=estructura)
+                           estructura=estructura,
+                           fotos=fotos)
 
 
 @app.route("/historial/resultados/<int:indice>")

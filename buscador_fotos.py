@@ -59,25 +59,47 @@ def termino_busqueda(categoria):
     return TERMINO_POR_DEFECTO
 
 
-def buscar_foto_categoria(categoria):
-    """Busca una foto de la categoría en Pexels. Devuelve la URL de la imagen,
-    o None si algo falla (red de seguridad para no romper el mockup)."""
+def buscar_fotos_categoria(categoria, cantidad=4):
+    """Busca varias fotos de calidad de la categoría en Pexels. Devuelve hasta
+    `cantidad` URLs distintas, descartando fotos pequeñas o demasiado cuadradas.
+    Devuelve lista vacía si algo falla (red de seguridad para no romper el mockup)."""
     try:
         api_key = os.environ.get("PEXELS_API_KEY")
         if not api_key:
-            return None
+            return []
         query = termino_busqueda(categoria)
         resp = requests.get(
             "https://api.pexels.com/v1/search",
             headers={"Authorization": api_key},
-            params={"query": query, "per_page": 1, "orientation": "landscape"},
+            params={"query": query, "per_page": 15, "orientation": "landscape"},
             timeout=8,
         )
         if resp.status_code != 200:
-            return None
+            return []
         fotos = resp.json().get("photos", [])
-        if not fotos:
-            return None
-        return fotos[0]["src"]["large"]
+        urls = []
+        vistas = set()
+        for foto in fotos:
+            ancho = foto.get("width") or 0
+            alto = foto.get("height") or 0
+            if ancho < 1200 or alto <= 0:
+                continue
+            if (ancho / alto) < 1.2:
+                continue
+            url = foto.get("src", {}).get("large")
+            if not url or url in vistas:
+                continue
+            vistas.add(url)
+            urls.append(url)
+            if len(urls) >= cantidad:
+                break
+        return urls
     except Exception:
-        return None
+        return []
+
+
+def buscar_foto_categoria(categoria):
+    """Busca una foto de la categoría en Pexels. Devuelve la URL de la imagen,
+    o None si algo falla (red de seguridad para no romper el mockup)."""
+    fotos = buscar_fotos_categoria(categoria, cantidad=1)
+    return fotos[0] if fotos else None

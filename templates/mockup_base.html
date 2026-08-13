@@ -50,7 +50,6 @@ img,svg{display:block}
 .foto::before{content:"";position:absolute;inset:0;background:
   radial-gradient(circle at 30% 30%, rgba(32,30,29,.05), transparent 60%),
   radial-gradient(circle at 75% 70%, rgba(32,30,29,.05), transparent 55%)}
-.foto::after{content:attr(data-foto);position:absolute;left:16px;bottom:14px;font-family:var(--fuente-cuerpo);font-size:calc(12px * var(--escala-cuerpo));font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--color-texto-suave);opacity:.75}
 
 /* nav */
 #nav{position:sticky;top:0;z-index:20;background:var(--color-fondo);border-bottom:1px solid var(--color-linea)}
@@ -313,7 +312,7 @@ img,svg{display:block}
 {% if estructura == 'foto' %}
 <section id="hero" class="hero-foto-full">
   <div class="heroF">
-    <div class="heroF-fondo foto" data-foto="hero"></div>
+    <div class="heroF-fondo foto" data-foto="hero"{% if fotos and fotos|length > 0 %} style="background-image:url('{{ fotos[0] }}');background-size:cover;background-position:center"{% endif %}></div>
     <div class="heroF-velo"></div>
     <div class="heroF-inner">
       <span class="kicker">{{ negocio.rubro }}</span>
@@ -349,7 +348,7 @@ img,svg{display:block}
     </div>
   </div>
   <div class="wrap">
-    <div class="heroT-banda foto" data-foto="hero">
+    <div class="heroT-banda foto" data-foto="hero"{% if fotos and fotos|length > 0 %} style="background-image:url('{{ fotos[0] }}');background-size:cover;background-position:center"{% endif %}>
       {% if c.destacado %}<div class="badge">
         <b>{{ c.destacado.valor }}</b>
         <small>{{ c.destacado.texto }}</small>
@@ -375,7 +374,7 @@ img,svg{display:block}
     </div>
     <div class="hero-art">
       <div class="blob"></div>
-      <div class="foto hero-foto" data-foto="hero"></div>
+      <div class="foto hero-foto" data-foto="hero"{% if fotos and fotos|length > 0 %} style="background-image:url('{{ fotos[0] }}');background-size:cover;background-position:center"{% endif %}></div>
       {% if c.destacado %}<div class="badge">
         <b>{{ c.destacado.valor }}</b>
         <small>{{ c.destacado.texto }}</small>
@@ -421,7 +420,7 @@ img,svg{display:block}
     </div>
     <div class="cursos-grid">
       {% for s in c.servicios %}<article class="curso">
-        <div class="foto curso-foto" data-foto="servicio-{{ loop.index }}">{% if s.etiqueta %}<span class="tag {{ s.etiqueta_clase|default('tag-acento') }} curso-tag">{{ s.etiqueta }}</span>{% endif %}</div>
+        <div class="foto curso-foto" data-foto="servicio-{{ loop.index }}"{% if fotos and fotos|length > loop.index %} style="background-image:url('{{ fotos[loop.index] }}');background-size:cover;background-position:center"{% endif %}>{% if s.etiqueta %}<span class="tag {{ s.etiqueta_clase|default('tag-acento') }} curso-tag">{{ s.etiqueta }}</span>{% endif %}</div>
         <div class="curso-body">
           <h3>{{ s.nombre }}</h3>
           <div class="curso-datos">
