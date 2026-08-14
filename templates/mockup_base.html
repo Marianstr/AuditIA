@@ -556,6 +556,13 @@ body.panel-arrastrando,body.panel-arrastrando *{cursor:grabbing !important}
     </div>
 
     <div class="panel-seccion">
+      <h4>Estructura</h4>
+      <label class="panel-checkbox"><input type="radio" name="panel-estructura" id="panel-estructura-partido" value="partido"{% if estructura == 'partido' %} checked{% endif %}><span>Hero partido</span></label>
+      <label class="panel-checkbox"><input type="radio" name="panel-estructura" id="panel-estructura-foto" value="foto"{% if estructura == 'foto' %} checked{% endif %}><span>Foto a pantalla completa</span></label>
+      <label class="panel-checkbox"><input type="radio" name="panel-estructura" id="panel-estructura-tipografica" value="tipografica"{% if estructura == 'tipografica' %} checked{% endif %}><span>Tipográfica con banda</span></label>
+    </div>
+
+    <div class="panel-seccion">
       <h4>Preset</h4>
       <div class="panel-presets" id="panel-presets">
         {% for p in presets %}
@@ -734,7 +741,7 @@ body.panel-arrastrando,body.panel-arrastrando *{cursor:grabbing !important}
     fondo_foto: null
   };
 
-  function aplicarEstadoUrl() {
+  function construirUrlConEstado() {
     const url = new URL(window.location.href);
     Object.keys(estadoUrl).forEach(function (clave) {
       const valor = estadoUrl[clave];
@@ -744,12 +751,26 @@ body.panel-arrastrando,body.panel-arrastrando *{cursor:grabbing !important}
         url.searchParams.set(clave, valor);
       }
     });
-    history.replaceState(null, "", url);
+    return url;
+  }
+
+  function aplicarEstadoUrl() {
+    history.replaceState(null, "", construirUrlConEstado());
   }
 
   function actualizarEnlaceFuentes(url) {
     document.getElementById("enlace-fuentes").href = url;
   }
+
+  // ---- Estructura (requiere recarga: la decide el servidor) ----
+  document.querySelectorAll('input[name="panel-estructura"]').forEach(function (input) {
+    input.addEventListener("change", function () {
+      if (!input.checked) return;
+      const url = construirUrlConEstado();
+      url.searchParams.set("estructura", input.value);
+      window.location.href = url.toString();
+    });
+  });
 
   // ---- Preset ----
   const botonesPreset = Array.prototype.slice.call(document.querySelectorAll(".panel-preset-muestra"));
