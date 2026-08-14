@@ -59,7 +59,7 @@ img,svg{display:block}
 /* nav */
 #nav{position:sticky;top:0;z-index:20;background:var(--color-fondo);border-bottom:1px solid var(--color-linea)}
 .nav-in{display:flex;align-items:center;gap:32px;height:78px}
-.brand{font-family:var(--fuente-titulo);font-size:calc(30px * var(--escala-titulo));color:var(--color-texto);letter-spacing:-.02em}
+.brand{font-family:var(--fuente-titulo);font-size:calc(30px * var(--escala-titulo));color:var(--color-texto);letter-spacing:-.02em;line-height:1.02}
 .nav-links{display:flex;gap:30px;margin-left:auto;list-style:none;padding:0;margin-block:0}
 .nav-links a{font-weight:600;font-size:calc(16px * var(--escala-cuerpo));color:var(--color-texto);padding:6px 0;border-bottom:2px solid transparent}
 .nav-links a:hover{color:var(--color-acento-oscuro);border-bottom-color:var(--color-acento)}
@@ -177,6 +177,7 @@ img,svg{display:block}
 #footer a{color:var(--color-oscuro-suave)}
 #footer a:hover{color:var(--color-superficie)}
 .foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
+.foot-brand .brand{margin-top:-6px}
 .foot-brand .brand{color:var(--color-superficie)}
 .foot-brand p{margin-top:16px;color:var(--color-oscuro-suave);font-size:calc(15.5px * var(--escala-cuerpo));max-width:26em}
 .foot-col h4{font-family:var(--fuente-cuerpo);font-size:calc(13px * var(--escala-cuerpo));font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--color-acento);margin-bottom:18px}
@@ -186,6 +187,7 @@ img,svg{display:block}
 .news p{color:var(--color-oscuro-suave);font-size:calc(15.5px * var(--escala-cuerpo));margin-top:8px}
 .news-form{display:flex;gap:12px;flex-wrap:wrap}
 .input{font-family:var(--fuente-cuerpo);font-size:calc(16px * var(--escala-cuerpo));padding:15px 22px;border-radius:var(--radio-pill);border:2px solid rgba(245,234,216,.24);background:transparent;color:var(--color-superficie);min-width:260px}
+.input-pdf-relleno{display:none}
 .input::placeholder{color:var(--color-oscuro-suave)}
 .input:focus{outline:2px solid var(--color-acento);outline-offset:2px;border-color:transparent}
 .foot-bottom{margin-top:38px;padding-top:26px;border-top:1px solid rgba(245,234,216,.16);display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;color:var(--color-oscuro-suave);font-size:calc(14.5px * var(--escala-cuerpo))}
@@ -238,6 +240,59 @@ img,svg{display:block}
   #panel-edicion{display:none !important}
   .foto-refrescar{display:none !important}
 }
+
+/* Generación de PDF (html2canvas): correcciones puntuales que solo se aplican
+   durante la captura (clase .generando-pdf en <html>). No afectan a la pantalla.
+
+   Causa raíz: html2canvas no calcula el line-height de un navegador real. El
+   texto de una sola línea siempre acaba pintado varios píxeles más abajo de lo
+   que le corresponde dentro de su propia caja, sea cual sea el line-height que
+   se le dé (probado: da igual 0, 1 o un valor grande, el sesgo en píxeles es
+   parecido, solo cambia como fracción de una caja más alta). Por eso:
+   - Los elementos con fondo/borde visible (donde ese desplazamiento se nota
+     como "texto pegado abajo") se corrigen con padding vertical asimétrico,
+     medido caso a caso: menos padding-top, más padding-bottom, manteniendo el
+     tamaño total similar al original.
+   - OJO con asumir que "el alto de caja lo fija el CSS, así que el hueco al
+     siguiente elemento no se ve afectado": es falso en general. El glifo puede
+     desbordar la propia caja (medido: el "01" de .paso .num, con line-height
+     .9 y fuente grande, pinta ~29px más abajo del borde inferior de su caja,
+     tanto da el margin-bottom que se le ponga). La única forma fiable de saber
+     si hace falta corregir es medir la distancia entre el GLIFO renderizado
+     (no la caja) y el glifo del elemento siguiente, comparando esa medida
+     contra la captura nativa del navegador. .curso h3 y .quote .mark sí se
+     comprobó que no desbordan (su gap real coincide con el de pantalla sin
+     tocarlos); .paso .num necesita mucho más margen del que parece a simple
+     vista porque desborda por los dos lados (el número por abajo, y encima el
+     título siguiente puede arrancar antes de su propia caja).
+   - Los títulos multilínea (h1-h4) no comprimen el interlineado entre líneas
+     (el espaciado línea a línea coincide con pantalla), pero todo el bloque de
+     texto se pinta desplazado hacia abajo como conjunto, así que la última
+     línea puede quedar muy cerca del elemento siguiente. Se compensa con
+     padding-bottom en em (escala con el tamaño de fuente); .curso h3 ya tiene
+     su propio ajuste correcto y se excluye para no duplicar el margen.
+   - Los iconos SVG dentro de una fila flex (p.ej. .dato) no sufren este bug
+     (son vectores, no texto), así que al desplazar el texto con padding para
+     corregirlo, el icono se queda "más arriba" en comparación. Ajustarlo con
+     margin-top rompe el centrado flex y hace que html2canvas recorte el icono
+     (queda cortado a la mitad); hay que usar position:relative + top, que
+     solo desplaza el pintado sin tocar el cálculo de la fila flex. */
+.generando-pdf #panel-edicion{display:none !important}
+.generando-pdf .foto-refrescar{display:none !important}
+.generando-pdf #nav{position:static !important}
+.generando-pdf .paso .num{margin-bottom:38px}
+.generando-pdf h1,.generando-pdf h2,.generando-pdf h3,.generando-pdf h4{padding-bottom:0.5em}
+.generando-pdf .curso h3{padding-bottom:0}
+.generando-pdf .btn{display:block;line-height:1;padding-top:4px;padding-bottom:26px}
+.generando-pdf .btn.btn-sm{padding-top:2px;padding-bottom:20px}
+.generando-pdf .tag{padding-top:0;padding-bottom:16px}
+.generando-pdf .curso-tag{padding-top:3px;padding-bottom:12px}
+.generando-pdf .dato{padding-top:0;padding-bottom:14px}
+.generando-pdf .codigo{padding-top:0;padding-bottom:21px}
+.generando-pdf .nav-links a{display:inline-block;padding-bottom:19px}
+.generando-pdf .foot-bottom span{display:inline-block;padding-bottom:14px}
+.generando-pdf .input{display:none}
+.generando-pdf .input-pdf-relleno{display:block;font-family:var(--fuente-cuerpo);font-size:calc(16px * var(--escala-cuerpo));line-height:1;padding:4px 22px 26px;border-radius:var(--radio-pill);border:2px solid rgba(245,234,216,.24);color:var(--color-oscuro-suave);min-width:260px}
 
 </style>
 <style>:root{
@@ -308,6 +363,9 @@ body.panel-arrastrando,body.panel-arrastrando *{cursor:grabbing !important}
 #panel-restablecer:hover{background:#f5f5f4}
 #panel-ocultar{border:1px solid #1c1917;background:#1c1917;color:#fff}
 #panel-ocultar:hover{background:#292524}
+#panel-descargar-pdf{width:100%;margin-top:8px;padding:8px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;border:1px solid #d6d3d1;background:#fff;color:#1c1917}
+#panel-descargar-pdf:hover{background:#f5f5f4}
+#panel-descargar-pdf:disabled{opacity:.6;cursor:wait}
 </style>
 </head>
 <body>
@@ -538,6 +596,7 @@ body.panel-arrastrando,body.panel-arrastrando *{cursor:grabbing !important}
       </div>
       <form class="news-form">
         <input class="input" type="email" placeholder="tu@email.com" aria-label="Email" required="required">
+        <span class="input-pdf-relleno" aria-hidden="true">tu@email.com</span>
         <button class="btn btn-primary" type="submit">{{ c.news_boton }}</button>
       </form>
     </div>
@@ -701,9 +760,12 @@ body.panel-arrastrando,body.panel-arrastrando *{cursor:grabbing !important}
       <button type="button" id="panel-restablecer">Restablecer</button>
       <button type="button" id="panel-ocultar">Ocultar panel</button>
     </div>
+    <button type="button" id="panel-descargar-pdf">Descargar PDF</button>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function () {
   const PRESET_ACTUAL = {{ preset_actual|tojson }};
@@ -1142,6 +1204,58 @@ body.panel-arrastrando,body.panel-arrastrando *{cursor:grabbing !important}
     if (panelEdicion.style.left === "" && panelEdicion.style.top === "") return;
     const rect = panelEdicion.getBoundingClientRect();
     moverPanelA(rect.left, rect.top);
+  });
+
+  // ---- Descargar PDF ----
+  const NOMBRE_NEGOCIO = {{ negocio.nombre|tojson }};
+
+  function nombreArchivoPdf() {
+    const base = (NOMBRE_NEGOCIO || "landing")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    return (base || "landing") + ".pdf";
+  }
+
+  const botonDescargarPdf = document.getElementById("panel-descargar-pdf");
+  const textoDescargarPdfOriginal = botonDescargarPdf.textContent;
+
+  botonDescargarPdf.addEventListener("click", function () {
+    if (botonDescargarPdf.disabled) return;
+    botonDescargarPdf.disabled = true;
+    botonDescargarPdf.textContent = "Generando…";
+
+    raiz.classList.add("generando-pdf");
+
+    const colorFondo = getComputedStyle(raiz).getPropertyValue("--color-fondo").trim() || "#ffffff";
+
+    html2canvas(document.body, {
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: colorFondo,
+      windowWidth: 1440,
+      windowHeight: 900,
+      scrollX: 0,
+      scrollY: 0,
+      scale: 2
+    }).then(function (canvas) {
+      const jsPDF = window.jspdf.jsPDF;
+      const pdf = new jsPDF({
+        orientation: canvas.width >= canvas.height ? "l" : "p",
+        unit: "px",
+        format: [canvas.width, canvas.height]
+      });
+      pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, canvas.width, canvas.height);
+      pdf.save(nombreArchivoPdf());
+    }).catch(function (error) {
+      console.error(error);
+      window.alert("No se pudo generar el PDF. Inténtalo de nuevo.");
+    }).finally(function () {
+      raiz.classList.remove("generando-pdf");
+      botonDescargarPdf.disabled = false;
+      botonDescargarPdf.textContent = textoDescargarPdfOriginal;
+    });
   });
 
   // ---- Restablecer ----
