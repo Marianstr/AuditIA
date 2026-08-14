@@ -63,9 +63,10 @@ def termino_busqueda(categoria, ya_en_ingles=False):
     return TERMINO_POR_DEFECTO
 
 
-def buscar_fotos_categoria(categoria, cantidad=4, ya_en_ingles=False):
-    """Busca varias fotos de calidad de la categoría en Pexels. Devuelve hasta
-    `cantidad` URLs distintas, descartando fotos pequeñas o demasiado cuadradas.
+def buscar_fotos_categoria(categoria, cantidad=None, ya_en_ingles=False):
+    """Busca fotos de calidad de la categoría en Pexels. Devuelve URLs distintas,
+    descartando fotos pequeñas o demasiado cuadradas. Si `cantidad` es None,
+    devuelve todas las que pasan el filtro (hasta las 15 que pide a Pexels).
     Devuelve lista vacía si algo falla (red de seguridad para no romper el mockup)."""
     try:
         api_key = os.environ.get("PEXELS_API_KEY")
@@ -95,7 +96,7 @@ def buscar_fotos_categoria(categoria, cantidad=4, ya_en_ingles=False):
                 continue
             vistas.add(url)
             urls.append(url)
-            if len(urls) >= cantidad:
+            if cantidad is not None and len(urls) >= cantidad:
                 break
         return urls
     except Exception:

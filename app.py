@@ -495,10 +495,10 @@ def mockup_landing():
 
     termino_foto_ia = (c.get("termino_foto") or "").strip()
     if termino_foto_ia:
-        fotos = buscar_fotos_categoria(termino_foto_ia, cantidad=4, ya_en_ingles=True)
+        fotos = buscar_fotos_categoria(termino_foto_ia, ya_en_ingles=True)
     else:
         categoria_fotos = (lead.get("categoria_google") or "").strip() or (lead.get("primary_type") or "").strip()
-        fotos = buscar_fotos_categoria(categoria_fotos, cantidad=4)
+        fotos = buscar_fotos_categoria(categoria_fotos)
 
     return render_template("mockup_base.html",
                            negocio=negocio,
